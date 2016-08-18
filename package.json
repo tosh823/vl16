@@ -1,0 +1,41 @@
+{
+  "name": "vl16",
+  "version": "1.0.0",
+  "description": "VL",
+  "main": "index.js",
+  "scripts": {
+    "build": "node_modules/.bin/browserify src/client/app.js -o build/bundle.js",
+    "watch": "node_modules/.bin/watchify src/client/app.js -o build/bundle.js --debug --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tosh823/vl16.git"
+  },
+  "keywords": [
+    "threejs"
+  ],
+  "author": "Ilya Minyaev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tosh823/vl16/issues"
+  },
+  "homepage": "https://github.com/tosh823/vl16#readme",
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "browserify-shim": "^3.8.12",
+    "watchify": "^3.7.0"
+  },
+  "browser": {
+    "three": "./src/client/libs/three.js",
+    "OrbitControls": "./src/client/libs/OrbitControls.js",
+    "stats": "./src/client/libs/stats.min.js",
+    "dat.GUI": "./src/client/libs/dat.gui.min.js"
+  },
+  "browserify": {
+    "transform": "browserify-shim"
+  },
+  "browserify-shim": {
+    "three": "THREE",
+    "dat.GUI": "dat"
+  }
+}
