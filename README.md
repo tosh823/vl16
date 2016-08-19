@@ -1,8 +1,14 @@
 # vl16
 Complete Virtual Library Project for Oulu City Library
 
+# Install
+Firstly, install all dependencies:
+```
+npm install
+```
+
 # Build
-Run this command in the root folder of the project
+Then, build client:
 ```
 npm run build
 ```
