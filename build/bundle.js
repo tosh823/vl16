@@ -21056,7 +21056,7 @@ Library.prototype.loadMainLibrary = function () {
         function onLoad(object) {
             this.scene = object;
             // Set camera and renderer
-            this.mainCamera = this.scene.getObjectByName("Main Camera");
+            this.mainCamera = this.scene.getObjectByName("Camera");
             this.mainCamera.aspect = window.innerWidth / window.innerHeight;
             this.mainCamera.updateProjectionMatrix();
             this.activeCamera = this.mainCamera;
@@ -21071,18 +21071,26 @@ Library.prototype.loadMainLibrary = function () {
             this.controls.maxPolarAngle = Math.PI / 2.1;
 
             // Add some test colliders
-            this.grounds.push(this.scene.getObjectByName("Ground"));
-            this.grounds.push(this.scene.getObjectByName("FirstFloor"));
-            this.grounds.push(this.scene.getObjectByName("Stairs12"));
-            this.grounds.push(this.scene.getObjectByName("SecondFloor"));
-
-            this.obstacles.push(this.scene.getObjectByName("Building"));
-            this.obstacles.push(this.scene.getObjectByName("Wall17"));
+            $.getJSON("assets/LibraryTags.json", function (json) {
+                if (json.tags !== undefined) {
+                    if (json.tags.Ground !== undefined) {
+                        for (var g = 0; g < json.tags.Ground.length; g++) {
+                            this.grounds.push(this.scene.getObjectByProperty('uuid', json.tags.Ground[g]));
+                        }
+                    }
+                    if (json.tags.Collider !== undefined) {
+                        for (var c = 0; c < json.tags.Collider.length; c++) {
+                            this.obstacles.push(this.scene.getObjectByProperty('uuid', json.tags.Collider[c]));
+                        }
+                    }
+                    console.log(this.grounds);
+                }
+            }.bind(this));
 
             this.avatar = new Avatar(this, new THREE.Vector3(0, 2, 0));
             this.scene.add(this.avatar);
 
-            window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
+            window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
             // Launch rendering cycle
             clock = new THREE.Clock();
@@ -21151,7 +21159,7 @@ Library.prototype.changeView = function () {
     }
 };
 
-Library.prototype.onWindowResize = function() {
+Library.prototype.onWindowResize = function () {
     this.activeCamera.aspect = window.innerWidth / window.innerHeight;
     this.activeCamera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
