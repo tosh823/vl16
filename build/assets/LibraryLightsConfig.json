@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "version": "4.3",
+    "type": "Object",
+    "generator": "Unity Export3JS"
+  },
+  "spotlights": {
+    "68A6F98F-B253-4433-B38D-EC7F3DC662E8": [
+      6.28,
+      7.72999954,
+      2.0
+    ],
+    "40624D17-C997-44CC-895E-A9215CD4B803": [
+      7.47,
+      7.72999954,
+      18.11
+    ]
+  }
+}

@@ -51,7 +51,7 @@ Library.prototype.loadMainLibrary = function () {
             this.controls.maxDistance = 100;
             this.controls.maxPolarAngle = Math.PI / 2.1;
 
-            // Add some test colliders
+            // Add colliders
             $.getJSON("assets/LibraryTags.json", function (json) {
                 if (json.tags !== undefined) {
                     if (json.tags.Ground !== undefined) {
@@ -64,6 +64,19 @@ Library.prototype.loadMainLibrary = function () {
                             this.obstacles.push(this.scene.getObjectByProperty('uuid', json.tags.Collider[c]));
                         }
                     }
+                }
+            }.bind(this));
+
+            // Create targets for spot lights
+            $.getJSON("assets/LibraryLightsConfig.json", function (json) {
+                if (json.spotlights !== undefined) {
+                    $.each(json.spotlights, function(key, value) {
+                        var spotLight = this.scene.getObjectByProperty('uuid', key);
+                        var target = new THREE.Object3D();
+                        target.position.set(value[0], value[1], value[2]);
+                        spotLight.target = target;
+                        this.scene.add(target);
+                    }.bind(this));
                 }
             }.bind(this));
 
