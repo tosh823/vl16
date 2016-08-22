@@ -4,7 +4,7 @@ var LoginDialog = React.createClass({
 
     getInitialState: function() {
         return { 
-            userName: 'Tu turu',
+            userName: 'DefaultName',
             isVisible: true 
         };
     },

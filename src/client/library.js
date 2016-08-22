@@ -30,7 +30,7 @@ function Library(canvas) {
 
 Library.prototype.constructor = Library;
 
-Library.prototype.loadMainLibrary = function () {
+Library.prototype.loadMainLibrary = function (progressCallback, finishCallback) {
     var loader = new THREE.ObjectLoader();
     var url = 'assets/Library.json';
     loader.load(url,
@@ -88,9 +88,10 @@ Library.prototype.loadMainLibrary = function () {
             // Launch rendering cycle
             clock = new THREE.Clock();
             this.render();
+            finishCallback();
         }.bind(this),
         function onProgress(progress) {
-
+            progressCallback(progress.loaded, progress.total);
         },
         function onError(error) {
             console.log(error.message);
