@@ -36,6 +36,12 @@
   "browser": {
     "three": "./src/client/libs/three.js",
     "OrbitControls": "./src/client/libs/OrbitControls.js",
+    "EffectComposer": "./src/client/libs/EffectComposer.js",
+    "RenderPass": "./src/client/libs/RenderPass.js",
+    "ShaderPass": "./src/client/libs/ShaderPass.js",
+    "HorizontalBlurShader": "./src/client/shaders/HorizontalBlurShader.js",
+    "VerticalBlurShader": "./src/client/shaders/VerticalBlurShader.js",
+    "CopyShader": "./src/client/shaders/CopyShader.js",
     "stats": "./src/client/libs/stats.min.js",
     "dat.GUI": "./src/client/libs/dat.gui.min.js"
   },

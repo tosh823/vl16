@@ -1,7 +1,13 @@
-var THREE = require('three');
-require('OrbitControls');
 var Stats = require('stats');
 var Avatar = require('./avatar');
+var THREE = require('three');
+require('OrbitControls');
+require('EffectComposer');
+require('RenderPass');
+require('ShaderPass');
+require('CopyShader');
+require('HorizontalBlurShader');
+require('VerticalBlurShader');
 
 var VIEW_MODE = {
     GLOBAL: 0,
@@ -23,9 +29,12 @@ function Library(canvas) {
         alpha: true
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.composer = new THREE.EffectComposer(this.renderer);
     this.avatar = null;
     this.grounds = [];
     this.obstacles = [];
+
+    this.blurEnabled = false;
 }
 
 Library.prototype.constructor = Library;
@@ -115,8 +124,30 @@ Library.prototype.render = function () {
     this.stats.update();
     this.avatar.update(delta);
     // Render stuff
-    this.renderer.render(this.scene, this.activeCamera);
+    if (this.blurEnabled) {
+        this.composer.render();
+    }
+    else this.renderer.render(this.scene, this.activeCamera);
 };
+
+Library.prototype.enableBlur = function () {
+    // Recreate composer
+    this.composer = new THREE.EffectComposer(this.renderer);
+    this.composer.addPass(new THREE.RenderPass(this.scene, this.mainCamera));
+    // Add horizontal blur shader
+    var hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+    this.composer.addPass(hblur);
+    // Add vertical blur shader
+    var vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
+    vblur.renderToScreen = true;
+    this.composer.addPass(vblur);
+
+    this.blurEnabled = true;
+},
+
+Library.prototype.disableBlur = function () {
+    this.blurEnabled = false;
+},
 
 Library.prototype.changeView = function () {
     if (this.viewMode == VIEW_MODE.GLOBAL) {
