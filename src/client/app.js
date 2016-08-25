@@ -1,4 +1,3 @@
-//var dat = require('dat.GUI');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Library = require('./library');
@@ -32,7 +31,11 @@ vl.loadMainLibrary(
         {
           onOnlineCallback: function () {
             vl.disableBlur();
-            topRightUI = ReactDOM.render(React.createElement(TopRightUI), document.getElementById('ui'));
+            topRightUI = ReactDOM.render(React.createElement(TopRightUI, {
+              onChangeView: function() {
+                vl.changeView();
+              }
+            }), document.getElementById('ui'));
           },
           onOfflineCallback: function() {
             vl.disableBlur();
@@ -43,9 +46,6 @@ vl.loadMainLibrary(
     );
   }
 );
-
-/*var gui = new dat.GUI();
-gui.add(vl, 'changeView');*/
 
 
 

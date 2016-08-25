@@ -59,6 +59,7 @@ Library.prototype.loadMainLibrary = function (progressCallback, finishCallback) 
             this.controls.minDistance = 10;
             this.controls.maxDistance = 100;
             this.controls.maxPolarAngle = Math.PI / 2.1;
+            this.controls.rotateSpeed = 0.2;
 
             // Add colliders
             $.getJSON("assets/LibraryTags.json", function (json) {
@@ -89,7 +90,7 @@ Library.prototype.loadMainLibrary = function (progressCallback, finishCallback) 
                 }
             }.bind(this));
 
-            this.avatar = new Avatar(this, new THREE.Vector3(0, 2, 0));
+            this.avatar = new Avatar(this, new THREE.Vector3(5, 1.9, -3));
             this.scene.add(this.avatar);
 
             window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -122,7 +123,7 @@ Library.prototype.render = function () {
     // Update stuff
     this.controls.update();
     this.stats.update();
-    this.avatar.update(delta);
+    this.avatar.update(delta, elapsedTime);
     // Render stuff
     if (this.blurEnabled) {
         this.composer.render();

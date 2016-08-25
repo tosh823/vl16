@@ -8,13 +8,46 @@ function Avatar(library, position) {
     this.height = position.y;
 
     // Create body
-    var geometry = new THREE.SphereGeometry(0.4, 32, 32);
+    /*var geometry = new THREE.SphereGeometry(0.4, 32, 32);
     var material = new THREE.MeshPhongMaterial();
-    this.body = new THREE.Mesh(geometry, material);
-    this.add(this.body);
+    this.body = new THREE.Mesh(geometry, material);*/
+    this.psAttributes = {
+        startSize: [],
+        startPosition: [],
+        randomness: []
+    };
+    var textureloader = new THREE.TextureLoader();
+    textureloader.load('assets/textures/Spark.png',
+        function(texture) {
+            this.body = new THREE.Object3D();
+            var particlesAmount = 50;
+            var radiusRange = 0.4;
+            var scaleBase = 0.4;
+            var scaleDelta = 0.2;
+            for (var i = 0; i < particlesAmount; i++) {
+                var spriteMaterial = new THREE.SpriteMaterial({ 
+                    map: texture,  
+                    color: 0xffffff,
+                    blending: THREE.AdditiveBlending
+                });
+                var sprite = new THREE.Sprite(spriteMaterial);
+                var scale = scaleBase + Math.random() * 2 * scaleDelta - scaleDelta;
+                sprite.scale.set(scale, scale, 1.0);
+                sprite.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+                sprite.position.setLength(radiusRange * Math.random());
+                sprite.material.color.setHSL(Math.random(), 0.9, 0.7);
+                this.psAttributes.startSize.push(sprite.scale.clone().x);
+                this.psAttributes.startPosition.push(sprite.position.clone());
+                this.psAttributes.randomness.push(Math.random() + 1);
+                this.body.add(sprite);
+            }
+            this.body.translateY(-this.height/4);
+            this.add(this.body);
+        }.bind(this)
+    );
 
     // Create camera
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.5, 1000);
     this.add(this.camera);
 
     // Instances of event listeners
@@ -29,7 +62,7 @@ function Avatar(library, position) {
     this.moveVector = new THREE.Vector3(0, 0, 0);
     this.speed = 0.1;
     // Raycasters
-    this.directionCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 1);
+    this.directionCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 0.9);
     this.groundCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 3);
 }
 
@@ -91,7 +124,7 @@ Avatar.prototype.onKeyUp = function (event) {
     }
 };
 
-Avatar.prototype.update = function (delta) {
+Avatar.prototype.update = function (delta, time) {
     if (this.enabled) {
         // If direct control is enabled
         // Check collisions with obstacles
@@ -104,6 +137,23 @@ Avatar.prototype.update = function (delta) {
             this.translateZ(zShift);
         }
     }
+    this.animate(time);
+};
+
+Avatar.prototype.animate = function (time) {
+    if (this.body === undefined) return;
+    for (var i = 0; i < this.body.children.length; i++) {
+        var sprite = this.body.children[i];
+        var acceleration = this.psAttributes.randomness[i];
+        var pulseFactor = Math.sin(acceleration * time);
+        sprite.position.setX(this.psAttributes.startPosition[i].x * pulseFactor);
+        sprite.position.setY(this.psAttributes.startPosition[i].y * pulseFactor);
+        sprite.position.setZ(this.psAttributes.startPosition[i].z * pulseFactor);
+        
+        var scale = this.psAttributes.startSize[i] + pulseFactor * 0.1;
+        sprite.scale.setX(scale);
+        sprite.scale.setY(scale);
+    }
 };
 
 Avatar.prototype.checkCollisions = function (direction) {
@@ -111,7 +161,7 @@ Avatar.prototype.checkCollisions = function (direction) {
     // Rotate ray in corresponding direction
     var origin = new THREE.Vector3();
     origin.copy(this.position);
-    origin.y -= 1;
+    origin.y -= this.height / 1.8;
     this.directionCaster.ray.origin = origin;
     var matrix = new THREE.Matrix4();
     var vector = new THREE.Vector3();
@@ -137,7 +187,11 @@ Avatar.prototype.checkGround = function () {
     if (intersections.length > 0) {
         // Take closest
         var closest = intersections[0];
-        this.position.setY(closest.point.y + this.height);
+        var nextPosition = new THREE.Vector3();
+        nextPosition.copy(this.position);
+        nextPosition.y = closest.point.y + this.height;
+        // Using lerp for smooth interpolation between heights
+        this.position.lerp(nextPosition, 0.3);
     }
 };
 
