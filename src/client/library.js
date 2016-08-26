@@ -35,23 +35,25 @@ function Library(canvas) {
     this.obstacles = [];
 
     this.blurEnabled = false;
+
+    window.addEventListener('resize', this.onWindowResize.bind(this), false);
 }
 
 Library.prototype.constructor = Library;
 
-Library.prototype.loadMainLibrary = function (progressCallback, finishCallback) {
+Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) {
     var loader = new THREE.ObjectLoader();
-    var url = 'assets/Library.json';
-    loader.load(url,
+    var sceneURL = 'assets/' + name + '.json';
+    loader.load(sceneURL,
         function onLoad(object) {
             this.scene = object;
-            // Set camera and renderer
+            // Set Camera and Renderer
             this.mainCamera = this.scene.getObjectByName("Camera");
             this.mainCamera.aspect = window.innerWidth / window.innerHeight;
             this.mainCamera.updateProjectionMatrix();
             this.activeCamera = this.mainCamera;
-            this.renderer.setClearColor(this.scene.fog.color);
-            // Set controls
+            if (this.scene.fog !== undefined) this.renderer.setClearColor(this.scene.fog.color);
+            // Set OrbitControls
             this.controls = new THREE.OrbitControls(this.mainCamera, this.canvas);
             this.controls.enableDamping = true;
             this.controls.dampingFactor = 0.25;
@@ -61,50 +63,56 @@ Library.prototype.loadMainLibrary = function (progressCallback, finishCallback) 
             this.controls.maxPolarAngle = Math.PI / 2.1;
             this.controls.rotateSpeed = 0.2;
 
-            // Add colliders
-            $.getJSON("assets/LibraryTags.json", function (json) {
-                if (json.tags !== undefined) {
-                    if (json.tags.Ground !== undefined) {
-                        for (var g = 0; g < json.tags.Ground.length; g++) {
-                            this.grounds.push(this.scene.getObjectByProperty('uuid', json.tags.Ground[g]));
+            var sceneTagsURL = 'assets/' + name + 'Tags.json';
+            $.getJSON(sceneTagsURL, 
+                function onSuccess(json) {
+                    if (json.tags !== undefined) {
+                        if (json.tags.Ground !== undefined) {
+                            for (var g = 0; g < json.tags.Ground.length; g++) {
+                                this.grounds.push(this.scene.getObjectByProperty('uuid', json.tags.Ground[g]));
+                            }
+                        }
+                        if (json.tags.Collider !== undefined) {
+                            for (var c = 0; c < json.tags.Collider.length; c++) {
+                                this.obstacles.push(this.scene.getObjectByProperty('uuid', json.tags.Collider[c]));
+                            }
                         }
                     }
-                    if (json.tags.Collider !== undefined) {
-                        for (var c = 0; c < json.tags.Collider.length; c++) {
-                            this.obstacles.push(this.scene.getObjectByProperty('uuid', json.tags.Collider[c]));
-                        }
+                }.bind(this)
+            );
+
+            var sceneLightsURL = 'assets/' + name + 'LightsConfig.json';
+            $.getJSON(sceneLightsURL, 
+                function onSuccess(json) {
+                    if (json.spotlights !== undefined) {
+                        $.each(json.spotlights, function(key, value) {
+                            var spotLight = this.scene.getObjectByProperty('uuid', key);
+                            var target = new THREE.Object3D();
+                            target.position.set(value[0], value[1], value[2]);
+                            spotLight.target = target;
+                            this.scene.add(target);
+                        }.bind(this));
                     }
-                }
-            }.bind(this));
+                }.bind(this)
+            );
 
-            // Create targets for spot lights
-            $.getJSON("assets/LibraryLightsConfig.json", function (json) {
-                if (json.spotlights !== undefined) {
-                    $.each(json.spotlights, function(key, value) {
-                        var spotLight = this.scene.getObjectByProperty('uuid', key);
-                        var target = new THREE.Object3D();
-                        target.position.set(value[0], value[1], value[2]);
-                        spotLight.target = target;
-                        this.scene.add(target);
-                    }.bind(this));
-                }
-            }.bind(this));
-
-            this.avatar = new Avatar(this, new THREE.Vector3(5, 1.9, -3));
+            // Spawn an Avatar
+            var spawnPoint = this.scene.getObjectByName('SpawnPoint');
+            this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, 1.9, spawnPoint.position.z));
             this.scene.add(this.avatar);
-
-            window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
             // Launch rendering cycle
             clock = new THREE.Clock();
             this.render();
-            finishCallback();
+            loadCallback();
         }.bind(this),
+
         function onProgress(progress) {
             progressCallback(progress.loaded, progress.total);
         },
+
         function onError(error) {
-            console.log(error.message);
+            console.log('Error when loading scene ' + sceneURL + ' : ' + error.message);
         }
     );
 };
@@ -186,9 +194,11 @@ Library.prototype.changeView = function () {
 };
 
 Library.prototype.onWindowResize = function () {
-    this.activeCamera.aspect = window.innerWidth / window.innerHeight;
-    this.activeCamera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    if (this.renderer != null && this.activeCamera != null) {
+        this.activeCamera.aspect = window.innerWidth / window.innerHeight;
+        this.activeCamera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
 };
 
 module.exports = Library;
