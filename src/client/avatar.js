@@ -47,7 +47,7 @@ function Avatar(library, position) {
     );
 
     // Create camera
-    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.5, 1000);
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.6, 1000);
     this.add(this.camera);
 
     // Instances of event listeners

@@ -1,4 +1,5 @@
 var React = require('react');
+var config = require('../config');
 
 var TopRightUI = React.createClass({
 
@@ -14,40 +15,46 @@ var TopRightUI = React.createClass({
         });
     },
 
+    onChangeLocation(event) {
+        this.props.onChangeLocation(config[event.target.id]);
+    },
+
     render: function () {
+
+        var locationOptions = [];
+        for (var key in config) {
+            if (config.hasOwnProperty(key)) {
+                if (config[key].name != this.props.libraryName) {
+                    locationOptions.push(
+                        <button className="dropdown-item" type="button" key={key} id={key} onClick={this.onChangeLocation}>{config[key].name}</button>
+                    );
+                }
+            }
+        }
+
         return (this.state.isVisible ?
-            <div>
-                <div className="row flex-items-xs-right stretch">
-                    <div className="col-xs-3 m-t-1">
-                        <div className="card">
-                            <div className="card-header">{this.props.libraryName}</div>
-                            <div className="card-block">
-                                <h5 className="card-title">User Interface</h5>
-                                <p className="card-text">In development.</p>
-                                <button type="button" className="btn btn-primary" id="online_login" onClick={this.props.onChangeView}>Change View</button>
-                            </div>
-                            <div className="card-block">
-                                <button type="button" className="btn btn-primary" id="online_login" onClick={this.props.onChangeLocation} data-toggle="modal" data-target="#locationSelect">Change Location</button>
+            <div className="row flex-items-xs-right stretch">
+                <div className="col-xs-3 m-t-1">
+                    <div className="card">
+                        <div className="card-header">{this.props.libraryName}</div>
+                        <div className="card-block">
+                            <h5 className="card-title">User Interface</h5>
+                            <p className="card-text">Welcome to Virtual Library project!</p>
+                        </div>
+                        <div className="card-block">
+                            <label htmlFor="locationSelection">Change Location.</label>
+                            <div className="dropdown">
+                                <button className="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                                    {this.props.libraryName}
+                                </button>
+                                <div className="dropdown-menu" id="locationSelectionDropDown" aria-labelledby="dropdownMenuButton">
+                                    {locationOptions}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div className="modal fade" id="locationSelect" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times; </span>
-                                </button>
-                                <h4 className="modal-title" id="myModalLabel">Modal title</h4>
-                            </div>
-                            <div className="modal-body">
-                                ...
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button" className="btn btn-primary">Save changes</button>
-                            </div>
+                        <div className="card-block">
+                            <p className="card-text">Change to FPS mode.</p>
+                            <button type="button" className="btn btn-primary" onClick={this.props.onChangeView}>Change View</button>
                         </div>
                     </div>
                 </div>

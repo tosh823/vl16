@@ -17,25 +17,7 @@ var VIEW_MODE = {
 var clock;
 
 function Library(canvas) {
-    this.scene = null;
-    this.mainCamera = null;
-    this.activeCamera = null;
-    this.viewMode = VIEW_MODE.GLOBAL;
-    this.controls = null;
-    this.stats = null;
     this.canvas = canvas;
-    this.renderer = new THREE.WebGLRenderer({
-        canvas: canvas,
-        alpha: true
-    });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.composer = new THREE.EffectComposer(this.renderer);
-    this.avatar = null;
-    this.grounds = [];
-    this.obstacles = [];
-
-    this.blurEnabled = false;
-
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
 }
 
@@ -46,13 +28,14 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
     var sceneURL = 'assets/' + name + '.json';
     loader.load(sceneURL,
         function onLoad(object) {
+            this.cleanup();
             this.scene = object;
             // Set Camera and Renderer
             this.mainCamera = this.scene.getObjectByName("Camera");
             this.mainCamera.aspect = window.innerWidth / window.innerHeight;
             this.mainCamera.updateProjectionMatrix();
             this.activeCamera = this.mainCamera;
-            if (this.scene.fog !== undefined) this.renderer.setClearColor(this.scene.fog.color);
+            if (this.scene.fog != null) this.renderer.setClearColor(this.scene.fog.color);
             // Set OrbitControls
             this.controls = new THREE.OrbitControls(this.mainCamera, this.canvas);
             this.controls.enableDamping = true;
@@ -103,8 +86,10 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
 
             // Launch rendering cycle
             clock = new THREE.Clock();
+            this.initFrameRateUI();
             this.render();
             loadCallback();
+            
         }.bind(this),
 
         function onProgress(progress) {
@@ -115,6 +100,23 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
             console.log('Error when loading scene ' + sceneURL + ' : ' + error.message);
         }
     );
+};
+
+Library.prototype.cleanup = function () {
+    this.scene = null;
+    this.mainCamera = null;
+    this.activeCamera = null;
+    this.controls = null;
+    this.renderer = new THREE.WebGLRenderer({
+        canvas: this.canvas,
+        alpha: true
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.composer = new THREE.EffectComposer(this.renderer);
+    this.grounds = [];
+    this.obstacles = [];
+
+    this.blurEnabled = false;
 };
 
 Library.prototype.initFrameRateUI = function () {

@@ -5,12 +5,13 @@ var config = require('./config');
 var LoginDialog = require('./components/LoginDialog.jsx');
 var LoadingScreen = require('./components/LoadingScreen.jsx');
 var TopRightUI = require('./components/TopRightUI.jsx');
+var LocationDialog = require('./components/LocationDialog.jsx');
 var config = require('./config');
 
 // Application
 var currentLocation = config.MainLibrary;
 var vl = new Library(document.getElementById('world'));
-vl.initFrameRateUI();
+//vl.initFrameRateUI();
 loadLocation(currentLocation);
 
 function loadLocation(location) {
@@ -40,10 +41,12 @@ function loadLocation(location) {
               topRightUI = ReactDOM.render(React.createElement(TopRightUI, {
                 libraryName: location.name,
                 onChangeView: function () {
-                  vl.changeView();
+                  //vl.changeView();
+                  var modal = ReactDOM.render(React.createElement(LocationDialog), document.getElementById('ui'));
+                  modal.show();
                 },
-                onChangeLocation: function () {
-
+                onChangeLocation: function (newLocation) {
+                  loadLocation(newLocation)
                 }
               }), document.getElementById('ui'));
             },
