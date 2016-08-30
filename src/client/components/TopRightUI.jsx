@@ -19,6 +19,10 @@ var TopRightUI = React.createClass({
         this.props.onChangeLocation(config[event.target.id]);
     },
 
+    onChangeView(event) {
+        this.props.onChangeView();
+    },
+
     render: function () {
 
         var locationOptions = [];
@@ -38,7 +42,7 @@ var TopRightUI = React.createClass({
                     <div className="card">
                         <div className="card-header">{this.props.libraryName}</div>
                         <div className="card-block">
-                            <h5 className="card-title">User Interface</h5>
+                            <h5 className="card-title">User Interface (In development)</h5>
                             <p className="card-text">Welcome to Virtual Library project!</p>
                         </div>
                         <div className="card-block">
@@ -54,7 +58,7 @@ var TopRightUI = React.createClass({
                         </div>
                         <div className="card-block">
                             <p className="card-text">Change to FPS mode.</p>
-                            <button type="button" className="btn btn-primary" onClick={this.props.onChangeView}>Change View</button>
+                            <button type="button" className="btn btn-primary" onClick={this.onChangeView}>Change View</button>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 var Stats = require('stats');
 var Avatar = require('./avatar');
+var Warp = require('./warp');
 var THREE = require('three');
 require('OrbitControls');
 require('EffectComposer');
@@ -84,6 +85,11 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
             this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, 1.9, spawnPoint.position.z));
             this.scene.add(this.avatar);
 
+            // Create Warp to different dimension (other library)
+            var warpPoint = this.scene.getObjectByName('WarpPoint');
+            this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, 2, warpPoint.position.z));
+            this.scene.add(this.warp);
+
             // Launch rendering cycle
             clock = new THREE.Clock();
             this.initFrameRateUI();
@@ -134,6 +140,7 @@ Library.prototype.render = function () {
     this.controls.update();
     this.stats.update();
     this.avatar.update(delta, elapsedTime);
+    this.warp.update(delta, elapsedTime);
     // Render stuff
     if (this.blurEnabled) {
         this.composer.render();
