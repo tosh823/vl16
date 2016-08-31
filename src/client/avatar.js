@@ -8,9 +8,6 @@ function Avatar(library, position) {
     this.height = position.y;
 
     // Create body
-    /*var geometry = new THREE.SphereGeometry(0.4, 32, 32);
-    var material = new THREE.MeshPhongMaterial();
-    this.body = new THREE.Mesh(geometry, material);*/
     this.psAttributes = {
         startSize: [],
         startPosition: [],
@@ -18,15 +15,15 @@ function Avatar(library, position) {
     };
     var textureloader = new THREE.TextureLoader();
     textureloader.load('assets/textures/Spark.png',
-        function(texture) {
+        function (texture) {
             this.body = new THREE.Object3D();
             var particlesAmount = 50;
             var radiusRange = 0.4;
             var scaleBase = 0.4;
             var scaleDelta = 0.2;
             for (var i = 0; i < particlesAmount; i++) {
-                var spriteMaterial = new THREE.SpriteMaterial({ 
-                    map: texture,  
+                var spriteMaterial = new THREE.SpriteMaterial({
+                    map: texture,
                     color: 0xffffff,
                     blending: THREE.AdditiveBlending
                 });
@@ -41,7 +38,7 @@ function Avatar(library, position) {
                 this.psAttributes.randomness.push(Math.random() + 1);
                 this.body.add(sprite);
             }
-            this.body.translateY(-this.height/4);
+            this.body.translateY(-this.height / 4);
             this.add(this.body);
         }.bind(this)
     );
@@ -52,6 +49,7 @@ function Avatar(library, position) {
 
     // Instances of event listeners
     this.onMouseMoveEvent = null;
+    this.onClickEvent = null;
     this.onKeyDownEvent = null;
     this.onKeyUpEvent = null;
 
@@ -124,6 +122,18 @@ Avatar.prototype.onKeyUp = function (event) {
     }
 };
 
+Avatar.prototype.onClick = function (event) {
+    if (event.button == 0) {
+        // Left button click
+        var raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
+        raycaster.setFromCamera(new THREE.Vector2(0.5, 0.5), this.camera);
+        var intersections = raycaster.intersectObjects(this.library.interactable, true);
+        if (intersections.length > 0) {
+            console.log('Clicked ' + intersections[0].object);
+        }
+    }
+}
+
 Avatar.prototype.update = function (delta, time) {
     if (this.enabled) {
         // If direct control is enabled
@@ -149,7 +159,7 @@ Avatar.prototype.animate = function (time) {
         sprite.position.setX(this.psAttributes.startPosition[i].x * pulseFactor);
         sprite.position.setY(this.psAttributes.startPosition[i].y * pulseFactor);
         sprite.position.setZ(this.psAttributes.startPosition[i].z * pulseFactor);
-        
+
         var scale = this.psAttributes.startSize[i] + pulseFactor * 0.1;
         sprite.scale.setX(scale);
         sprite.scale.setY(scale);
@@ -199,9 +209,11 @@ Avatar.prototype.enableFirstPersonControl = function () {
     this.onMouseMoveEvent = this.onMouseMove.bind(this);
     this.onKeyDownEvent = this.onKeyDown.bind(this);
     this.onKeyUpEvent = this.onKeyUp.bind(this);
+    this.onClickEvent = this.onClick.bind(this);
     document.addEventListener('mousemove', this.onMouseMoveEvent, false);
     document.addEventListener('keydown', this.onKeyDownEvent, false);
     document.addEventListener('keyup', this.onKeyUpEvent, false);
+    document.addEventListener('click', this.onClickEvent, false);
     this.enabled = true;
 };
 
@@ -209,6 +221,7 @@ Avatar.prototype.disableFirstPersonControl = function () {
     document.removeEventListener('mousemove', this.onMouseMoveEvent, false);
     document.removeEventListener('keydown', this.onKeyDownEvent, false);
     document.removeEventListener('keyup', this.onKeyUpEvent, false);
+    document.removeEventListener('click', this.onClickEvent, false);
     this.enabled = false;
 };
 

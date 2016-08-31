@@ -1,9 +1,11 @@
 var THREE = require('three');
+var LocationDialog = require('./components/LocationDialog.jsx');
 
-function Warp(library, position) {
+function Warp(library, position, rotation) {
     THREE.Object3D.call(this);
     this.library = library;
     this.position.set(position.x, position.y, position.z);
+    this.rotation.set(rotation.x, rotation.y, rotation.z);
 
     // Create body of the warp vortex
     this.psAttributes = {

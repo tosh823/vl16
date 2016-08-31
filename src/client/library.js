@@ -1,6 +1,7 @@
 var Stats = require('stats');
 var Avatar = require('./avatar');
 var Warp = require('./warp');
+var Canvas = require('./canvas');
 var THREE = require('three');
 require('OrbitControls');
 require('EffectComposer');
@@ -18,7 +19,7 @@ var VIEW_MODE = {
 var clock;
 
 function Library(canvas) {
-    this.canvas = canvas;
+    this.canvas = new Canvas(canvas);
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
 }
 
@@ -38,7 +39,7 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
             this.activeCamera = this.mainCamera;
             if (this.scene.fog != null) this.renderer.setClearColor(this.scene.fog.color);
             // Set OrbitControls
-            this.controls = new THREE.OrbitControls(this.mainCamera, this.canvas);
+            this.controls = new THREE.OrbitControls(this.mainCamera, this.canvas.domElement);
             this.controls.enableDamping = true;
             this.controls.dampingFactor = 0.25;
             this.controls.enableZoom = true;
@@ -48,7 +49,7 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
             this.controls.rotateSpeed = 0.2;
 
             var sceneTagsURL = 'assets/' + name + 'Tags.json';
-            $.getJSON(sceneTagsURL, 
+            $.getJSON(sceneTagsURL,
                 function onSuccess(json) {
                     if (json.tags !== undefined) {
                         if (json.tags.Ground !== undefined) {
@@ -66,10 +67,10 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
             );
 
             var sceneLightsURL = 'assets/' + name + 'LightsConfig.json';
-            $.getJSON(sceneLightsURL, 
+            $.getJSON(sceneLightsURL,
                 function onSuccess(json) {
                     if (json.spotlights !== undefined) {
-                        $.each(json.spotlights, function(key, value) {
+                        $.each(json.spotlights, function (key, value) {
                             var spotLight = this.scene.getObjectByProperty('uuid', key);
                             var target = new THREE.Object3D();
                             target.position.set(value[0], value[1], value[2]);
@@ -87,15 +88,17 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
 
             // Create Warp to different dimension (other library)
             var warpPoint = this.scene.getObjectByName('WarpPoint');
-            this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, 2, warpPoint.position.z));
+            this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, 1.8, warpPoint.position.z), warpPoint.rotation.clone());
             this.scene.add(this.warp);
+            this.interactable.push(this.warp);
+            this.interactable.push(this.scene.getObjectByName('FirstFloor'));
 
             // Launch rendering cycle
             clock = new THREE.Clock();
             this.initFrameRateUI();
             this.render();
             loadCallback();
-            
+
         }.bind(this),
 
         function onProgress(progress) {
@@ -114,13 +117,14 @@ Library.prototype.cleanup = function () {
     this.activeCamera = null;
     this.controls = null;
     this.renderer = new THREE.WebGLRenderer({
-        canvas: this.canvas,
+        canvas: this.canvas.domElement,
         alpha: true
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer = new THREE.EffectComposer(this.renderer);
     this.grounds = [];
     this.obstacles = [];
+    this.interactable = [];
 
     this.blurEnabled = false;
 };
@@ -161,40 +165,28 @@ Library.prototype.enableBlur = function () {
     this.composer.addPass(vblur);
 
     this.blurEnabled = true;
-},
+};
 
 Library.prototype.disableBlur = function () {
     this.blurEnabled = false;
-},
+};
 
 Library.prototype.changeView = function () {
     if (this.viewMode == VIEW_MODE.GLOBAL) {
         // Requesting Pointer Lock
-        this.canvas.requestPointerLock = this.canvas.requestPointerLock || this.canvas.mozRequestPointerLock;
-        var onLockChange = function () {
-            if (document.pointerLockElement === this.canvas || document.mozPointerLockElement === this.canvas) {
-                // Enter first person perspective
+        this.canvas.requestPointerLock(
+            function onEnterLock() {
                 this.viewMode = VIEW_MODE.AVATAR;
                 this.activeCamera = this.avatar.camera;
                 this.avatar.enableFirstPersonControl();
-            }
-            else {
-                // Exit first person perspective
-                // Change to global camera
+            }.bind(this),
+            function onExitLock() {
                 this.changeView();
-            }
-        };
-        this.canvas.requestPointerLock();
-        if ("onpointerlockchange" in document) {
-            document.addEventListener('pointerlockchange', onLockChange.bind(this), false);
-        } else if ("onmozpointerlockchange" in document) {
-            document.addEventListener('mozpointerlockchange', onLockChange.bind(this), false);
-        }
+            }.bind(this)
+        );
     }
     else {
-        // Just in case, exiting pointer lock
-        document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
-        document.exitPointerLock();
+        this.canvas.exitPointerLock();
 
         this.viewMode = VIEW_MODE.GLOBAL;
         this.activeCamera = this.mainCamera;
