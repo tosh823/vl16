@@ -1,4 +1,6 @@
 var THREE = require('three');
+var React = require('react');
+var ReactDOM = require('react-dom');
 var LocationDialog = require('./components/LocationDialog.jsx');
 
 function Warp(library, position, rotation) {
@@ -20,6 +22,7 @@ function Warp(library, position, rotation) {
             this.vortex = new THREE.Object3D();
             var depth = 8;
             var radius = 1;
+            var inBetween = 1 / 6;
             var particlesAmount = 300;
             var particlesOnTurn = particlesAmount / depth;
             var scaleBase = 0.5;
@@ -35,12 +38,12 @@ function Warp(library, position, rotation) {
                     var sprite = new THREE.Sprite(spriteMaterial);
                     var scale = scaleBase + 2 * scaleDelta * Math.random() - scaleDelta;
                     sprite.scale.set(scale, scale, 1.0);
-                    
+
                     sprite.position.setZ(2 * Math.random() - 1);
                     sprite.position.setLength(turnRadius * Math.random());
                     sprite.position.setY(Math.sqrt(turnRadius * turnRadius - sprite.position.z * sprite.position.z));
-                    sprite.position.setX(turn/6);
-                    
+                    sprite.position.setX(turn * inBetween);
+
                     sprite.material.color.setHSL(0.58, Math.random(), 0.5);
 
                     this.psAttributes.startSize.push(sprite.scale.clone().x);
@@ -50,20 +53,43 @@ function Warp(library, position, rotation) {
                     this.vortex.add(sprite);
                 }
             }
+            this.vortex.translateX(-(depth / 2) * inBetween);
             this.add(this.vortex);
 
         }.bind(this)
     );
+    // Add some solid invisible object to interact with
+    var boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+    var material = new THREE.MeshBasicMaterial({
+        visible: false
+    });
+    this.body = new THREE.Mesh(boxGeometry, material);
+    this.add(this.body);
 }
 
 Warp.prototype = Object.create(THREE.Object3D.prototype);
 Warp.prototype.constructor = Warp;
 
+Warp.prototype.interact = function () {
+    ReactDOM.unmountComponentAtNode(document.getElementById('ui_modal'));
+    this.library.canvas.exitPointerLock(true);
+    this.library.avatar.disableFirstPersonControl();
+    var modal = ReactDOM.render(React.createElement(LocationDialog, {
+        onClose: function() {
+            this.library.canvas.enterPointerLock(true);
+        }.bind(this),
+        onSubmit: function() {
+            this.library.canvas.enterPointerLock(true);
+        }.bind(this)
+    }), document.getElementById('ui_modal'));
+    modal.show();
+};
+
 Warp.prototype.update = function (delta, time) {
     this.animate(time);
 };
 
-Warp.prototype.animate = function(time) {
+Warp.prototype.animate = function (time) {
     if (this.vortex === undefined) return;
     for (var i = 0; i < this.vortex.children.length; i++) {
         var sprite = this.vortex.children[i];
@@ -73,7 +99,7 @@ Warp.prototype.animate = function(time) {
         sprite.position.setZ(this.psAttributes.startPosition[i].z * pulseFactor);
         var foo = ((pulseFactor > 0) ? 1 : -1);
         sprite.position.setY(foo * Math.sqrt(turnRadius * turnRadius - sprite.position.z * sprite.position.z));
-        
+
         var scale = this.psAttributes.startSize[i] + pulseFactor * 0.1;
         sprite.scale.setX(scale);
         sprite.scale.setY(scale);

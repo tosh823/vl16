@@ -68,12 +68,14 @@ Avatar.prototype = Object.create(THREE.Object3D.prototype);
 Avatar.prototype.constructor = Avatar;
 
 Avatar.prototype.onMouseMove = function (event) {
-    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    if (this.enabled) {
+        var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-    this.rotation.y -= movementX * 0.002;
-    this.camera.rotation.x -= movementY * 0.002;
-    this.camera.rotation.x = Math.max(- Math.PI / 2, Math.min(Math.PI / 2, this.camera.rotation.x));
+        this.rotation.y -= movementX * 0.002;
+        this.camera.rotation.x -= movementY * 0.002;
+        this.camera.rotation.x = Math.max(- Math.PI / 2, Math.min(Math.PI / 2, this.camera.rotation.x));
+    }
 };
 
 Avatar.prototype.onKeyDown = function (event) {
@@ -127,9 +129,9 @@ Avatar.prototype.onClick = function (event) {
         // Left button click
         var raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
         raycaster.setFromCamera(new THREE.Vector2(0.5, 0.5), this.camera);
-        var intersections = raycaster.intersectObjects(this.library.interactable, true);
+        var intersections = raycaster.intersectObjects(this.library.interactable, false);
         if (intersections.length > 0) {
-            console.log('Clicked ' + intersections[0].object);
+            intersections[0].object.parent.interact();
         }
     }
 }
@@ -206,6 +208,7 @@ Avatar.prototype.checkGround = function () {
 };
 
 Avatar.prototype.enableFirstPersonControl = function () {
+    if (this.enabled == true) return;
     this.onMouseMoveEvent = this.onMouseMove.bind(this);
     this.onKeyDownEvent = this.onKeyDown.bind(this);
     this.onKeyUpEvent = this.onKeyUp.bind(this);
@@ -218,6 +221,7 @@ Avatar.prototype.enableFirstPersonControl = function () {
 };
 
 Avatar.prototype.disableFirstPersonControl = function () {
+    if (this.enabled == false) return;
     document.removeEventListener('mousemove', this.onMouseMoveEvent, false);
     document.removeEventListener('keydown', this.onKeyDownEvent, false);
     document.removeEventListener('keyup', this.onKeyUpEvent, false);

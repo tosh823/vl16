@@ -22,7 +22,6 @@ Canvas.prototype.requestPointerLock = function (onEnterLock, onExitLock) {
         }
     };
     this.domElement.requestPointerLock = this.domElement.requestPointerLock || this.domElement.mozRequestPointerLock;
-    this.domElement.requestPointerLock();
     if ("onpointerlockchange" in document) {
         // General case
         if (this.onLockChangeInstance != null) {
@@ -43,18 +42,51 @@ Canvas.prototype.requestPointerLock = function (onEnterLock, onExitLock) {
         this.onLockChangeInstance = onLockChange.bind(this);
         document.addEventListener('mozpointerlockchange', this.onLockChangeInstance, false);
     }
+    this.domElement.requestPointerLock();
 };
 
-// Assuming that we already requested pointer lock in the past
-// Enter it again without deleting previous callbacks
-Canvas.prototype.enterPointerLock = function () {
+// Assuming that we already requested pointer lock some time in the past
+Canvas.prototype.enterPointerLock = function (recoverListener = false) {
+    // If we have deleted listeners when exiting last time
+    // we might want to enable it again
+    if (recoverListener == true) this.addExistingListener();
     this.domElement.requestPointerLock = this.domElement.requestPointerLock || this.domElement.mozRequestPointerLock;
     this.domElement.requestPointerLock();
 };
 
-Canvas.prototype.exitPointerLock = function () {
+Canvas.prototype.exitPointerLock = function (removeListener = false) {
+    // We might want to just exit the lock without invoking listeneres
+    // Be aware that this removes them from listening
+    // so you have to add them again if needed
+    if (removeListener == true) this.removeExistingListener();
     document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
     document.exitPointerLock();
+};
+
+// Removes existing listeners of onChange event
+Canvas.prototype.removeExistingListener = function() {
+    if (this.onLockChangeInstance != null) {
+        console.log('Remove pointer lock change listeners');
+        if ("onpointerlockchange" in document) {
+            document.removeEventListener('pointerlockchange', this.onLockChangeInstance, false);
+        }
+        else if ("onmozpointerlockchange" in document) {
+            document.removeEventListener('mozpointerlockchange', this.onLockChangeInstance, false);
+        }   
+    }     
+};
+
+// Reestablish listening to onChange event with existing callbacks
+Canvas.prototype.addExistingListener = function() {
+    if (this.onLockChangeInstance != null) {
+        console.log('Add pointer lock change listeners');
+        if ("onpointerlockchange" in document) {
+            document.addEventListener('pointerlockchange', this.onLockChangeInstance, false);
+        }
+        else if ("onmozpointerlockchange" in document) {
+            document.addEventListener('mozpointerlockchange', this.onLockChangeInstance, false);
+        }   
+    }
 };
 
 module.exports = Canvas;

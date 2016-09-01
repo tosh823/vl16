@@ -41,7 +41,7 @@ function loadLocation(location) {
               topRightUI = ReactDOM.render(React.createElement(TopRightUI, {
                 libraryName: location.name,
                 onChangeView: function () {
-                  vl.changeView();
+                  vl.switchViewMode();
                   /*var modal = ReactDOM.render(React.createElement(LocationDialog), document.getElementById('ui_modal'));
                   modal.show();*/
                 },

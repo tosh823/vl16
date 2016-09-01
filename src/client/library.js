@@ -12,7 +12,7 @@ require('HorizontalBlurShader');
 require('VerticalBlurShader');
 
 var VIEW_MODE = {
-    GLOBAL: 0,
+    ORBIT: 0,
     AVATAR: 1
 };
 
@@ -90,7 +90,7 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
             var warpPoint = this.scene.getObjectByName('WarpPoint');
             this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, 1.8, warpPoint.position.z), warpPoint.rotation.clone());
             this.scene.add(this.warp);
-            this.interactable.push(this.warp);
+            this.interactable.push(this.warp.body);
             this.interactable.push(this.scene.getObjectByName('FirstFloor'));
 
             // Launch rendering cycle
@@ -122,6 +122,7 @@ Library.prototype.cleanup = function () {
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer = new THREE.EffectComposer(this.renderer);
+    this.viewMode = VIEW_MODE.ORBIT;
     this.grounds = [];
     this.obstacles = [];
     this.interactable = [];
@@ -171,26 +172,44 @@ Library.prototype.disableBlur = function () {
     this.blurEnabled = false;
 };
 
-Library.prototype.changeView = function () {
-    if (this.viewMode == VIEW_MODE.GLOBAL) {
+Library.prototype.switchViewMode = function () {
+    if (this.viewMode == VIEW_MODE.ORBIT) {
         // Requesting Pointer Lock
         this.canvas.requestPointerLock(
             function onEnterLock() {
                 this.viewMode = VIEW_MODE.AVATAR;
                 this.activeCamera = this.avatar.camera;
                 this.avatar.enableFirstPersonControl();
+                console.log('Library switch view mode on enter');
             }.bind(this),
             function onExitLock() {
-                this.changeView();
+                this.switchViewMode();
+                console.log('Library switch view mode on exit');
             }.bind(this)
         );
     }
     else {
-        this.canvas.exitPointerLock();
-
-        this.viewMode = VIEW_MODE.GLOBAL;
+        this.viewMode = VIEW_MODE.ORBIT;
         this.activeCamera = this.mainCamera;
         this.avatar.disableFirstPersonControl();
+    }
+};
+
+Library.prototype.setViewMode = function(viewMode) {
+    switch (viewMode) {
+        case VIEW_MODE.ORBIT:
+            this.viewMode = VIEW_MODE.ORBIT;
+            this.activeCamera = this.mainCamera;
+            this.avatar.disableFirstPersonControl();
+            break;
+        case VIEW_MODE.AVATAR:
+            this.viewMode = VIEW_MODE.AVATAR;
+            this.activeCamera = this.avatar.camera;
+            this.avatar.enableFirstPersonControl();
+            break;
+        default:
+            console.log('Undefined VIEW MODE ' + viewMode);
+            break;
     }
 };
 
