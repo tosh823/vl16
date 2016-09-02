@@ -25,9 +25,10 @@ function Library(canvas) {
 
 Library.prototype.constructor = Library;
 
-Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) {
+Library.prototype.loadLibrary = function (location, progressCallback, loadCallback) {
+    this.location = location;
     var loader = new THREE.ObjectLoader();
-    var sceneURL = 'assets/' + name + '.json';
+    var sceneURL = 'assets/' + location.asset + '.json';
     loader.load(sceneURL,
         function onLoad(object) {
             this.cleanup();
@@ -48,7 +49,7 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
             this.controls.maxPolarAngle = Math.PI / 2.1;
             this.controls.rotateSpeed = 0.2;
 
-            var sceneTagsURL = 'assets/' + name + 'Tags.json';
+            var sceneTagsURL = 'assets/' + location.asset + 'Tags.json';
             $.getJSON(sceneTagsURL,
                 function onSuccess(json) {
                     if (json.tags !== undefined) {
@@ -66,7 +67,7 @@ Library.prototype.loadLibrary = function (name, progressCallback, loadCallback) 
                 }.bind(this)
             );
 
-            var sceneLightsURL = 'assets/' + name + 'LightsConfig.json';
+            var sceneLightsURL = 'assets/' + location.asset + 'LightsConfig.json';
             $.getJSON(sceneLightsURL,
                 function onSuccess(json) {
                     if (json.spotlights !== undefined) {
@@ -180,11 +181,9 @@ Library.prototype.switchViewMode = function () {
                 this.viewMode = VIEW_MODE.AVATAR;
                 this.activeCamera = this.avatar.camera;
                 this.avatar.enableFirstPersonControl();
-                console.log('Library switch view mode on enter');
             }.bind(this),
             function onExitLock() {
                 this.switchViewMode();
-                console.log('Library switch view mode on exit');
             }.bind(this)
         );
     }
