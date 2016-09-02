@@ -4,8 +4,8 @@
   "description": "VL",
   "main": "index.js",
   "scripts": {
-    "build": "node_modules/.bin/browserify -t [ babelify --presets [ react ] --extensions .jsx] src/client/app.js -o build/bundle.js",
-    "watch": "node_modules/.bin/watchify -t [ babelify --presets [ react ] --extensions .jsx] src/client/app.js -o build/bundle.js --debug --verbose",
+    "build": "node_modules/.bin/browserify -t [ babelify --presets [ react ] --extensions .jsx] src/client/main.js -o build/bundle.js",
+    "watch": "node_modules/.bin/watchify -t [ babelify --presets [ react ] --extensions .jsx] src/client/main.js -o build/bundle.js --debug --verbose",
     "serve": "node_modules/.bin/http-server ./build --cors"
   },
   "repository": {

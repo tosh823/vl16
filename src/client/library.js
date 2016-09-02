@@ -18,7 +18,8 @@ var VIEW_MODE = {
 
 var clock;
 
-function Library(canvas) {
+function Library(app, canvas) {
+    this.app = app;
     this.canvas = new Canvas(canvas);
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
 }

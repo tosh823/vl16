@@ -33,7 +33,7 @@ var LocationDialog = React.createClass({
 
     submit: function(event) {
         var currentSelected = null;
-        for (var i = 0; i < this.state.items; i++) {
+        for (var i = 0; i < this.state.items.length; i++) {
             if (this.state.items[i].active) currentSelected = this.state.items[i].location;
         }
 

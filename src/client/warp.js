@@ -2,7 +2,6 @@ var THREE = require('three');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var LocationDialog = require('./components/LocationDialog.jsx');
-var App = require('./app');
 
 function Warp(library, position, rotation) {
     THREE.Object3D.call(this);
@@ -80,9 +79,8 @@ Warp.prototype.interact = function () {
             this.library.canvas.enterPointerLock(true);
         }.bind(this),
         onSubmit: function(selectedLocation) {
-            this.library.canvas.enterPointerLock(true);
-            console.log(App);
-            App.loadLocation(selectedLocation);
+            this.library.canvas.addExistingListener();
+            if (selectedLocation != null) this.library.app.loadLocation(selectedLocation);
         }.bind(this)
     }), document.getElementById('ui_modal'));
     modal.show(this.library.location);
