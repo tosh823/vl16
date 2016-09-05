@@ -96,7 +96,6 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, 1.8, warpPoint.position.z), warpPoint.rotation.clone());
             this.scene.add(this.warp);
             this.interactable.push(this.warp.body);
-            this.interactable.push(this.scene.getObjectByName('FirstFloor'));
 
             // Launch rendering cycle
             clock = new THREE.Clock();
