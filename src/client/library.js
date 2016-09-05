@@ -21,7 +21,10 @@ var clock;
 function Library(app, canvas) {
     this.app = app;
     this.canvas = new Canvas(canvas);
+    // ready - flag that used to decide, do we need to render a scene or not
+    this.ready = false;
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
+    this.render();
 }
 
 Library.prototype.constructor = Library;
@@ -98,9 +101,8 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             // Launch rendering cycle
             clock = new THREE.Clock();
             this.initFrameRateUI();
-            this.render();
+            this.ready = true;
             loadCallback();
-
         }.bind(this),
 
         function onProgress(progress) {
@@ -114,6 +116,7 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 };
 
 Library.prototype.cleanup = function () {
+    this.ready = false;
     this.scene = null;
     this.mainCamera = null;
     this.activeCamera = null;
@@ -140,19 +143,21 @@ Library.prototype.initFrameRateUI = function () {
 
 Library.prototype.render = function () {
     requestAnimationFrame(this.render.bind(this));
-    // Update clock
-    var elapsedTime = clock.getElapsedTime();
-    var delta = clock.getDelta();
-    // Update stuff
-    this.controls.update();
-    this.stats.update();
-    this.avatar.update(delta, elapsedTime);
-    this.warp.update(delta, elapsedTime);
-    // Render stuff
-    if (this.blurEnabled) {
-        this.composer.render();
+    if (this.ready) {
+        // Update clock
+        var elapsedTime = clock.getElapsedTime();
+        var delta = clock.getDelta();
+        // Update stuff
+        this.controls.update();
+        this.stats.update();
+        this.avatar.update(delta, elapsedTime);
+        this.warp.update(delta, elapsedTime);
+        // Render stuff
+        if (this.blurEnabled) {
+            this.composer.render();
+        }
+        else this.renderer.render(this.scene, this.activeCamera);
     }
-    else this.renderer.render(this.scene, this.activeCamera);
 };
 
 Library.prototype.enableBlur = function () {
@@ -195,7 +200,7 @@ Library.prototype.switchViewMode = function () {
     }
 };
 
-Library.prototype.setViewMode = function(viewMode) {
+Library.prototype.setViewMode = function (viewMode) {
     switch (viewMode) {
         case VIEW_MODE.ORBIT:
             this.viewMode = VIEW_MODE.ORBIT;
