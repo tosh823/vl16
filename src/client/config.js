@@ -2,11 +2,13 @@
 var Config = {
     MainLibrary: {
         name: 'Pääkirjasto',
-        asset: 'MainLibrary'
+        asset: 'MainLibrary',
+        avatarLift: 1.9
     },
     Ritaharju : {
         name: 'Ritaharjun kirjasto',
-        asset: 'Ritaharju'
+        asset: 'Ritaharju',
+        avatarLift: 2.9
     }
 }
 

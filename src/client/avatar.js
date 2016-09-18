@@ -1,6 +1,6 @@
 var THREE = require('three');
 
-function Avatar(library, position) {
+function Avatar(library, position, rotation) {
     THREE.Object3D.call(this);
     // Set position and height
     this.library = library;

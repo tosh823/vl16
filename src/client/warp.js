@@ -21,7 +21,7 @@ function Warp(library, position, rotation) {
         function (texture) {
             this.vortex = new THREE.Object3D();
             var depth = 8;
-            var radius = 1;
+            var radius = 0.6 * position.y;
             var inBetween = 1 / 6;
             var particlesAmount = 300;
             var particlesOnTurn = particlesAmount / depth;
@@ -80,7 +80,7 @@ Warp.prototype.interact = function () {
         }.bind(this),
         onSubmit: function(selectedLocation) {
             this.library.canvas.addExistingListener();
-            if (selectedLocation != null) this.library.app.loadLocation(selectedLocation);
+            if (selectedLocation != null) this.library.app.loadLocationAsAvatar(selectedLocation);
         }.bind(this)
     }), document.getElementById('ui_modal'));
     modal.show(this.library.location);

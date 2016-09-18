@@ -88,12 +88,12 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 
             // Spawn an Avatar
             var spawnPoint = this.scene.getObjectByName('SpawnPoint');
-            this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, 1.9, spawnPoint.position.z));
+            this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, location.avatarLift, spawnPoint.position.z), spawnPoint.rotation.clone());
             this.scene.add(this.avatar);
 
             // Create Warp to different dimension (other library)
             var warpPoint = this.scene.getObjectByName('WarpPoint');
-            this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, 1.8, warpPoint.position.z), warpPoint.rotation.clone());
+            this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, location.avatarLift, warpPoint.position.z), warpPoint.rotation.clone());
             this.scene.add(this.warp);
             this.interactable.push(this.warp.body);
 
@@ -207,9 +207,16 @@ Library.prototype.setViewMode = function (viewMode) {
             this.avatar.disableFirstPersonControl();
             break;
         case VIEW_MODE.AVATAR:
-            this.viewMode = VIEW_MODE.AVATAR;
-            this.activeCamera = this.avatar.camera;
-            this.avatar.enableFirstPersonControl();
+            this.canvas.requestPointerLock(
+                function onEnterLock() {
+                    this.viewMode = VIEW_MODE.AVATAR;
+                    this.activeCamera = this.avatar.camera;
+                    this.avatar.enableFirstPersonControl();
+                }.bind(this),
+                function onExitLock() {
+                    this.switchViewMode();
+                }.bind(this)
+            );
             break;
         default:
             console.log('Undefined VIEW MODE ' + viewMode);

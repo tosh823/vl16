@@ -12,7 +12,7 @@ function App(canvas) {
 
 App.prototype.constructor = App;
 App.prototype.vl = null;
-App.prototype.loadLocation = function(location) {
+App.prototype.loadLocation = function (location) {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   var loading = ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('ui'));
   this.vl.loadLibrary(location,
@@ -40,12 +40,9 @@ App.prototype.loadLocation = function(location) {
                   this.vl.switchViewMode();
                 }.bind(this),
                 onChangeLocation: function (newLocation) {
-                  this.loadLocation(newLocation)
+                  this.loadLocation(newLocation);
                 }.bind(this)
               }), document.getElementById('ui'));
-            }.bind(this),
-            onOfflineCallback: function () {
-              this.vl.disableBlur();
             }.bind(this)
           }
         ),
@@ -54,6 +51,35 @@ App.prototype.loadLocation = function(location) {
     }.bind(this)
   );
 };
+
+App.prototype.loadLocationAsAvatar = function (location) {
+  ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+  var loading = ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('ui'));
+  this.vl.loadLibrary(location,
+    function onProgress(loaded, total) {
+      var ratio = Math.round(loaded / total * 100);
+      if (ratio >= 100) {
+        loading.updateProgress(ratio, 'Setting things up');
+      }
+      else {
+        loading.updateProgress(ratio);
+      }
+    },
+    function onLoad() {
+      loading.hide();
+      ReactDOM.render(React.createElement(TopRightUI, {
+        libraryName: location.name,
+        onChangeView: function () {
+          this.vl.switchViewMode();
+        }.bind(this),
+        onChangeLocation: function (newLocation) {
+          this.loadLocation(newLocation);
+        }.bind(this)
+      }), document.getElementById('ui'));
+      this.vl.switchViewMode();
+    }.bind(this)
+  );
+}
 
 module.exports = App;
 
