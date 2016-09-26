@@ -25,3 +25,7 @@ body {
     width: 100vw;
 }
 
+video {
+    display: none;
+}
+
