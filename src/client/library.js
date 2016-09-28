@@ -1,5 +1,6 @@
 var Stats = require('stats');
 var Avatar = require('./avatar');
+var Stuff = require('./stuff');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
 var THREE = require('three');
@@ -90,6 +91,14 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             var spawnPoint = this.scene.getObjectByName('SpawnPoint');
             this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, location.avatarLift, spawnPoint.position.z), spawnPoint.rotation.clone());
             this.scene.add(this.avatar);
+
+            // Find stuff bar to make it interactable
+            var stuffBar = this.scene.getObjectByName("LibraryStuffBar1");
+            if (stuffBar != null) {
+                var stuffObject = new Stuff(this, new THREE.Vector3(stuffBar.position.x, stuffBar.position.y, stuffBar.position.z), stuffBar);
+                stuffBar.parent.add(stuffObject);
+                this.interactable.push(stuffObject.body);
+            }
 
             // Create Warp to different dimension (other library)
             var warpPoint = this.scene.getObjectByName('WarpPoint');

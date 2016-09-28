@@ -127,7 +127,7 @@ Avatar.prototype.onKeyUp = function (event) {
 Avatar.prototype.onClick = function (event) {
     if (event.button == 0) {
         // Left button click
-        var raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
+        var raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 100);
         raycaster.setFromCamera(new THREE.Vector2(0.5, 0.5), this.camera);
         var intersections = raycaster.intersectObjects(this.library.interactable, false);
         if (intersections.length > 0) {

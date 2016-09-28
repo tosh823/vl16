@@ -8,10 +8,14 @@ var WebCam = React.createClass({
         };
     },
 
+    componentDidMount: function () {
+
+    },
+
     render: function () {
         return (
             <div>
-                <video id="camReceiver"></video>     
+                <video id="camReceiver">Video is not available</video>     
             </div>
         );
     }
