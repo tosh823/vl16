@@ -66,7 +66,6 @@ Canvas.prototype.exitPointerLock = function (removeListener = false) {
 // Removes existing listeners of onChange event
 Canvas.prototype.removeExistingListener = function() {
     if (this.onLockChangeInstance != null) {
-        console.log('Remove pointer lock change listeners');
         if ("onpointerlockchange" in document) {
             document.removeEventListener('pointerlockchange', this.onLockChangeInstance, false);
         }
@@ -79,7 +78,6 @@ Canvas.prototype.removeExistingListener = function() {
 // Reestablish listening to onChange event with existing callbacks
 Canvas.prototype.addExistingListener = function() {
     if (this.onLockChangeInstance != null) {
-        console.log('Add pointer lock change listeners');
         if ("onpointerlockchange" in document) {
             document.addEventListener('pointerlockchange', this.onLockChangeInstance, false);
         }

@@ -1,7 +1,7 @@
 var THREE = require('three');
 var React = require('react');
 var ReactDOM = require('react-dom');
-var WebCam = require('./components/WebCam.jsx');
+var StuffDialog = require('./components/StuffDialog.jsx');
 
 function Stuff(library, position, originObject) {
     THREE.Object3D.call(this);
@@ -35,9 +35,18 @@ Stuff.prototype = Object.create(THREE.Object3D.prototype);
 Stuff.prototype.constructor = Stuff;
 
 Stuff.prototype.interact = function () {
-    console.log("Interaction with StuffBar");
-    ReactDOM.unmountComponentAtNode(document.getElementById('webcam'));
-    var webcamComponent = ReactDOM.render(React.createElement(WebCam), document.getElementById('webcam'));
+    ReactDOM.unmountComponentAtNode(document.getElementById('ui_modal'));
+
+    this.library.canvas.exitPointerLock(true);
+    this.library.avatar.disableFirstPersonControl();
+    this.stuffDialog = ReactDOM.render(React.createElement(StuffDialog, {
+        onClose: function() {
+            this.library.canvas.enterPointerLock(true);
+            this.library.avatar.enableFirstPersonControl();
+            this.library.avatar.lookAt(this.display);
+        }.bind(this)
+    }), document.getElementById('ui_modal'));
+    this.stuffDialog.show();
 }
 
 Stuff.prototype.update = function (delta, time) {

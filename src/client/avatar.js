@@ -207,6 +207,10 @@ Avatar.prototype.checkGround = function () {
     }
 };
 
+Avatar.prototype.lookAt = function(target) {
+    this.camera.lookAt(target);
+}
+
 Avatar.prototype.enableFirstPersonControl = function () {
     if (this.enabled == true) return;
     this.onMouseMoveEvent = this.onMouseMove.bind(this);
