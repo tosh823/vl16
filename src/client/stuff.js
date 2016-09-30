@@ -44,13 +44,55 @@ Stuff.prototype.interact = function () {
             this.library.canvas.enterPointerLock(true);
             this.library.avatar.enableFirstPersonControl();
             this.library.avatar.lookAt(this.display);
+        }.bind(this),
+        onMakeCall: function() {
+            this.makeCall(document.getElementById('webcam'));
         }.bind(this)
     }), document.getElementById('ui_modal'));
     this.stuffDialog.show();
-}
+};
 
 Stuff.prototype.update = function (delta, time) {
     
+};
+
+Stuff.prototype.makeCall = function(video) {
+
+    var texture = new THREE.VideoTexture(video);
+    texture.minFilter = THREE.LinearFilter;
+	texture.magFilter = THREE.LinearFilter;
+	texture.format = THREE.RGBFormat;
+    this.display.material = new THREE.MeshLambertMaterial({
+        map: texture,
+        color: 0xffffff
+    })
+
+    navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+    navigator.getMedia(
+        {
+            video: true,
+            audio: false
+        },
+        function (stream) {
+            // Close modal
+            this.stuffDialog.hide();
+            // Lock point
+            this.library.canvas.enterPointerLock(true);
+            this.library.avatar.enableFirstPersonControl();
+            this.library.avatar.lookAt(this.display);
+            // Set streaming
+            if (navigator.mozGetUserMedia) {
+                video.mozSrcObject = stream;
+            } else {
+                var vendorURL = window.URL || window.webkitURL;
+                video.src = vendorURL.createObjectURL(stream);
+            }
+            video.play();
+        }.bind(this),
+        function (err) {
+            console.log("An error occured! " + err);
+        }
+    );
 };
 
 module.exports = Stuff;

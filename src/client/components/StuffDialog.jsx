@@ -21,11 +21,7 @@ var StuffDialog = React.createClass({
     },
 
      submit: function(event) {
-        $('#modalDialog').modal('hide');
-        this.setState({
-            isVisible: false
-        });
-        this.props.onClose();
+        this.props.onMakeCall();
     },
 
     hide: function() {
@@ -52,7 +48,7 @@ var StuffDialog = React.createClass({
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.hide}>Close</button>
-                            <button type="button" className="btn btn-primary" onClick={this.submit}>Submit</button>
+                            <button type="button" className="btn btn-primary" onClick={this.submit}>Call</button>
                         </div>
                     </div>
                 </div>
