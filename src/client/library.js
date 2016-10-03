@@ -192,45 +192,39 @@ Library.prototype.switchViewMode = function () {
         // Requesting Pointer Lock
         this.canvas.requestPointerLock(
             function onEnterLock() {
-                this.viewMode = VIEW_MODE.AVATAR;
-                this.activeCamera = this.avatar.camera;
-                this.avatar.enableFirstPersonControl();
+                this.viewAvatarMode();
             }.bind(this),
             function onExitLock() {
-                this.switchViewMode();
+                this.viewOrbitMode();
             }.bind(this)
         );
     }
     else {
-        this.viewMode = VIEW_MODE.ORBIT;
-        this.activeCamera = this.mainCamera;
-        this.avatar.disableFirstPersonControl();
+        this.viewOrbitMode();
     }
 };
 
-Library.prototype.setViewMode = function (viewMode) {
-    switch (viewMode) {
-        case VIEW_MODE.ORBIT:
-            this.viewMode = VIEW_MODE.ORBIT;
-            this.activeCamera = this.mainCamera;
-            this.avatar.disableFirstPersonControl();
-            break;
-        case VIEW_MODE.AVATAR:
-            this.canvas.requestPointerLock(
-                function onEnterLock() {
-                    this.viewMode = VIEW_MODE.AVATAR;
-                    this.activeCamera = this.avatar.camera;
-                    this.avatar.enableFirstPersonControl();
-                }.bind(this),
-                function onExitLock() {
-                    this.switchViewMode();
-                }.bind(this)
-            );
-            break;
-        default:
-            console.log('Undefined VIEW MODE ' + viewMode);
-            break;
-    }
+Library.prototype.viewOrbitMode = function () {
+    this.viewMode = VIEW_MODE.ORBIT;
+    this.activeCamera = this.mainCamera;
+    this.avatar.disableFirstPersonControl();
+};
+
+Library.prototype.viewAvatarMode = function () {
+    this.viewMode = VIEW_MODE.AVATAR;
+    this.activeCamera = this.avatar.camera;
+    this.avatar.enableFirstPersonControl();
+};
+
+Library.prototype.setStandardViewCallbacks = function () {
+    this.canvas.setCallbacks(
+        function onEnterLock() {
+            this.viewAvatarMode();
+        }.bind(this),
+        function onExitLock() {
+            this.viewOrbitMode();
+        }.bind(this)
+    );
 };
 
 Library.prototype.onWindowResize = function () {

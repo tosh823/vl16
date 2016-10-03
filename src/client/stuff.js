@@ -29,6 +29,8 @@ function Stuff(library, position, originObject) {
     this.add(this.display);
     this.display.translateY(1.3);
     this.display.rotateY(Math.PI);
+
+    this.charOnKeyDownInstance = null;
 }
 
 Stuff.prototype = Object.create(THREE.Object3D.prototype);
@@ -37,13 +39,14 @@ Stuff.prototype.constructor = Stuff;
 Stuff.prototype.interact = function () {
     ReactDOM.unmountComponentAtNode(document.getElementById('ui_modal'));
 
-    this.library.canvas.exitPointerLock(true);
+    this.library.canvas.exitPointerLock(null);
     this.library.avatar.disableFirstPersonControl();
     this.stuffDialog = ReactDOM.render(React.createElement(StuffDialog, {
         onClose: function () {
-            this.library.canvas.enterPointerLock(true);
+            this.library.canvas.enterPointerLock(null);
             this.library.avatar.enableFirstPersonControl();
             this.library.avatar.lookAt(this.display);
+            this.library.setStandardViewCallbacks();
         }.bind(this),
         onMakeCall: function () {
             this.makeCall(document.getElementById('webcam'));
@@ -86,11 +89,13 @@ Stuff.prototype.makeCall = function (video) {
                 var vendorURL = window.URL || window.webkitURL;
                 video.src = vendorURL.createObjectURL(stream);
             }
-            window.addEventListener('keydown', this.chatOnKeyDown.bind(this), false);
+            this.charOnKeyDownInstance = this.chatOnKeyDown.bind(this);
+            window.addEventListener('keydown', this.charOnKeyDownInstance, false);
             video.play();
         }.bind(this),
         function (err) {
             console.log("An error occured! " + err);
+            if (this.charOnKeyDownInstance != null) window.removeEventListener('keydown', this.charOnKeyDownInstance, false);
         }
     );
 };
@@ -101,7 +106,7 @@ Stuff.prototype.chatOnKeyDown = function (event) {
         // Stop the stream
         this.stream.stop();
         // Entering point lock
-        this.library.canvas.enterPointerLock(true);
+        this.library.canvas.enterPointerLock(null);
         this.library.avatar.enableFirstPersonControl();
         this.library.avatar.lookAt(this.display);
         // Reset panel material
@@ -111,6 +116,7 @@ Stuff.prototype.chatOnKeyDown = function (event) {
             opacity: 0.5
         });
         this.display.material = planeMaterial;
+        this.library.setStandardViewCallbacks();
     }
 };
 

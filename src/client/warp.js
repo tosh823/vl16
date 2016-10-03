@@ -72,14 +72,15 @@ Warp.prototype.constructor = Warp;
 
 Warp.prototype.interact = function () {
     ReactDOM.unmountComponentAtNode(document.getElementById('ui_modal'));
-    this.library.canvas.exitPointerLock(true);
+    this.library.canvas.exitPointerLock(null);
     this.library.avatar.disableFirstPersonControl();
     var modal = ReactDOM.render(React.createElement(LocationDialog, {
         onClose: function() {
-            this.library.canvas.enterPointerLock(true);
+            this.library.canvas.enterPointerLock(null);
+            this.library.avatar.enableFirstPersonControl();
         }.bind(this),
         onSubmit: function(selectedLocation) {
-            this.library.canvas.addExistingListener();
+            this.library.setStandardViewCallbacks();
             if (selectedLocation != null) this.library.app.loadLocationAsAvatar(selectedLocation);
         }.bind(this)
     }), document.getElementById('ui_modal'));
