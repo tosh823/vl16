@@ -20,16 +20,16 @@ var StuffDialog = React.createClass({
         $('#modalDialog').modal('show');
     },
 
-     submit: function(event) {
+    submit: function(event) {
         this.props.onMakeCall();
     },
 
-    hide: function() {
+    hide: function(withCallback = true) {
         $('#modalDialog').modal('hide');
         this.setState({
             isVisible: false
         });
-        this.props.onClose();
+        if (withCallback) this.props.onClose();
     },
 
     render: function () {

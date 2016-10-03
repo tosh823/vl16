@@ -14,6 +14,7 @@ Canvas.prototype.requestPointerLock = function (onEnterLock, onExitLock) {
         return this.enterPointerLock();
     }
     var onLockChange = function () {
+        console.log(document.mozPointerLockElement);
         if (document.pointerLockElement === this.domElement || document.mozPointerLockElement === this.domElement) {
             if (onEnterLock != null) onEnterLock();
         }
@@ -49,18 +50,18 @@ Canvas.prototype.requestPointerLock = function (onEnterLock, onExitLock) {
 Canvas.prototype.enterPointerLock = function (recoverListener = false) {
     // If we have deleted listeners when exiting last time
     // we might want to enable it again
-    if (recoverListener == true) this.addExistingListener();
     this.domElement.requestPointerLock = this.domElement.requestPointerLock || this.domElement.mozRequestPointerLock;
     this.domElement.requestPointerLock();
+    if (recoverListener == true) this.addExistingListener();
 };
 
 Canvas.prototype.exitPointerLock = function (removeListener = false) {
     // We might want to just exit the lock without invoking listeneres
     // Be aware that this removes them from listening
     // so you have to add them again if needed
-    if (removeListener == true) this.removeExistingListener();
     document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
     document.exitPointerLock();
+    if (removeListener == true) this.removeExistingListener();
 };
 
 // Removes existing listeners of onChange event
