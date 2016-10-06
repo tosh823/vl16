@@ -108,7 +108,7 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 
             // Launch rendering cycle
             clock = new THREE.Clock();
-            this.initFrameRateUI();
+            //this.initFrameRateUI();
             this.ready = true;
             loadCallback();
         }.bind(this),
@@ -157,7 +157,7 @@ Library.prototype.render = function () {
         var delta = clock.getDelta();
         // Update stuff
         this.controls.update();
-        this.stats.update();
+        //this.stats.update();
         this.avatar.update(delta, elapsedTime);
         this.warp.update(delta, elapsedTime);
         // Render stuff

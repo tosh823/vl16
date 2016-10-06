@@ -10,7 +10,7 @@ function Stuff(library, position, originObject) {
 
     // Add some solid invisible object to interact with
     var boundingBox = new THREE.Box3().setFromObject(originObject);
-    var size = boundingBox.size();
+    var size = boundingBox.getSize();
     var boxGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
     var boxMaterial = new THREE.MeshBasicMaterial({
         visible: false

@@ -34,16 +34,16 @@
     "watchify": "^3.7.0"
   },
   "browser": {
-    "three": "./src/client/libs/three.js",
-    "OrbitControls": "./src/client/libs/OrbitControls.js",
-    "EffectComposer": "./src/client/libs/EffectComposer.js",
-    "RenderPass": "./src/client/libs/RenderPass.js",
-    "ShaderPass": "./src/client/libs/ShaderPass.js",
+    "three": "./src/client/lib/three.min.js",
+    "OrbitControls": "./src/client/lib/OrbitControls.js",
+    "EffectComposer": "./src/client/lib/EffectComposer.js",
+    "RenderPass": "./src/client/lib/RenderPass.js",
+    "ShaderPass": "./src/client/lib/ShaderPass.js",
     "HorizontalBlurShader": "./src/client/shaders/HorizontalBlurShader.js",
     "VerticalBlurShader": "./src/client/shaders/VerticalBlurShader.js",
     "CopyShader": "./src/client/shaders/CopyShader.js",
-    "stats": "./src/client/libs/stats.min.js",
-    "dat.GUI": "./src/client/libs/dat.gui.min.js"
+    "stats": "./src/client/lib/stats.min.js",
+    "dat.GUI": "./src/client/lib/dat.gui.min.js"
   },
   "browserify": {
     "transform": "browserify-shim"
