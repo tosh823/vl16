@@ -4,6 +4,7 @@ var Stuff = require('./stuff');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
 var THREE = require('three');
+//var Client = require('./client');
 require('OrbitControls');
 require('EffectComposer');
 require('RenderPass');
@@ -26,6 +27,7 @@ function Library(app, canvas) {
     this.ready = false;
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
     this.render();
+    //var client = new Client();
 }
 
 Library.prototype.constructor = Library;
