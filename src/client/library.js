@@ -110,6 +110,10 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.scene.add(this.warp);
             this.interactable.push(this.warp.body);
 
+            // Creare HemisphereLight
+            var hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+            this.scene.add(hemiLight);
+
             // Create SkyShader
             var sky = new THREE.Sky();
             var uniforms = sky.uniforms;
