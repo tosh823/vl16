@@ -7,6 +7,7 @@ var THREE = require('three');
 //var Client = require('./client');
 require('OrbitControls');
 require('EffectComposer');
+require('SkyShader');
 require('RenderPass');
 require('ShaderPass');
 require('CopyShader');
@@ -43,6 +44,7 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             // Set Camera and Renderer
             this.mainCamera = this.scene.getObjectByName("Camera");
             this.mainCamera.aspect = window.innerWidth / window.innerHeight;
+            this.mainCamera.far = 2000000;
             this.mainCamera.updateProjectionMatrix();
             this.activeCamera = this.mainCamera;
             if (this.scene.fog != null) this.renderer.setClearColor(this.scene.fog.color);
@@ -107,6 +109,26 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, location.avatarLift, warpPoint.position.z), warpPoint.rotation.clone());
             this.scene.add(this.warp);
             this.interactable.push(this.warp.body);
+
+            // Create SkyShader
+            var sky = new THREE.Sky();
+            var uniforms = sky.uniforms;
+            uniforms.turbidity.value = 2;
+            uniforms.rayleigh.value = 2.333;
+            uniforms.luminance.value = 1;
+            uniforms.mieCoefficient.value = 0.005;
+            uniforms.mieDirectionalG.value = 0.882;
+            var sunPosition = new THREE.Vector3();
+            var distance = 400000;
+            var inclination = 0.335;
+            var azimuth = 0.1514;
+            var theta = Math.PI * (inclination - 0.5);
+            var phi = 2 * Math.PI * (azimuth - 0.5);
+            sunPosition.x = distance * Math.cos(phi);
+            sunPosition.y = distance * Math.sin(phi) * Math.sin(theta);
+            sunPosition.z = distance * Math.sin(phi) * Math.cos(theta);
+            uniforms.sunPosition.value = sunPosition;
+            this.scene.add(sky.mesh);
 
             // Launch rendering cycle
             clock = new THREE.Clock();

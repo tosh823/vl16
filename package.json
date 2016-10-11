@@ -39,6 +39,7 @@
     "EffectComposer": "./src/client/lib/EffectComposer.js",
     "RenderPass": "./src/client/lib/RenderPass.js",
     "ShaderPass": "./src/client/lib/ShaderPass.js",
+    "SkyShader": "./src/client/lib/SkyShader.js",
     "HorizontalBlurShader": "./src/client/shaders/HorizontalBlurShader.js",
     "VerticalBlurShader": "./src/client/shaders/VerticalBlurShader.js",
     "CopyShader": "./src/client/shaders/CopyShader.js",
