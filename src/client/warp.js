@@ -81,7 +81,7 @@ Warp.prototype.interact = function () {
         }.bind(this),
         onSubmit: function(selectedLocation) {
             this.library.setStandardViewCallbacks();
-            if (selectedLocation != null) this.library.app.loadLocationAsAvatar(selectedLocation);
+            if (selectedLocation != null) this.library.app.loadLocation(selectedLocation, true);
         }.bind(this)
     }), document.getElementById('ui_modal'));
     modal.show(this.library.location);

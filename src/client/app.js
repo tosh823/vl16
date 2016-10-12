@@ -5,14 +5,22 @@ var config = require('./config');
 var LoginDialog = require('./components/LoginDialog.jsx');
 var LoadingScreen = require('./components/LoadingScreen.jsx');
 var TopRightUI = require('./components/TopRightUI.jsx');
+var NavBar = require('./components/NavBar.jsx');
 
 function App(canvas) {
   this.vl = new Library(this, canvas);
+  this.renderNavBar();
 }
 
 App.prototype.constructor = App;
 App.prototype.vl = null;
-App.prototype.loadLocation = function (location) {
+
+App.prototype.renderNavBar = function() {
+  ReactDOM.unmountComponentAtNode(document.getElementById('page-header'));
+  this.navBar = ReactDOM.render(React.createElement(NavBar), document.getElementById('page-header'));
+};
+
+App.prototype.loadInitialLocation = function (location) {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   var loading = ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('ui'));
   this.vl.loadLibrary(location,
@@ -52,7 +60,7 @@ App.prototype.loadLocation = function (location) {
   );
 };
 
-App.prototype.loadLocationAsAvatar = function (location) {
+App.prototype.loadLocation = function (location, asAvatar = false) {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   var loading = ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('ui'));
   this.vl.loadLibrary(location,
@@ -76,7 +84,7 @@ App.prototype.loadLocationAsAvatar = function (location) {
           this.loadLocation(newLocation);
         }.bind(this)
       }), document.getElementById('ui'));
-      this.vl.switchViewMode();
+      if (asAvatar) this.vl.switchViewMode();
     }.bind(this)
   );
 }
