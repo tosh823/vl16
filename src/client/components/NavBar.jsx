@@ -1,10 +1,12 @@
 var React = require('react');
+var config = require('../config');
 
 var NavBar = React.createClass({
 
     getInitialState: function () {
         return {
-            isVisible: true
+            isVisible: true,
+            currentLocation: this.props.location
         };
     },
 
@@ -12,6 +14,16 @@ var NavBar = React.createClass({
         this.setState({
             isVisible: false
         });
+    },
+
+    setCurrentLocation: function(location) {
+        this.setState({
+            currentLocation: location
+        });
+    },
+
+    onLocationClick(event) {
+        this.props.onWarpTo(config[event.target.id]);
     },
 
     render: function () {
@@ -24,10 +36,17 @@ var NavBar = React.createClass({
                     </li>
                     <li className="nav-item active btn-group">
                         <a className="nav-link dropdown-toggle " type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Pääkirjasto
-                    </a>
+                            {this.state.currentLocation.name}
+                        </a>
+
                         <div className="dropdown-menu" aria-labelledby="dropdownMenu1">
-                            <a className="dropdown-item" href="#">Ritaharju</a>
+                            {
+                                Object.keys(config).map(function (value, index) {
+                                    if (config[value] !== this.state.currentLocation) {
+                                        return <a className="dropdown-item" href="#" key={value} id={value} onClick={this.onLocationClick}>{config[value].name}</a>
+                                    }
+                                }.bind(this))
+                            }
                         </div>
                     </li>
                     <li className="nav-item">

@@ -7,8 +7,9 @@ var LoadingScreen = require('./components/LoadingScreen.jsx');
 var TopRightUI = require('./components/TopRightUI.jsx');
 var NavBar = require('./components/NavBar.jsx');
 
-function App(canvas) {
+function App(canvas, defaultLocation) {
   this.vl = new Library(this, canvas);
+  this.currentLocation = defaultLocation;
   this.renderNavBar();
 }
 
@@ -17,13 +18,18 @@ App.prototype.vl = null;
 
 App.prototype.renderNavBar = function() {
   ReactDOM.unmountComponentAtNode(document.getElementById('page-header'));
-  this.navBar = ReactDOM.render(React.createElement(NavBar), document.getElementById('page-header'));
+  this.navBar = ReactDOM.render(React.createElement(NavBar, {
+    location: this.currentLocation,
+    onWarpTo: function(location) {
+      this.loadLocation(location);
+    }.bind(this)
+  }), document.getElementById('page-header'));
 };
 
-App.prototype.loadInitialLocation = function (location) {
+App.prototype.loadInitialLocation = function () {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   var loading = ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('ui'));
-  this.vl.loadLibrary(location,
+  this.vl.loadLibrary(this.currentLocation,
     function onProgress(loaded, total) {
       var ratio = Math.round(loaded / total * 100);
       if (ratio >= 100) {
@@ -42,15 +48,6 @@ App.prototype.loadInitialLocation = function (location) {
           {
             onOnlineCallback: function () {
               this.vl.disableBlur();
-              topRightUI = ReactDOM.render(React.createElement(TopRightUI, {
-                libraryName: location.name,
-                onChangeView: function () {
-                  this.vl.switchViewMode();
-                }.bind(this),
-                onChangeLocation: function (newLocation) {
-                  this.loadLocation(newLocation);
-                }.bind(this)
-              }), document.getElementById('ui'));
             }.bind(this)
           }
         ),
@@ -61,6 +58,16 @@ App.prototype.loadInitialLocation = function (location) {
 };
 
 App.prototype.loadLocation = function (location, asAvatar = false) {
+
+  this.currentLocation = location;
+  if (asAvatar) {
+    // Hide NavBar
+    this.navBar.hide();
+  }
+  else {
+    this.navBar.setCurrentLocation(this.currentLocation);
+  }
+
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   var loading = ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('ui'));
   this.vl.loadLibrary(location,
@@ -75,15 +82,6 @@ App.prototype.loadLocation = function (location, asAvatar = false) {
     },
     function onLoad() {
       loading.hide();
-      ReactDOM.render(React.createElement(TopRightUI, {
-        libraryName: location.name,
-        onChangeView: function () {
-          this.vl.switchViewMode();
-        }.bind(this),
-        onChangeLocation: function (newLocation) {
-          this.loadLocation(newLocation);
-        }.bind(this)
-      }), document.getElementById('ui'));
       if (asAvatar) this.vl.switchViewMode();
     }.bind(this)
   );
