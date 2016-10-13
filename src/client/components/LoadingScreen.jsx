@@ -25,8 +25,8 @@ var LoadingScreen = React.createClass({
 
     render: function () {
         return (this.state.isVisible ?
-            <div className="row flex-items-xs-middle flex-items-xs-center fullscreen" id="loadingBG">
-                <div className="col-xs-6">
+            <div className="row flex-items-xs-center stretch-y" id="loadingBG">
+                <div className="col-xs-6 flex-xs-middle">
                     <div className="text-xs-center" id="example-caption-1">{this.state.message}&hellip;</div>
                     <progress className="progress progress-striped progress-animated" value={this.state.currentProgress} max="100" aria-describedby="example-caption-1"></progress>
                 </div>

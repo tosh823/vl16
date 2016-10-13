@@ -16,7 +16,13 @@ var NavBar = React.createClass({
         });
     },
 
-    setCurrentLocation: function(location) {
+    show: function () {
+        this.setState({
+            isVisible: true
+        });
+    },
+
+    setCurrentLocation: function (location) {
         this.setState({
             currentLocation: location
         });
@@ -26,13 +32,21 @@ var NavBar = React.createClass({
         this.props.onWarpTo(config[event.target.id]);
     },
 
+    onSettingsClick(event) {
+        this.props.onAction();
+    },
+
+    onAboutClick(event) {
+        this.props.onAbout();
+    },
+
     render: function () {
         return (this.state.isVisible ?
-            <nav className="navbar navbar-fixed-top navbar-light bg-faded">
+            <nav className="navbar navbar-full navbar-light bg-faded">
                 <a className="navbar-brand" href="#">Virtual Library</a>
                 <ul className="nav navbar-nav">
                     <li className="nav-item">
-                        <a className="nav-link" href="#">Home</a>
+                        <a className="nav-link" href="http://www.ouka.fi/oulu/library" target="_blank">Home</a>
                     </li>
                     <li className="nav-item active btn-group">
                         <a className="nav-link dropdown-toggle " type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -43,17 +57,17 @@ var NavBar = React.createClass({
                             {
                                 Object.keys(config).map(function (value, index) {
                                     if (config[value] !== this.state.currentLocation) {
-                                        return <a className="dropdown-item" href="#" key={value} id={value} onClick={this.onLocationClick}>{config[value].name}</a>
+                                        return <a className="dropdown-item" type="button" key={value} id={value} onClick={this.onLocationClick}>{config[value].name}</a>
                                     }
                                 }.bind(this))
                             }
                         </div>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" href="#">Settings</a>
+                        <a className="nav-link" type="button" onClick={this.onSettingsClick}>Settings</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" href="#">About</a>
+                        <a className="nav-link" type="button" onClick={this.onAboutClick}>About</a>
                     </li>
                 </ul>
                 <form className="form-inline pull-xs-right">

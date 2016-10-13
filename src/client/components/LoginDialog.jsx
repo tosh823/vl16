@@ -19,8 +19,8 @@ var LoginDialog = React.createClass({
 
     render: function () {
         return (this.state.isVisible ?
-            <div className="row flex-items-xs-middle flex-items-xs-center stretch">
-                <div className="col-xs-3">
+            <div className="row flex-items-xs-center stretch-y">
+                <div className="col-xs-3 flex-xs-middle">
                     <div className="card text-xs-center">
                         <div className="card-header">Oulu City Library</div>
                         <div className="card-block">

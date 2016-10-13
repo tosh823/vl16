@@ -231,12 +231,14 @@ Library.prototype.switchViewMode = function () {
 };
 
 Library.prototype.viewOrbitMode = function () {
+    this.app.navBar.show();
     this.viewMode = VIEW_MODE.ORBIT;
     this.activeCamera = this.mainCamera;
     this.avatar.disableFirstPersonControl();
 };
 
 Library.prototype.viewAvatarMode = function () {
+    this.app.navBar.hide();
     this.viewMode = VIEW_MODE.AVATAR;
     this.activeCamera = this.avatar.camera;
     this.avatar.enableFirstPersonControl();

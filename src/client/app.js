@@ -6,6 +6,7 @@ var LoginDialog = require('./components/LoginDialog.jsx');
 var LoadingScreen = require('./components/LoadingScreen.jsx');
 var TopRightUI = require('./components/TopRightUI.jsx');
 var NavBar = require('./components/NavBar.jsx');
+var ControlPanel = require('./components/ControlPanel.jsx');
 
 function App(canvas, defaultLocation) {
   this.vl = new Library(this, canvas);
@@ -22,8 +23,23 @@ App.prototype.renderNavBar = function() {
     location: this.currentLocation,
     onWarpTo: function(location) {
       this.loadLocation(location);
-    }.bind(this)
+    }.bind(this),
+    onAction: function() {
+      this.renderControlPanel();
+    }.bind(this),
+    onAbout: function() {
+
+    }
   }), document.getElementById('page-header'));
+};
+
+App.prototype.renderControlPanel = function() {
+  ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+  this.controlPanel = ReactDOM.render(React.createElement(ControlPanel, {
+    onSwitchView: function() {
+      this.vl.switchViewMode();
+    }.bind(this)
+  }), document.getElementById('ui')); 
 };
 
 App.prototype.loadInitialLocation = function () {

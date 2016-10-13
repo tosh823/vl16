@@ -2,26 +2,35 @@ body {
     margin: 0;
 }
 
-#content {
-    position: relative;
+#world {
+    display: block;
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    right: 0;
+    left: 0;
 }
 
-#content canvas {
-    position: absolute;
-    width: 100vh;
-    height: 100vw;
+#content {
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 #loadingBG {
     background-color: rgba(135, 150, 156, 0.6);
 }
 
-.stretch {
-    height: 100vh;
+.stretch-y {
+    height: 92vh;
+}
+
+.stretch-x {
+    height: 100vw;
 }
 
 .fullscreen {
-    height: 100vh;
+    height: 92vh;
     width: 100vw;
 }
 
