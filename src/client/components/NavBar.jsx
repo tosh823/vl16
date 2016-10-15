@@ -40,6 +40,12 @@ var NavBar = React.createClass({
         this.props.onAbout();
     },
 
+    onSearchClick(event) {
+        //event.preventDefault();
+        var query = this.refs.searchRequest.value;
+        this.props.onSearch(query);
+    },
+
     render: function () {
         return (this.state.isVisible ?
             <nav className="navbar navbar-full navbar-light bg-faded">
@@ -71,8 +77,8 @@ var NavBar = React.createClass({
                     </li>
                 </ul>
                 <form className="form-inline pull-xs-right">
-                    <input className="form-control" type="text" placeholder="Search" />
-                    <button className="btn btn-outline-success" type="submit">Search</button>
+                    <input className="form-control" ref="searchRequest" type="text" placeholder="Search" />
+                    <button className="btn btn-outline-success" type="button" onClick={this.onSearchClick}>Search</button>
                 </form>
             </nav>
             : null

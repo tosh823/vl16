@@ -2,6 +2,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Library = require('./library');
 var config = require('./config');
+var LibraryAPI = require('./libraryAPI');
 var LoginDialog = require('./components/LoginDialog.jsx');
 var LoadingScreen = require('./components/LoadingScreen.jsx');
 var TopRightUI = require('./components/TopRightUI.jsx');
@@ -29,7 +30,11 @@ App.prototype.renderNavBar = function() {
     }.bind(this),
     onAbout: function() {
 
-    }
+    },
+    onSearch: function(query) {
+      var api = new LibraryAPI();
+      api.search(query, null);
+    }.bind(this)
   }), document.getElementById('page-header'));
 };
 

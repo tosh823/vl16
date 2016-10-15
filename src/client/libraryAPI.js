@@ -1,12 +1,18 @@
 
-var libraryAPI = function() {
+var LibraryAPI = function () {
     this.baseURL = 'https://koha.outikirjastot.fi/cgi-bin/koha/';
 };
 
-libraryAPI.prototype.contructor = libraryAPI;
+LibraryAPI.prototype.contructor = LibraryAPI;
 
-libraryAPI.prototype.search = function(query, onSearchFinnish) {
-    
+LibraryAPI.prototype.search = function (query, onSearchFinnish) {
+    var correctQuery = query.replace(/ /g, '+');
+    var fullURL = this.baseURL + 'opac-search.pl?idx=&q=' + correctQuery + '&branch_group_limit=branch%3AOUPK';
+    $.get(fullURL, function(data) {
+        console.log(data);
+    }).fail(function(error) {
+        console.log(error);
+    });
 };
 
-module.exports = libraryAPI;
+module.exports = LibraryAPI;
