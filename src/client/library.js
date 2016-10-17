@@ -132,6 +132,9 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             uniforms.sunPosition.value = sunPosition;
             this.scene.add(sky.mesh);
 
+            // Test navigation line
+            this.renderPath();
+
             // Launch rendering cycle
             clock = new THREE.Clock();
             //this.initFrameRateUI();
@@ -192,6 +195,20 @@ Library.prototype.render = function () {
         }
         else this.renderer.render(this.scene, this.activeCamera);
     }
+};
+
+Library.prototype.renderPath = function () {
+    var navigation = this.scene.getObjectByName('Navigation');
+    var lineGeometry = new THREE.Geometry();
+    for (var index in navigation.children) {
+        console.log(navigation.children[index]);
+        lineGeometry.vertices.push(navigation.children[index].position.clone());
+    }
+    var lineMaterial = new THREE.LineBasicMaterial({
+        color: 0x0000ff
+    });
+    var line = new THREE.Line(lineGeometry, lineMaterial);
+    this.scene.add(line);
 };
 
 Library.prototype.enableBlur = function () {
