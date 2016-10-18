@@ -42,7 +42,8 @@ App.prototype.renderControlPanel = function() {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   this.controlPanel = ReactDOM.render(React.createElement(ControlPanel, {
     onSwitchView: function() {
-      this.vl.switchViewMode();
+      //this.vl.switchViewMode();
+      this.vl.testPathfinding();
     }.bind(this)
   }), document.getElementById('ui')); 
 };

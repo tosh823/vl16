@@ -1,6 +1,7 @@
 var Stats = require('stats');
 var Avatar = require('./avatar');
 var Stuff = require('./stuff');
+var Pathfinder = require('./pathfinder');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
 var THREE = require('three');
@@ -23,6 +24,7 @@ var clock;
 function Library(app, canvas) {
     this.app = app;
     this.canvas = new Canvas(canvas);
+    this.pathfinder = new Pathfinder(this);
     // ready - flag that used to decide, do we need to render a scene or not
     this.ready = false;
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -33,6 +35,7 @@ Library.prototype.constructor = Library;
 
 Library.prototype.loadLibrary = function (location, progressCallback, loadCallback) {
     this.location = location;
+    this.pathfinder.loadMap();
     var loader = new THREE.ObjectLoader();
     var sceneURL = 'assets/' + location.asset + '.json';
     loader.load(sceneURL,
@@ -133,7 +136,7 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.scene.add(sky.mesh);
 
             // Test navigation line
-            this.renderPath();
+            //this.renderPath();
 
             // Launch rendering cycle
             clock = new THREE.Clock();
@@ -201,7 +204,6 @@ Library.prototype.renderPath = function () {
     var navigation = this.scene.getObjectByName('Navigation');
     var lineGeometry = new THREE.Geometry();
     for (var index in navigation.children) {
-        console.log(navigation.children[index]);
         lineGeometry.vertices.push(navigation.children[index].position.clone());
     }
     var lineMaterial = new THREE.LineBasicMaterial({
@@ -228,6 +230,10 @@ Library.prototype.enableBlur = function () {
 
 Library.prototype.disableBlur = function () {
     this.blurEnabled = false;
+};
+
+Library.prototype.testPathfinding = function() {
+    this.pathfinder.findPath('F1P1', 'F1P21');
 };
 
 Library.prototype.switchViewMode = function () {
