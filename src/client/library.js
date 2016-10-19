@@ -135,9 +135,6 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             uniforms.sunPosition.value = sunPosition;
             this.scene.add(sky.mesh);
 
-            // Test navigation line
-            //this.renderPath();
-
             // Launch rendering cycle
             clock = new THREE.Clock();
             //this.initFrameRateUI();
@@ -200,19 +197,6 @@ Library.prototype.render = function () {
     }
 };
 
-Library.prototype.renderPath = function () {
-    var navigation = this.scene.getObjectByName('Navigation');
-    var lineGeometry = new THREE.Geometry();
-    for (var index in navigation.children) {
-        lineGeometry.vertices.push(navigation.children[index].position.clone());
-    }
-    var lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x0000ff
-    });
-    var line = new THREE.Line(lineGeometry, lineMaterial);
-    this.scene.add(line);
-};
-
 Library.prototype.enableBlur = function () {
     // Recreate composer
     this.composer = new THREE.EffectComposer(this.renderer);
@@ -233,7 +217,17 @@ Library.prototype.disableBlur = function () {
 };
 
 Library.prototype.testPathfinding = function() {
-    this.pathfinder.findPath('F1P1', 'F1P21');
+    var route = this.pathfinder.findPath('F1P1', 'F1P21');
+    var lineGeometry = new THREE.Geometry();
+    for (var i = 0; i < route.length; i++) {
+        var wayPoint = this.scene.getObjectByName(route[i]);
+        lineGeometry.vertices.push(wayPoint.position.clone());
+    }
+    var lineMaterial = new THREE.LineBasicMaterial({
+        color: 0x0000ff
+    });
+    var line = new THREE.Line(lineGeometry, lineMaterial);
+    this.scene.add(line);
 };
 
 Library.prototype.switchViewMode = function () {
