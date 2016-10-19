@@ -45,6 +45,9 @@ App.prototype.renderControlPanel = function() {
     onSwitchView: function() {
       //this.vl.switchViewMode();
       this.vl.testPathfinding();
+    }.bind(this),
+    onNavigateTo: function(destination) {
+      console.log('Show me path to ' + destination);
     }.bind(this)
   }), document.getElementById('ui')); 
 };

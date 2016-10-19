@@ -17,6 +17,11 @@ body {
     overflow-y: hidden;
 }
 
+.limited-h-50 {
+    max-height: 50vh;
+    overflow-y: scroll;
+}
+
 #loadingBG {
     background-color: rgba(135, 150, 156, 0.6);
 }
