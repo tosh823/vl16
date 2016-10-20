@@ -32,8 +32,8 @@ var NavBar = React.createClass({
         this.props.onWarpTo(config[event.target.id]);
     },
 
-    onSettingsClick(event) {
-        this.props.onAction();
+    onNavigationClick(event) {
+        this.props.onNavigation();
     },
 
     onAboutClick(event) {
@@ -70,7 +70,7 @@ var NavBar = React.createClass({
                         </div>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" type="button" onClick={this.onSettingsClick}>Settings</a>
+                        <a className="nav-link" type="button" onClick={this.onNavigationClick}>Navigation</a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link" type="button" onClick={this.onAboutClick}>About</a>

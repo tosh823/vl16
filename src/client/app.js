@@ -2,12 +2,12 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Library = require('./library');
 var config = require('./config');
-var LibraryAPI = require('./libraryAPI');
 var LoginDialog = require('./components/LoginDialog.jsx');
 var LoadingScreen = require('./components/LoadingScreen.jsx');
 var TopRightUI = require('./components/TopRightUI.jsx');
 var NavBar = require('./components/NavBar.jsx');
 var ControlPanel = require('./components/ControlPanel.jsx');
+var SearchPanel = require('./components/SearchPanel.jsx');
 
 function App(canvas, defaultLocation) {
   this.vl = new Library(this, canvas);
@@ -18,38 +18,44 @@ function App(canvas, defaultLocation) {
 App.prototype.constructor = App;
 App.prototype.vl = null;
 
-App.prototype.renderNavBar = function() {
+App.prototype.renderNavBar = function () {
   ReactDOM.unmountComponentAtNode(document.getElementById('page-header'));
   this.navBar = ReactDOM.render(React.createElement(NavBar, {
     location: this.currentLocation,
-    onWarpTo: function(location) {
+    onWarpTo: function (location) {
       this.loadLocation(location);
     }.bind(this),
-    onAction: function() {
+    onNavigation: function () {
       this.renderControlPanel();
     }.bind(this),
-    onAbout: function() {
+    onAbout: function () {
 
     },
-    onSearch: function(query) {
-      var api = new LibraryAPI();
-      api.search(query, null);
+    onSearch: function (query) {
+      this.renderSearchPanel(query);
     }.bind(this)
   }), document.getElementById('page-header'));
 };
 
-App.prototype.renderControlPanel = function() {
+App.prototype.renderControlPanel = function () {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   this.controlPanel = ReactDOM.render(React.createElement(ControlPanel, {
     location: this.currentLocation,
-    onSwitchView: function() {
-      //this.vl.switchViewMode();
-      this.vl.testPathfinding();
+    onSwitchView: function () {
+      this.vl.switchViewMode();
     }.bind(this),
-    onNavigateTo: function(destination) {
+    onNavigateTo: function (destination) {
       console.log('Show me path to ' + destination);
+      this.vl.findPath(destination);
     }.bind(this)
-  }), document.getElementById('ui')); 
+  }), document.getElementById('ui'));
+};
+
+App.prototype.renderSearchPanel = function (query) {
+  ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+  this.searchPanel = ReactDOM.render(React.createElement(SearchPanel, {
+    search: query
+  }), document.getElementById('ui'));
 };
 
 App.prototype.loadInitialLocation = function () {

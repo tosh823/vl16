@@ -216,8 +216,15 @@ Library.prototype.disableBlur = function () {
     this.blurEnabled = false;
 };
 
-Library.prototype.testPathfinding = function() {
-    var route = this.pathfinder.findPath('F1P1', 'F1P21');
+Library.prototype.findPath = function(destination) {
+    // Remove previously drawn path if existed
+    if (this.path != null) this.scene.remove(this.path);
+
+    // Find closest to avatar waypoint
+    var closestWayPoint = this.getClosestWayPoint();
+    if (closestWayPoint == null) return;
+
+    var route = this.pathfinder.findPath(closestWayPoint.name, destination);
     var lineGeometry = new THREE.Geometry();
     for (var i = 0; i < route.length; i++) {
         var wayPoint = this.scene.getObjectByName(route[i]);
@@ -226,8 +233,24 @@ Library.prototype.testPathfinding = function() {
     var lineMaterial = new THREE.LineBasicMaterial({
         color: 0x0000ff
     });
-    var line = new THREE.Line(lineGeometry, lineMaterial);
-    this.scene.add(line);
+    this.path = new THREE.Line(lineGeometry, lineMaterial);
+    this.scene.add(this.path);
+};
+
+Library.prototype.getClosestWayPoint = function() {
+    var navigation = this.scene.getObjectByName('Navigation');
+    var avatarPos = this.avatar.position.clone();
+    var minDistance = Number.MAX_SAFE_INTEGER;
+    var closestWayPoint = null;
+    for (var i = 0; i < navigation.children.length; i++) {
+        var distance = navigation.children[i].position.distanceTo(avatarPos);
+        if (distance < minDistance) {
+            closestWayPoint = navigation.children[i];
+            minDistance = distance;
+        }
+    }
+    console.log('Closest point is ' + closestWayPoint.name);
+    return closestWayPoint;
 };
 
 Library.prototype.switchViewMode = function () {

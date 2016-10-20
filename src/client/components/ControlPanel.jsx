@@ -22,7 +22,7 @@ var ControlPanel = React.createClass({
         });
     },
 
-    onLocationSelect: function(event) {
+    onLocationSelect: function (event) {
         var selected = event.target.id;
         this.props.onNavigateTo(selected);
     },
@@ -51,17 +51,16 @@ var ControlPanel = React.createClass({
                 <button type="button" className="list-group-item list-group-item-action" key={code} id={code} onClick={this.onLocationSelect}>{location}</button>
             );
         }
-
-        /*
-        <div className="list-group list-group-flush">
-                            {locations}
-                        </div>
-        */
+        if (locations.length == 0) {
+            locations.push(
+                <li className="list-group-item" key="no-code">No locations for this space, sorry.</li>
+            );
+        }
 
         return (this.state.isVisible ?
             <div className="row flex-items-xs-right">
                 <div className="col-xs-3 flex-xs-top">
-                    <div className="card">
+                    <div className="card m-t-1 m-r-1">
                         <div className="card-header">
                             <ul className="nav nav-pills card-header-pills float-xs-left">
                                 {navs}

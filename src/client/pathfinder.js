@@ -19,6 +19,7 @@ Pathfinder.prototype.loadMap = function () {
     );
 };
 
+// Delete this method later if not needed
 Pathfinder.prototype.findPathOld = function(start, destination) {
     if (this.map == null) {
         console.log('Pathfinder does not have a map.');
@@ -127,7 +128,6 @@ Pathfinder.prototype.findPath = function (start, destination) {
     }
     route.reverse();
 
-    console.log(nodes);
     console.log(route);
 
     return route;
