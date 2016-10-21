@@ -1,4 +1,5 @@
 var React = require('react');
+var SearchResultsListView = require('./SearchResultsListView.jsx');
 var LibraryAPI = require('../LibraryAPI');
 
 var SearchPanel = React.createClass({
@@ -6,7 +7,8 @@ var SearchPanel = React.createClass({
     getInitialState: function () {
         return {
             isVisible: true,
-            isLoading: false
+            isLoading: true,
+            books: []
         };
     },
 
@@ -20,7 +22,8 @@ var SearchPanel = React.createClass({
         api.search(this.props.search, function (data) {
             // Hide spinner
             this.setState({
-                isLoading: false
+                isLoading: false,
+                books: data
             });
         }.bind(this));
     },
@@ -39,6 +42,15 @@ var SearchPanel = React.createClass({
 
     render: function () {
 
+        /*
+        {(!this.state.isLoading ?
+                            <div className="card-block">
+                                <SearchResultsListView books={this.state.books} />
+                            </div>
+                            : null
+                        )}
+        */
+
         return (this.state.isVisible ?
             <div className="row flex-items-xs-right">
                 <div className="col-xs-3 flex-xs-top">
@@ -51,8 +63,14 @@ var SearchPanel = React.createClass({
                         </div>
                         <div className="card-block">
                             <h5 className="card-title">Results for <em>{'"' + this.props.search + '"'}</em></h5>
-                            <p className="card-text">Click on item to see addition information</p>
-                            {this.state.isLoading ? <i className="fa fa-spinner spinner" aria-hidden="true"></i> : null}
+                            <p className="card-text">{this.state.isLoading ? 'Please wait, request may take up to several seconds' : 'Click on item to see addition information'}</p>
+                            <div className="text-xs-center">
+                                {this.state.isLoading ? <i className="fa fa-spinner fa-3x fa-spin" aria-hidden="true"></i> : null}
+                            </div>
+                            {(!this.state.isLoading ?
+                                <SearchResultsListView books={this.state.books} />
+                                : null
+                            )}
                         </div>
                     </div>
                 </div>
