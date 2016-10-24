@@ -9,10 +9,10 @@ LibraryAPI.prototype.contructor = LibraryAPI;
 LibraryAPI.prototype.search = function (query, onSearchFinnish) {
     var correctQuery = query.replace(/ /g, '+');
     var url = this.host + this.searchReq + correctQuery + '&branch_group_limit=branch%3AOUPK';
-    $.get(url, function(data) {
+    $.get(url, function (data) {
         var searchResultsTable = $(data).find('.table-striped > tbody');
         var searchResults = [];
-        $(searchResultsTable).children('tr').each(function(index, element) {
+        $(searchResultsTable).children('tr').each(function (index, element) {
             var info = $(element).find('.bibliocol');
             var titleA = $(info, 'p').find('.nimeke');
             var authorSpan = $(info, 'p').find('.author');
@@ -35,7 +35,49 @@ LibraryAPI.prototype.search = function (query, onSearchFinnish) {
             });
         });
         onSearchFinnish(searchResults);
-    }).fail(function(error) {
+    }).fail(function (error) {
+        console.log(error);
+    });
+};
+
+LibraryAPI.prototype.getBook = function (href, onRequestFinished) {
+    var url = this.host + href;
+    $.get(url, function (data) {
+        var book = {};
+        var bookInfo = $(data).find('#catalogue_detail_biblio').children('.tietue');
+        var holdsInfo = $(data).find('#bibliodescriptions');
+        book['title'] = $(bookInfo).find('.title').text();
+        book['authors'] = [];
+        $(bookInfo).find('.author').find('span').each(function (index, element) {
+            if ($(element).attr('property') == 'name') {
+                book['authors'].push($(element).text());
+            }
+        });
+        book['type'] = $(bookInfo).find('.results_summary.type').text();
+        book['language'] = $(bookInfo).find('.results_summary.language').children('img').attr('alt');
+        book['publisher'] = [];
+        $(bookInfo).find('.results_summary.publisher').find('span').each(function (index, element) {
+            var property = $(element).attr('property');
+            var location = (property == 'location');
+            var name = (property == 'name');
+            var datePublished = (property == 'datePublished');
+            if (location || name || datePublished) {
+                book['publisher'].push($(element).text());
+            }
+        });
+        $(bookInfo).find('.results_summary.description > *').each(function (index, element) {
+            if ($(element).attr('property') == 'description') {
+                book['description'] = $(element).text();
+            }
+        });
+        $(bookInfo).find('.results_summary.isbn > *').each(function (index, element) {
+            if ($(element).attr('property') == 'isbn') {
+                book['isbn'] = $(element).text();
+            }
+        });
+        console.log(book);
+        onRequestFinished(book);
+    }).fail(function (error) {
         console.log(error);
     });
 };

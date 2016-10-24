@@ -10,26 +10,17 @@ var SearchResultsListView = React.createClass({
     },
 
     componentDidMount: function() {
-        console.log('List view mounted');
-        console.log(SearchResultsListItem);
+        
     },
 
     render: function () {
-
-        var searchResults = [];
-        for (var i = 0; i < this.props.books; i++) {
-            var book = this.props.books[i];
-            searchResults.push(
-                <SearchResultsListItem book={book} />
-            );
-        }
-
+    
         return (this.state.isVisible ?
             <div className="list-group list-group-flush limited-h-50">
                 {
-                    this.props.books.map(function(book) {
-                        return <SearchResultsListItem book={book} />
-                    })
+                    this.props.books.map(function(book, index) {
+                        return <SearchResultsListItem key={index} book={book} onBookClick={this.props.onBookClick} /> 
+                    }.bind(this))
                 }
             </div>
             : null

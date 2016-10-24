@@ -64,6 +64,9 @@ var ControlPanel = React.createClass({
                         <div className="card-header">
                             <ul className="nav nav-pills card-header-pills float-xs-left">
                                 {navs}
+                                <button type="button" className="close" aria-label="Close" onClick={this.hide}>
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </ul>
                         </div>
                         <div className="card-block">
