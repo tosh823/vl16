@@ -52,6 +52,12 @@ var SearchPanel = React.createClass({
         });
     },
 
+    back: function() {
+        this.setState({
+            renderSearch: true
+        });
+    },
+
     show: function () {
         this.setState({
             isVisible: true
@@ -65,9 +71,15 @@ var SearchPanel = React.createClass({
                 <div className="col-xs-3 flex-xs-top">
                     <div className="card m-t-1 m-r-1">
                         <div className="card-header">
+                            {!this.state.renderSearch ?
+                                <button type="button" className="close pull-xs-left m-r-1" aria-label="Back" onClick={this.back}>
+                                    <i className="fa fa-arrow-left" aria-hidden="true"></i>
+                                </button>
+                                : null
+                            }
                             Search
                             <button type="button" className="close" aria-label="Close" onClick={this.hide}>
-                                <span aria-hidden="true">&times;</span>
+                                <i className="fa fa-times" aria-hidden="true"></i>
                             </button>
                         </div>
                         {
@@ -91,7 +103,7 @@ var SearchPanel = React.createClass({
                                 :
                                 <div className="card-block">
                                     <h5 className="card-title">{this.state.selectedBook.title}</h5>
-                                    {(this.state.isLoading ?
+                                    {this.state.isLoading ?
                                         <div>
                                             <p className="card-text">Please wait, requesting additional information about selected book</p>
                                             <div className="text-xs-center">
@@ -107,7 +119,7 @@ var SearchPanel = React.createClass({
                                             <p className="card-text">Language: {this.state.selectedBook.language}</p>
                                             <p className="card-text">ISBN: {this.state.selectedBook.isbn}</p>
                                         </div>
-                                    )}
+                                    }
                                 </div>
                             )
                         }
