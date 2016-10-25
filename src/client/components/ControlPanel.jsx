@@ -36,11 +36,9 @@ var ControlPanel = React.createClass({
 
         var navs = [];
         for (var space in this.props.location.locations) {
-            var navLink = (this.state.activeSpace == space ? "nav-link active" : "nav-link");
+            var buttonClass = (this.state.activeSpace == space ? "btn btn-primary" : "btn btn-secondary");
             navs.push(
-                <li className="nav-item" key={"li-" + space}>
-                    <a className={navLink} type="button" key={space} id={space} onClick={this.onActiveSpaceChange}>{space}</a>
-                </li>
+                <button className={buttonClass} type="button" key={space} id={space} onClick={this.onActiveSpaceChange}>{space}</button>
             );
         }
 
@@ -62,17 +60,17 @@ var ControlPanel = React.createClass({
                 <div className="col-xs-3 flex-xs-top">
                     <div className="card m-t-1 m-r-1">
                         <div className="card-header">
-                            <ul className="nav nav-pills card-header-pills float-xs-left">
-                                {navs}
-                                <button type="button" className="close" aria-label="Close" onClick={this.hide}>
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </ul>
+                            Navigation
+                            <button type="button" className="close" aria-label="Close" onClick={this.hide}>
+                                <i className="fa fa-times" aria-hidden="true"></i>
+                            </button>
                         </div>
                         <div className="card-block">
-                            <h5 className="card-title">Navigation</h5>
-                            <p className="card-text">Choose the destination:</p>
-                            <a href="#" className="btn btn-primary" onClick={this.onButtonClick}>Switch view</a>
+                            <h5 className="card-title">Locations</h5>
+                            <p className="card-text">Choose the location and destination:</p>
+                            <div className="btn-group" role="group" aria-label="Basic example">
+                                {navs}
+                            </div>
                         </div>
                         <div className="card-block">
                             <div className="list-group list-group-flush limited-h-50">

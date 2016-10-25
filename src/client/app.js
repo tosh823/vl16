@@ -28,6 +28,9 @@ App.prototype.renderNavBar = function () {
     onNavigation: function () {
       this.renderControlPanel();
     }.bind(this),
+    onChangeMode: function() {
+      this.vl.switchViewMode();
+    }.bind(this),
     onAbout: function () {
 
     },
@@ -41,9 +44,6 @@ App.prototype.renderControlPanel = function () {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   this.controlPanel = ReactDOM.render(React.createElement(ControlPanel, {
     location: this.currentLocation,
-    onSwitchView: function () {
-      this.vl.switchViewMode();
-    }.bind(this),
     onNavigateTo: function (destination) {
       console.log('Show me path to ' + destination);
       this.vl.findPath(destination);

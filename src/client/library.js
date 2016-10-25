@@ -137,7 +137,7 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 
             // Launch rendering cycle
             clock = new THREE.Clock();
-            //this.initFrameRateUI();
+            this.initFrameRateUI();
             this.ready = true;
             loadCallback();
         }.bind(this),
@@ -175,6 +175,10 @@ Library.prototype.cleanup = function () {
 Library.prototype.initFrameRateUI = function () {
     this.stats = new Stats();
     this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    // Place the fps metter in the left bottom
+    this.stats.dom.style.top = 'auto';
+    this.stats.dom.style.left = '0px';
+    this.stats.dom.style.bottom = '0px';
     document.body.appendChild(this.stats.dom);
 };
 
@@ -186,7 +190,7 @@ Library.prototype.render = function () {
         var delta = clock.getDelta();
         // Update stuff
         this.controls.update();
-        //this.stats.update();
+        this.stats.update();
         this.avatar.update(delta, elapsedTime);
         this.warp.update(delta, elapsedTime);
         // Render stuff
@@ -216,7 +220,7 @@ Library.prototype.disableBlur = function () {
     this.blurEnabled = false;
 };
 
-Library.prototype.findPath = function(destination) {
+Library.prototype.findPath = function (destination) {
     // Remove previously drawn path if existed
     if (this.path != null) this.scene.remove(this.path);
 
@@ -237,7 +241,7 @@ Library.prototype.findPath = function(destination) {
     this.scene.add(this.path);
 };
 
-Library.prototype.getClosestWayPoint = function() {
+Library.prototype.getClosestWayPoint = function () {
     var navigation = this.scene.getObjectByName('Navigation');
     var avatarPos = this.avatar.position.clone();
     var minDistance = Number.MAX_SAFE_INTEGER;

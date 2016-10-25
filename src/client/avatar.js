@@ -143,6 +143,7 @@ Avatar.prototype.update = function (delta, time) {
         this.checkGround();
         var canMoveInDirection = this.checkCollisions(this.moveVector);
         if (canMoveInDirection) {
+            // Multiply by delta for time-dependent movement rather then frame-dependent
             var xShift = this.moveVector.x * this.speed;
             var zShift = this.moveVector.z * this.speed;
             this.translateX(xShift);
