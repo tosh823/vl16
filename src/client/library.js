@@ -234,9 +234,14 @@ Library.prototype.findPath = function (destination) {
         var wayPoint = this.scene.getObjectByName(route[i]);
         lineGeometry.vertices.push(wayPoint.position.clone());
     }
-    var lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x0000ff
+    var lineMaterial = new THREE.LineDashedMaterial({
+        color: 0x4286f4,
+        scale: 1,
+        dashSize: 3,
+        gapSize: 1,
+        fog: true
     });
+    lineGeometry.computeLineDistances();
     this.path = new THREE.Line(lineGeometry, lineMaterial);
     this.scene.add(this.path);
 };
