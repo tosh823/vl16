@@ -1,4 +1,7 @@
 var THREE = require('three');
+var React = require('react');
+var ReactDOM = require('react-dom');
+var Overlay = require('./components/Overlay.jsx');
 
 function Avatar(library, position, rotation) {
     THREE.Object3D.call(this);
@@ -54,6 +57,7 @@ function Avatar(library, position, rotation) {
     this.onKeyUpEvent = null;
 
     this.enabled = false;
+    this.uiShown = false;
 
     // X - left/right motion
     // Z - forward/back motion
@@ -120,6 +124,21 @@ Avatar.prototype.onKeyUp = function (event) {
             this.moveVector.x = 0;
             break;
         case 32: // space
+            if (this.uiShown) {
+                // hide UI
+                this.uiShown = false;
+                this.library.app.navBar.hide();
+                this.library.canvas.enterPointerLock(null);
+                this.library.setStandardViewCallbacks();
+                this.enabled = true;
+            }
+            else {
+                // show UI
+                this.uiShown = true;
+                this.library.app.navBar.show();
+                this.library.canvas.exitPointerLock(null);
+                this.enabled = false;
+            }
             break;
     }
 };
@@ -208,7 +227,7 @@ Avatar.prototype.checkGround = function () {
     }
 };
 
-Avatar.prototype.lookAt = function(target) {
+Avatar.prototype.lookAt = function (target) {
     this.camera.lookAt(target);
 }
 
@@ -222,6 +241,9 @@ Avatar.prototype.enableFirstPersonControl = function () {
     document.addEventListener('keydown', this.onKeyDownEvent, false);
     document.addEventListener('keyup', this.onKeyUpEvent, false);
     document.addEventListener('click', this.onClickEvent, false);
+
+    ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+    this.overlay = ReactDOM.render(React.createElement(Overlay), document.getElementById('ui'));
     this.enabled = true;
 };
 
@@ -231,6 +253,8 @@ Avatar.prototype.disableFirstPersonControl = function () {
     document.removeEventListener('keydown', this.onKeyDownEvent, false);
     document.removeEventListener('keyup', this.onKeyUpEvent, false);
     document.removeEventListener('click', this.onClickEvent, false);
+
+    ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
     this.enabled = false;
 };
 

@@ -2,6 +2,10 @@ body {
     margin: 0;
 }
 
+video {
+    display: none;
+}
+
 #world {
     display: block;
     position: absolute;
@@ -10,11 +14,17 @@ body {
     top: 0;
     right: 0;
     left: 0;
+    z-index: -1;
 }
 
 #content {
     overflow-x: hidden;
     overflow-y: hidden;
+    z-index: 0;
+}
+
+#loading {
+    background-color: rgba(135, 150, 156, 0.8);
 }
 
 .limited-h-50 {
@@ -22,12 +32,32 @@ body {
     overflow-y: scroll;
 }
 
-#loadingBG {
-    background-color: rgba(135, 150, 156, 0.6);
+.overlay {
+    z-index: 1000;
 }
 
 .stretch-y {
     height: 92vh;
+}
+
+.h-50 {
+    height: 50vh;
+}
+
+.h-60 {
+    height: 60vh;
+}
+
+.h-70 {
+    height: 70vh;
+}
+
+.h-80 {
+    height: 80vh;
+}
+
+.h-90 {
+    height: 90vh;
 }
 
 .stretch-x {
@@ -39,13 +69,13 @@ body {
     width: 100vw;
 }
 
-video {
-    display: none;
-}
-
 .spinner {
     animation: common-spin 1s infinite linear;
     -webkit-animation: webkit-spin 1s infinite linear;
+}
+
+.cursor {
+    color: white;
 }
 
 @keyframes common-spin {
