@@ -40,6 +40,10 @@ video {
     height: 92vh;
 }
 
+.anchor-bottom {
+    bottom: 0px;
+}
+
 .h-50 {
     height: 50vh;
 }
@@ -56,8 +60,16 @@ video {
     height: 80vh;
 }
 
+.h-88 {
+    height: 88vh;
+}
+
 .h-90 {
     height: 90vh;
+}
+
+.h-95 {
+    height: 95vh;
 }
 
 .stretch-x {

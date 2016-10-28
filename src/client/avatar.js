@@ -50,14 +50,20 @@ function Avatar(library, position, rotation) {
     this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.6, 1000);
     this.add(this.camera);
 
+    // UI
+    this.overlay = null; // Reference to interface
+
     // Instances of event listeners
     this.onMouseMoveEvent = null;
+    this.onMouseDownEvent = null;
+    this.onMouseUpEvent = null;
     this.onClickEvent = null;
     this.onKeyDownEvent = null;
     this.onKeyUpEvent = null;
 
     this.enabled = false;
-    this.uiShown = false;
+    this.uiShown = false; 
+    this.cursorShown = false; // Store this flag in order to reduce overlay methods calls
 
     // X - left/right motion
     // Z - forward/back motion
@@ -79,6 +85,9 @@ Avatar.prototype.onMouseMove = function (event) {
         this.rotation.y -= movementX * 0.002;
         this.camera.rotation.x -= movementY * 0.002;
         this.camera.rotation.x = Math.max(- Math.PI / 2, Math.min(Math.PI / 2, this.camera.rotation.x));
+
+        // Whenever we move camera, check possible interactable objects
+        this.checkInteractables();
     }
 };
 
@@ -126,6 +135,7 @@ Avatar.prototype.onKeyUp = function (event) {
         case 32: // space
             if (this.uiShown) {
                 // hide UI
+                this.overlay.shift();
                 this.uiShown = false;
                 this.library.app.navBar.hide();
                 this.library.canvas.enterPointerLock(null);
@@ -134,6 +144,7 @@ Avatar.prototype.onKeyUp = function (event) {
             }
             else {
                 // show UI
+                this.overlay.shift();
                 this.uiShown = true;
                 this.library.app.navBar.show();
                 this.library.canvas.exitPointerLock(null);
@@ -143,6 +154,7 @@ Avatar.prototype.onKeyUp = function (event) {
     }
 };
 
+// On Click event listener, check interactables and launch their action if present
 Avatar.prototype.onClick = function (event) {
     if (event.button == 0) {
         // Left button click
@@ -151,6 +163,43 @@ Avatar.prototype.onClick = function (event) {
         var intersections = raycaster.intersectObjects(this.library.interactable, false);
         if (intersections.length > 0) {
             intersections[0].object.parent.interact();
+        }
+    }
+};
+
+// On MouseDown event listener, switches cursor type
+Avatar.prototype.onMouseDown = function (event) {
+    if (event.button == 0) {
+        if (this.cursorShown) {
+            this.overlay.showGrabCursor();
+        }
+    }
+};
+
+// On MouseUp event listener, switches cursor type
+Avatar.prototype.onMouseUp = function (event) {
+    if (event.button == 0) {
+        if (this.cursorShown) {
+            this.overlay.showPointCursor();
+        }
+    }
+};
+
+// Method that checks if our focus reached any interactible object
+Avatar.prototype.checkInteractables = function () {
+    var raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 100);
+    raycaster.setFromCamera(new THREE.Vector2(0.5, 0.5), this.camera);
+    var intersections = raycaster.intersectObjects(this.library.interactable, false);
+    if (intersections.length > 0) {
+        if (!this.cursorShown) {
+            this.overlay.showPointCursor();
+            this.cursorShown = true;
+        }
+    }
+    else {
+        if (this.cursorShown) {
+            this.overlay.hideCursor();
+            this.cursorShown = false;
         }
     }
 }
@@ -234,10 +283,14 @@ Avatar.prototype.lookAt = function (target) {
 Avatar.prototype.enableFirstPersonControl = function () {
     if (this.enabled == true) return;
     this.onMouseMoveEvent = this.onMouseMove.bind(this);
+    this.onMouseDownEvent = this.onMouseDown.bind(this);
+    this.onMouseUpEvent = this.onMouseUp.bind(this);
     this.onKeyDownEvent = this.onKeyDown.bind(this);
     this.onKeyUpEvent = this.onKeyUp.bind(this);
     this.onClickEvent = this.onClick.bind(this);
     document.addEventListener('mousemove', this.onMouseMoveEvent, false);
+    document.addEventListener('mousedown', this.onMouseDownEvent, false);
+    document.addEventListener('mouseup', this.onMouseUpEvent, false);
     document.addEventListener('keydown', this.onKeyDownEvent, false);
     document.addEventListener('keyup', this.onKeyUpEvent, false);
     document.addEventListener('click', this.onClickEvent, false);
@@ -250,6 +303,8 @@ Avatar.prototype.enableFirstPersonControl = function () {
 Avatar.prototype.disableFirstPersonControl = function () {
     if (this.enabled == false) return;
     document.removeEventListener('mousemove', this.onMouseMoveEvent, false);
+    document.removeEventListener('mousedown', this.onMouseDownEvent, false);
+    document.removeEventListener('mouseup', this.onMouseUpEvent, false);
     document.removeEventListener('keydown', this.onKeyDownEvent, false);
     document.removeEventListener('keyup', this.onKeyUpEvent, false);
     document.removeEventListener('click', this.onClickEvent, false);
