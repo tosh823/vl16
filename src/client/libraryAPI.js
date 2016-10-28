@@ -45,7 +45,7 @@ LibraryAPI.prototype.getBook = function (href, onRequestFinished) {
     $.get(url, function (data) {
         var book = {};
         var bookInfo = $(data).find('#catalogue_detail_biblio').children('.tietue');
-        var holdsInfo = $(data).find('#bibliodescriptions');
+        var holdsInfo = $(data).find('.holdingst');
         book['title'] = $(bookInfo).find('.title').text();
         book['authors'] = [];
         $(bookInfo).find('.author').find('span').each(function (index, element) {
@@ -67,12 +67,22 @@ LibraryAPI.prototype.getBook = function (href, onRequestFinished) {
         });
         $(bookInfo).find('.results_summary.description > *').each(function (index, element) {
             if ($(element).attr('property') == 'description') {
-                book['description'] = $(element).text();
+                book['description'] = $(element).text().trim();
             }
         });
         $(bookInfo).find('.results_summary.isbn > *').each(function (index, element) {
             if ($(element).attr('property') == 'isbn') {
-                book['isbn'] = $(element).text();
+                book['isbn'] = $(element).text().trim();
+            }
+        });
+        // Holds data
+        book['locations'] = [];
+        $(holdsInfo).find('tbody').children().each(function(index, element) {
+            var library = $(element).find('.location').children('div');
+            var libraryName = $(library).text().trim();
+            if (libraryName == 'Oulun kaupungin pääkirjasto') {
+                var location = $(element).find('.call_no');
+                book['locations'].push($(location).text().trim());
             }
         });
         console.log(book);
