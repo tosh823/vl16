@@ -45,9 +45,16 @@ var NavBar = React.createClass({
     },
 
     onSearchClick(event) {
-        //event.preventDefault();
         var query = this.refs.searchRequest.value;
         this.props.onSearch(query);
+    },
+
+    onSearchKeyDown(event) {
+        // When pressing enter in text field, launch searching
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            this.onSearchClick();
+        }
     },
 
     render: function () {
@@ -84,7 +91,7 @@ var NavBar = React.createClass({
                     </li>
                 </ul>
                 <form className="form-inline pull-xs-right">
-                    <input className="form-control" ref="searchRequest" type="text" placeholder="Search" />
+                    <input className="form-control" ref="searchRequest" type="text" placeholder="Search" onKeyDown={this.onSearchKeyDown} />
                     <button className="btn btn-outline-success" type="button" onClick={this.onSearchClick}>Search</button>
                 </form>
             </nav>
