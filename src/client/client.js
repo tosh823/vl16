@@ -1,21 +1,57 @@
 
 function Client() {
-    IApplication.call(this);
-    console.log('Created and instance of IApplication');
+    this.client = new TundraClient({
+        Tundra: {
+            polymer: (typeof Polymer === "function"),
+            deprecatedWarnings: false
+        },
+        TundraClient: {
+            renderer: ThreeJsRenderer, 
+            container: "#world",
+            loglevel: "error",
+            applications: {
+            }
+        },
+        AssetAPI: {
+            storages: {
+                "webtundra://": window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/")),
+                "webtundra-assets://": "./assets"
+            }
+        },
+        plugins: {
+            LoginScreenPlugin: {
+                loginControlsEnabled: true,
+                loadingScreenEnabled: true,
+                headerText: "realXtend WebTundra",
+                headerLinkUrl: "http://meshmoon.com",
+                connectingText: "Loading 3D Space"
+            }
+        }
+    });
+    this.client.onConnected(null, this.onConnected.bind(this));
+    this.client.onDisconnected(null, this.onDisconnected.bind(this));
+    this.client.onConnectionError(null, this.onConnectionError.bind(this));
 };
 
-Client.prototype = Object.create(IApplication);
 Client.prototype.constructor = Client;
 
-Client.prototype.onConnected = function() {
+Client.prototype.connect = function() {
+    this.client.connect('localhost:8080', {});
+};
+
+Client.prototype.onConnected = function () {
     console.log('Client connected');
 };
 
-Client.prototype.onDisconnected = function() {
+Client.prototype.onConnectionError = function(event) {
+    console.log('Connection error');
+};
+
+Client.prototype.onDisconnected = function () {
     console.log('Client disconnected');
 };
 
-Client.protytype.onUpdate = function(frame) {
+Client.prototype.onUpdate = function (frame) {
 
 };
 

@@ -4,6 +4,7 @@ var Stuff = require('./stuff');
 var Pathfinder = require('./pathfinder');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
+var Client = require('./client');
 //var THREE = require('three');
 require('OrbitControls');
 require('EffectComposer');
@@ -25,6 +26,7 @@ function Library(app, canvas) {
     this.app = app;
     this.canvas = new Canvas(canvas);
     this.pathfinder = new Pathfinder(this);
+    this.client = new Client();
     // ready - flag that used to decide, do we need to render a scene or not
     this.ready = false;
     window.addEventListener('resize', this.onWindowResize.bind(this), false);

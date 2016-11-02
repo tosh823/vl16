@@ -79,6 +79,7 @@ App.prototype.loadInitialLocation = function () {
           LoginDialog,
           {
             onOnlineCallback: function () {
+              this.vl.client.connect();
               this.vl.disableBlur();
             }.bind(this)
           }
