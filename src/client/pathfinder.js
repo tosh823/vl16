@@ -6,12 +6,12 @@ var Pathfinder = function (library) {
 Pathfinder.prototype.constructor = Pathfinder;
 Pathfinder.prototype.loadMap = function () {
     // Read navigation map
-    var navMapFile = 'assets/' + this.library.location.asset + '_Navigation.json';
+    var navMapFile = 'assets/' + this.library.location.asset + 'Navigation.json';
     $.getJSON(navMapFile,
         function onSuccess(json) {
             //this.nodes = json;
             this.map = {};
-            json.map(function(value, index) {
+            json['wayPoints'].map(function(value, index) {
                 this.map[value.name] = value.links;
             }.bind(this));
             console.log('Loaded map of ' + json.length + ' waypoints');
