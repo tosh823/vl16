@@ -8,23 +8,12 @@ function Client() {
         TundraClient: {
             renderer: ThreeJsRenderer, 
             container: "#world",
-            loglevel: "error",
-            applications: {
-            }
+            loglevel: "error"
         },
         AssetAPI: {
             storages: {
                 "webtundra://": window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/")),
                 "webtundra-assets://": "./assets"
-            }
-        },
-        plugins: {
-            LoginScreenPlugin: {
-                loginControlsEnabled: true,
-                loadingScreenEnabled: true,
-                headerText: "realXtend WebTundra",
-                headerLinkUrl: "http://meshmoon.com",
-                connectingText: "Loading 3D Space"
             }
         }
     });
@@ -37,6 +26,7 @@ Client.prototype.constructor = Client;
 
 Client.prototype.connect = function() {
     this.client.connect('localhost:8080', {});
+    console.log(this.client);
 };
 
 Client.prototype.onConnected = function () {

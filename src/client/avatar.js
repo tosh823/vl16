@@ -1,55 +1,11 @@
-//var THREE = require('three');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Overlay = require('./components/Overlay.jsx');
 
+var User = requrie('./user');
+
 function Avatar(library, position, rotation) {
-    THREE.Object3D.call(this);
-    // Set position and height
-    this.library = library;
-    this.position.set(position.x, position.y, position.z);
-    this.height = position.y;
-
-    // Create body
-    this.psAttributes = {
-        startSize: [],
-        startPosition: [],
-        randomness: []
-    };
-    var textureloader = new THREE.TextureLoader();
-    textureloader.load('assets/textures/Spark.png',
-        function (texture) {
-            this.body = new THREE.Object3D();
-            var particlesAmount = 50;
-            var radiusRange = 0.4;
-            var scaleBase = 0.4;
-            var scaleDelta = 0.2;
-            for (var i = 0; i < particlesAmount; i++) {
-                var spriteMaterial = new THREE.SpriteMaterial({
-                    map: texture,
-                    color: 0xffffff,
-                    blending: THREE.AdditiveBlending
-                });
-                var sprite = new THREE.Sprite(spriteMaterial);
-                var scale = scaleBase + Math.random() * 2 * scaleDelta - scaleDelta;
-                sprite.scale.set(scale, scale, 1.0);
-                sprite.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
-                sprite.position.setLength(radiusRange * Math.random());
-                sprite.material.color.setHSL(Math.random(), 0.9, 0.7);
-                this.psAttributes.startSize.push(sprite.scale.clone().x);
-                this.psAttributes.startPosition.push(sprite.position.clone());
-                this.psAttributes.randomness.push(Math.random() + 1);
-                this.body.add(sprite);
-            }
-            this.body.translateY(-this.height / 4);
-            this.add(this.body);
-        }.bind(this)
-    );
-
-    // Create camera
-    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.6, 1000);
-    this.add(this.camera);
-
+    User.call(this);
     // UI
     this.overlay = null; // Reference to interface
 
@@ -74,7 +30,7 @@ function Avatar(library, position, rotation) {
     this.groundCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 3);
 }
 
-Avatar.prototype = Object.create(THREE.Object3D.prototype);
+Avatar.prototype = Object.create(User.prototype);
 Avatar.prototype.constructor = Avatar;
 
 Avatar.prototype.onMouseMove = function (event) {
@@ -205,6 +161,7 @@ Avatar.prototype.checkInteractables = function () {
 }
 
 Avatar.prototype.update = function (delta, time) {
+    User.call(this, delta, time);
     if (this.enabled) {
         // If direct control is enabled
         // Check collisions with obstacles
@@ -218,7 +175,6 @@ Avatar.prototype.update = function (delta, time) {
             this.translateZ(zShift);
         }
     }
-    this.animate(time);
 };
 
 Avatar.prototype.animate = function (time) {
