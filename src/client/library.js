@@ -156,7 +156,7 @@ Library.prototype.createAvatar = function () {
     var transform = newbie.createComponent("Placeable", 'Transform', AttributeChange.Default);
     var attr = transform.attribute('transform');
     var spawnPoint = this.scene.getObjectByName('SpawnPoint');
-    attr.value.setPosition(spawnPoint.position.clone());
+    attr.value.setPosition(new THREE.Vector3(spawnPoint.position.x, this.location.avatarLift, spawnPoint.position.z));
     attr.value.setRotation(spawnPoint.rotation.clone());
     attr.value.setScale(spawnPoint.scale.clone());
     
