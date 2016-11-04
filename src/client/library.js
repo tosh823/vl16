@@ -5,7 +5,7 @@ var Pathfinder = require('./pathfinder');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
 var Client = require('./client');
-//var THREE = require('three');
+var User = require('./user');
 require('OrbitControls');
 require('EffectComposer');
 require('SkyShader');
@@ -62,8 +62,11 @@ Library.prototype.render = function () {
         var delta = this.clock.getDelta();
         // Update stuff
         this.controls.update();
-        if (this.stats != null ) this.stats.update();
-        this.avatar.update(delta, elapsedTime);
+        if (this.stats != null) this.stats.update();
+        if (this.users != null) this.users.map(function(user, index) {
+            user.update(delta, elapsedTime);
+        });
+        //this.avatar.update(delta, elapsedTime);
         this.warp.update(delta, elapsedTime);
         // Render stuff
         if (this.blurEnabled) this.composer.render();
@@ -83,9 +86,14 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.mainCamera = this.scene.getObjectByName("Camera");
             this.activeCamera = this.mainCamera;
             this.configureEnvironment();
+            this.configureInteractiveObjects();
 
             // Set OrbitControls
             this.configureControls();
+
+            // Load existing users
+            /*this.loadUsers();
+            this.createAvatar();*/
 
             this.addStats();
             this.ready = true;
@@ -104,14 +112,61 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 };
 
 Library.prototype.loadUsers = function() {
-    var users;
+    var container = Tundra.scene.entityByName('Users');
+    if (container != null) {
+        // Scene already contains users, load them
+        for (var i = 0; i < containter.children.length; i++) {
+            var child  = containter.children[i];
+            var user = new User(this, child);
+            this.users.push(user);
+            this.scene.add(user);
+        }
+    }
+    else {
+        // Scene doesn't contain users, create a container for them
+        container = Tundra.scene.createEntity(0, [], AttributeChange.Default, false, false);
+        container.setName('Users');
+    }
 };
 
-Library.prototype.createUser = function () {
-    // Spawn an Avatar
+Library.prototype.addUser = function(entity) {
+    console.log('Adding new user...');
+    var user = new User(this, entity);
+    this.users.push(user);
+    this.scene.add(user);
+};
+
+Library.prototype.removeUser = function(entity) {
+    var found = null;
+    for (var i = 0; i < this.users.length; i++) {
+        if (entity.id == this.users[i].entity.id) {
+            found = i;
+            break;
+        }
+    }
+    if (found != null) {
+        this.users.splice(found, 1);
+    }
+};
+
+Library.prototype.createAvatar = function () {
+    var container = Tundra.scene.entityByName('Users');
+    if (container == null) return;
+    var newbie = container.createChild(0, AttributeChange.Default);
+    var transform = newbie.createComponent("Placeable", 'Transform', AttributeChange.Default);
+    var attr = transform.attribute('transform');
     var spawnPoint = this.scene.getObjectByName('SpawnPoint');
-    this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, location.avatarLift, spawnPoint.position.z), spawnPoint.rotation.clone());
+    attr.value.setPosition(spawnPoint.position.clone());
+    attr.value.setRotation(spawnPoint.rotation.clone());
+    attr.value.setScale(spawnPoint.scale.clone());
+    
+    this.avatar = new Avatar(this, newbie);
+    this.users.push(this.avatar);
     this.scene.add(this.avatar);
+
+    // Create callbacks
+    Tundra.scene.onEntityCreated(this.addUser.bind(this));
+    Tundra.scene.onEntityRemoved(this.removeUser.bind(this));
 };
 
 Library.prototype.configureControls = function () {
@@ -157,7 +212,7 @@ Library.prototype.configureEnvironment = function () {
     this.scene.add(sky.mesh);
 };
 
-Library.prototype.configureInteractiveObject = function () {
+Library.prototype.configureInteractiveObjects = function () {
     // Find stuff bar to make it interactable
     var stuffBar = this.scene.getObjectByName("LibraryStuffBar1");
     if (stuffBar != null) {

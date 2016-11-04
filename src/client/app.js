@@ -79,8 +79,10 @@ App.prototype.loadInitialLocation = function () {
           LoginDialog,
           {
             onOnlineCallback: function () {
-              this.vl.client.connect();
+              this.vl.tundra.connect();
               this.vl.disableBlur();
+              this.vl.loadUsers();
+              this.vl.createAvatar();
             }.bind(this)
           }
         ),

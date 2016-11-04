@@ -1,11 +1,12 @@
 
-function User(library, position, rotation) {
+function User(library, entity) {
     THREE.Object3D.call(this);
 
     // Set position and height
     this.library = library;
-    this.position.set(position.x, position.y, position.z);
-    this.height = position.y;
+    this.entity = entity;
+    this.syncDown();
+    this.height = this.position.y;
 
     // Create body
     this.psAttributes = {
@@ -53,6 +54,22 @@ User.prototype.constructor = User;
 
 User.prototype.update = function (delta, time) {
     this.animate(time);
+    this.syncDown();
+};
+
+User.prototype.syncDown = function() {
+    if (this.entity != null) {
+        var transform = this.entity.component("Placeable", 'Transform');
+        var position = transform.attribute('transform').value.pos;
+        this.position.set(position.x, position.y, position.z);
+    }
+};
+
+User.prototype.syncUp = function() {
+    if (this.entity != null) {
+        var transform = this.entity.component("Placeable", 'Transform');
+        transform.attribute('transform').value.setPosition(this.position.clone());
+    }
 };
 
 User.prototype.animate = function (time) {

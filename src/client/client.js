@@ -7,7 +7,7 @@ function Client() {
         },
         TundraClient: {
             renderer: ThreeJsRenderer, 
-            container: "#world",
+            container: "#underworld",
             loglevel: "error"
         },
         AssetAPI: {
@@ -26,7 +26,6 @@ Client.prototype.constructor = Client;
 
 Client.prototype.connect = function() {
     this.client.connect('localhost:8080', {});
-    console.log(this.client);
 };
 
 Client.prototype.onConnected = function () {

@@ -17,6 +17,10 @@ video {
     z-index: -1;
 }
 
+#underworld {
+    display: none;
+}
+
 #content {
     overflow-x: hidden;
     overflow-y: hidden;

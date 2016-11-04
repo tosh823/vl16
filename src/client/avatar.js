@@ -2,10 +2,10 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Overlay = require('./components/Overlay.jsx');
 
-var User = requrie('./user');
+var User = require('./user');
 
-function Avatar(library, position, rotation) {
-    User.call(this);
+function Avatar(library, entity) {
+    User.call(this, library, entity);
     // UI
     this.overlay = null; // Reference to interface
 
@@ -161,7 +161,6 @@ Avatar.prototype.checkInteractables = function () {
 }
 
 Avatar.prototype.update = function (delta, time) {
-    User.call(this, delta, time);
     if (this.enabled) {
         // If direct control is enabled
         // Check collisions with obstacles
@@ -173,8 +172,10 @@ Avatar.prototype.update = function (delta, time) {
             var zShift = this.moveVector.z * this.speed;
             this.translateX(xShift);
             this.translateZ(zShift);
+            this.syncUp();
         }
     }
+    this.animate(time);
 };
 
 Avatar.prototype.animate = function (time) {
