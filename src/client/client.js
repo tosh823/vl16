@@ -1,5 +1,5 @@
 
-function Client() {
+function Client(onConnected, onDisconnected, onError) {
     this.client = new TundraClient({
         Tundra: {
             polymer: (typeof Polymer === "function"),
@@ -17,9 +17,9 @@ function Client() {
             }
         }
     });
-    this.client.onConnected(null, this.onConnected.bind(this));
-    this.client.onDisconnected(null, this.onDisconnected.bind(this));
-    this.client.onConnectionError(null, this.onConnectionError.bind(this));
+    this.client.onConnected(null, onConnected);
+    this.client.onDisconnected(null, onDisconnected);
+    this.client.onConnectionError(null, onError);
 };
 
 Client.prototype.constructor = Client;

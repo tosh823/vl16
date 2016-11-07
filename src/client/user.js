@@ -59,7 +59,7 @@ User.prototype.update = function (delta, time) {
 
 User.prototype.syncDown = function() {
     if (this.entity != null) {
-        var transform = this.entity.component("Placeable", 'Transform');
+        var transform = this.entity.component("Placeable");
         var position = transform.attribute('transform').value.pos;
         this.position.set(position.x, position.y, position.z);
     }
@@ -67,8 +67,17 @@ User.prototype.syncDown = function() {
 
 User.prototype.syncUp = function() {
     if (this.entity != null) {
-        var transform = this.entity.component("Placeable", 'Transform');
-        transform.attribute('transform').value.setPosition(this.position.clone());
+        /*var transform = this.entity.component("Placeable");
+        //transform.attribute('transform').value.setPosition(this.position.clone());
+        var value = transform.attribute('transform').value;
+        value.setPosition(this.position.clone());
+        transform.attribute('transform').set(value);*/
+        var userPosition = this.position.clone();
+        this.entity.exec(EntityAction.Server, "UserPositionUpdate", [JSON.stringify({ 
+            x : userPosition.x, 
+            y : userPosition.y, 
+            z : userPosition.z 
+        })]);
     }
 };
 

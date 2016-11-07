@@ -24,7 +24,21 @@ function Library(app, canvas) {
     this.app = app;
     this.canvas = new Canvas(canvas);
     this.pathfinder = new Pathfinder(this);
-    this.tundra = new Client();
+    this.tundra = new Client(
+        function onConnected() {
+            console.log('Connected to Tundra server');
+            this.disableBlur();
+
+            Tundra.scene.onEntityCreated(this, this.onEntityCreated.bind(this));
+            Tundra.scene.onEntityRemoved(this, this.onEntityRemoved.bind(this));
+        }.bind(this),
+        function onDisconnected() {
+            console.log('Disconnected from server');
+        },
+        function onError(error) {
+            console.log('Error while connecting to server');
+        }
+    );
     this.clock = new THREE.Clock();
     this.ready = false; // flag that used to decide, do we need to render a scene or not
     this.render();
@@ -63,7 +77,7 @@ Library.prototype.render = function () {
         // Update stuff
         this.controls.update();
         if (this.stats != null) this.stats.update();
-        if (this.users != null) this.users.map(function(user, index) {
+        if (this.users != null) this.users.map(function (user, index) {
             user.update(delta, elapsedTime);
         });
         //this.avatar.update(delta, elapsedTime);
@@ -91,10 +105,6 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             // Set OrbitControls
             this.configureControls();
 
-            // Load existing users
-            /*this.loadUsers();
-            this.createAvatar();*/
-
             this.addStats();
             this.ready = true;
 
@@ -111,32 +121,41 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
     );
 };
 
-Library.prototype.loadUsers = function() {
-    var container = Tundra.scene.entityByName('Users');
-    if (container != null) {
-        // Scene already contains users, load them
-        for (var i = 0; i < containter.children.length; i++) {
-            var child  = containter.children[i];
-            var user = new User(this, child);
-            this.users.push(user);
-            this.scene.add(user);
-        }
+Library.prototype.loadUsers = function () {
+
+};
+
+Library.prototype.onEntityCreated = function(entity) {
+    console.log('Added entity [' + entity.id + '] - ' + entity.name);
+    var clientName = 'User-' + this.tundra.client.connectionId;
+    if (entity.name == clientName) {
+        // If we are the connected user, create instance of Avatar
+        this.addAvatar(entity);
     }
     else {
-        // Scene doesn't contain users, create a container for them
-        container = Tundra.scene.createEntity(0, [], AttributeChange.Default, false, false);
-        container.setName('Users');
+        // Otherwise, create instance of User for other user
+        this.addUser(entity);
     }
 };
 
-Library.prototype.addUser = function(entity) {
-    console.log('Adding new user...');
+Library.prototype.onEntityRemoved = function(entity) {
+    console.log('Removed entity [' + entity.id + '] - ' + entity.name);
+    removeUser(entity);
+};
+
+Library.prototype.addUser = function (entity) {
     var user = new User(this, entity);
     this.users.push(user);
     this.scene.add(user);
 };
 
-Library.prototype.removeUser = function(entity) {
+Library.prototype.addAvatar = function (entity) {
+    this.avatar = new Avatar(this, entity);
+    this.users.push(this.avatar);
+    this.scene.add(this.avatar);
+};
+
+Library.prototype.removeUser = function (entity) {
     var found = null;
     for (var i = 0; i < this.users.length; i++) {
         if (entity.id == this.users[i].entity.id) {
@@ -147,26 +166,6 @@ Library.prototype.removeUser = function(entity) {
     if (found != null) {
         this.users.splice(found, 1);
     }
-};
-
-Library.prototype.createAvatar = function () {
-    var container = Tundra.scene.entityByName('Users');
-    if (container == null) return;
-    var newbie = container.createChild(0, AttributeChange.Default);
-    var transform = newbie.createComponent("Placeable", 'Transform', AttributeChange.Default);
-    var attr = transform.attribute('transform');
-    var spawnPoint = this.scene.getObjectByName('SpawnPoint');
-    attr.value.setPosition(new THREE.Vector3(spawnPoint.position.x, this.location.avatarLift, spawnPoint.position.z));
-    attr.value.setRotation(spawnPoint.rotation.clone());
-    attr.value.setScale(spawnPoint.scale.clone());
-    
-    this.avatar = new Avatar(this, newbie);
-    this.users.push(this.avatar);
-    this.scene.add(this.avatar);
-
-    // Create callbacks
-    Tundra.scene.onEntityCreated(this.addUser.bind(this));
-    Tundra.scene.onEntityRemoved(this.removeUser.bind(this));
 };
 
 Library.prototype.configureControls = function () {

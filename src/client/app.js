@@ -80,9 +80,6 @@ App.prototype.loadInitialLocation = function () {
           {
             onOnlineCallback: function () {
               this.vl.tundra.connect();
-              this.vl.disableBlur();
-              this.vl.loadUsers();
-              this.vl.createAvatar();
             }.bind(this)
           }
         ),
