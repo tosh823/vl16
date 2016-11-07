@@ -1,22 +1,42 @@
+var io = require('socket.io-client');
 
-function Client() {
-    IApplication.call(this);
-    console.log('Created and instance of IApplication');
+function Client(library) {
+    this.library = library;
 };
 
-Client.prototype = Object.create(IApplication);
 Client.prototype.constructor = Client;
 
-Client.prototype.onConnected = function() {
-    console.log('Client connected');
+Client.prototype.connect = function() {
+    this.socket = new io('http://localhost:8080', {
+        reconnection: false
+    });
+
+    this.socket.io.on('connect_error', function (error) {
+        var receiveTime = new Date().toLocaleString();
+        console.log(receiveTime + ' : Connection Failed');
+    });
+
+    this.socket.on('connect', function () {
+        var receiveTime = new Date().toLocaleString();
+        console.log(receiveTime + ' : Successfully connected to backend');
+    });
+
+    this.socket.on('fetch', function(data) {
+        this.library.loadClients(data.clients);
+        this.library.addAvatar();
+    }.bind(this));
+
+    this.socket.on('leave', function(data) {
+        this.library.removeUser(data.socketID);
+    }.bind(this));
+
+    this.socket.on('notify', function(data) {
+        this.library.addOrUpdateInfo(data);
+    }.bind(this));
 };
 
-Client.prototype.onDisconnected = function() {
-    console.log('Client disconnected');
-};
-
-Client.protytype.onUpdate = function(frame) {
-
+Client.prototype.update = function(position) {
+    this.socket.emit('update', position);
 };
 
 module.exports = Client;

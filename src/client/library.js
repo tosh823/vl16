@@ -4,6 +4,7 @@ var Stuff = require('./stuff');
 var Pathfinder = require('./pathfinder');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
+var Client = require('./client');
 var THREE = require('three');
 require('OrbitControls');
 require('EffectComposer');
@@ -23,9 +24,9 @@ function Library(app, canvas) {
     this.app = app;
     this.canvas = new Canvas(canvas);
     this.pathfinder = new Pathfinder(this);
+    this.client = new Client(this);
     this.clock = new THREE.Clock();
-    // ready - flag that used to decide, do we need to render a scene or not
-    this.ready = false;
+    this.ready = false; // ready - flag that used to decide, do we need to render a scene or not
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
     this.render();
 }
@@ -48,6 +49,8 @@ Library.prototype.cleanup = function () {
     this.grounds = [];
     this.obstacles = [];
     this.interactable = [];
+    this.avatar = null;
+    this.users = [];
 
     this.blurEnabled = false;
 };
@@ -60,9 +63,12 @@ Library.prototype.render = function () {
         var delta = this.clock.getDelta();
         // Update stuff
         this.controls.update();
-        this.stats.update();
-        this.avatar.update(delta, elapsedTime);
         this.warp.update(delta, elapsedTime);
+        if (this.stats != null) this.stats.update();
+        if (this.avatar != null) this.avatar.update(delta, elapsedTime);
+        this.users.map(function(user) {
+            user.animate(elapsedTime);
+        });
         // Render stuff
         if (this.blurEnabled) {
             this.composer.render();
@@ -95,11 +101,6 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             // Set Collisions
             this.loadCollisionData();
 
-            // Spawn an Avatar
-            var spawnPoint = this.scene.getObjectByName('SpawnPoint');
-            this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, location.avatarLift, spawnPoint.position.z), spawnPoint.rotation.clone());
-            this.scene.add(this.avatar);
-
             // Launch rendering cycle
             this.addStats();
             this.ready = true;
@@ -115,6 +116,52 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             console.log('Error when loading scene ' + sceneURL + ' : ' + error.message);
         }
     );
+};
+
+Library.prototype.loadClients = function (clientsData) {
+    for (var key in clientsData) {
+        this.addUser(key, clientsData[key]);
+    }
+};
+
+Library.prototype.addOrUpdateInfo = function (clientInfo) {
+    var updated = false;
+    for (var i = 0; i < this.users.length; i++) {
+        var user = this.users[i];
+        if (clientInfo.socketID == user.socketID) {
+            user.position.set(clientInfo.position.x, clientInfo.position.y, clientInfo.position.z);
+            updated = true;
+        }
+    }
+    if (!updated) {
+        this.addUser(clientInfo.socketID, clientInfo.position);
+    }
+};
+
+Library.prototype.addAvatar = function () {
+    console.log('Spawn avatar[' + this.client.socket.id + ']');
+    var spawnPoint = this.scene.getObjectByName('SpawnPoint');
+    this.avatar = new Avatar(this, this.client.socket.id, new THREE.Vector3(spawnPoint.position.x, this.location.avatarLift, spawnPoint.position.z));
+    this.scene.add(this.avatar);
+};
+
+Library.prototype.addUser = function (socketID, spawnPoint) {
+    console.log('Add user[' + socketID + '] in position ' + JSON.stringify(spawnPoint));
+    var user = new Avatar(this, socketID, spawnPoint);
+    this.users.push(user);
+    this.scene.add(user);
+};
+
+Library.prototype.removeUser = function(socketID) {
+    var index = null;
+    for (var i = 0; i < this.users.length; i++) {
+        var user = this.users[i];
+        if (socketID == user.socketID) index = i;
+    }
+    if (index != null) {
+        this.scene.remove(this.users[index]);
+        this.users.splice(index, 1);
+    }
 };
 
 Library.prototype.configureControls = function () {

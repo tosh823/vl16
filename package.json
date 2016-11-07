@@ -6,7 +6,8 @@
   "scripts": {
     "build": "node_modules/.bin/browserify -t [ babelify --presets [ react ] --extensions .jsx] src/client/main.js -o build/bundle.js",
     "watch": "node_modules/.bin/watchify -t [ babelify --presets [ react ] --extensions .jsx] src/client/main.js -o build/bundle.js --debug --verbose",
-    "serve": "node_modules/.bin/http-server ./build --cors"
+    "serve": "node src/server/server.js",
+    "dev": "node_modules/.bin/http-server ./build --cors"
   },
   "repository": {
     "type": "git",
@@ -24,8 +25,10 @@
   "dependencies": {
     "babel-preset-react": "^6.11.1",
     "babelify": "^7.3.0",
+    "express": "^4.14.0",
     "react": "^15.3.0",
-    "react-dom": "^15.3.0"
+    "react-dom": "^15.3.0",
+    "socket.io": "^1.5.1"
   },
   "devDependencies": {
     "browserify": "^13.1.0",

@@ -80,6 +80,7 @@ App.prototype.loadInitialLocation = function () {
           {
             onOnlineCallback: function () {
               this.vl.disableBlur();
+              this.vl.client.connect();
             }.bind(this)
           }
         ),

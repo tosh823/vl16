@@ -3,12 +3,13 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Overlay = require('./components/Overlay.jsx');
 
-function Avatar(library, position, rotation) {
+function Avatar(library, socketID, position) {
     THREE.Object3D.call(this);
     // Set position and height
     this.library = library;
     this.position.set(position.x, position.y, position.z);
     this.height = position.y;
+    this.socketID = socketID;
 
     // Create body
     this.psAttributes = {
@@ -72,6 +73,9 @@ function Avatar(library, position, rotation) {
     // Raycasters
     this.directionCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 0.9);
     this.groundCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 3);
+
+    // Initial update of avatar's position
+    this.library.client.update(this.position.clone());
 }
 
 Avatar.prototype = Object.create(THREE.Object3D.prototype);
@@ -216,6 +220,7 @@ Avatar.prototype.update = function (delta, time) {
             var zShift = this.moveVector.z * this.speed;
             this.translateX(xShift);
             this.translateZ(zShift);
+            this.library.client.update(this.position.clone());
         }
     }
     this.animate(time);
