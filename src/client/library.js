@@ -19,12 +19,11 @@ var VIEW_MODE = {
     AVATAR: 1
 };
 
-var clock;
-
 function Library(app, canvas) {
     this.app = app;
     this.canvas = new Canvas(canvas);
     this.pathfinder = new Pathfinder(this);
+    this.clock = new THREE.Clock();
     // ready - flag that used to decide, do we need to render a scene or not
     this.ready = false;
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -32,125 +31,6 @@ function Library(app, canvas) {
 }
 
 Library.prototype.constructor = Library;
-
-Library.prototype.loadLibrary = function (location, progressCallback, loadCallback) {
-    this.location = location;
-    this.pathfinder.loadMap();
-    var loader = new THREE.ObjectLoader();
-    var sceneURL = 'assets/' + location.asset + '.json';
-    loader.load(sceneURL,
-        function onLoad(object) {
-            this.cleanup();
-            this.scene = object;
-            // Set Camera and Renderer
-            this.mainCamera = this.scene.getObjectByName("Camera");
-            this.mainCamera.aspect = window.innerWidth / window.innerHeight;
-            this.mainCamera.far = 2000000;
-            this.mainCamera.updateProjectionMatrix();
-            this.activeCamera = this.mainCamera;
-            if (this.scene.fog != null) this.renderer.setClearColor(this.scene.fog.color);
-            // Set OrbitControls
-            this.controls = new THREE.OrbitControls(this.mainCamera, this.canvas.domElement);
-            this.controls.enableDamping = true;
-            this.controls.dampingFactor = 0.25;
-            this.controls.enableZoom = true;
-            this.controls.minDistance = 10;
-            this.controls.maxDistance = 100;
-            this.controls.maxPolarAngle = Math.PI / 2.1;
-            this.controls.rotateSpeed = 0.2;
-
-            var sceneTagsURL = 'assets/' + location.asset + 'Tags.json';
-            $.getJSON(sceneTagsURL,
-                function onSuccess(json) {
-                    if (json.tags !== undefined) {
-                        if (json.tags.Ground !== undefined) {
-                            for (var g = 0; g < json.tags.Ground.length; g++) {
-                                this.grounds.push(this.scene.getObjectByProperty('uuid', json.tags.Ground[g]));
-                            }
-                        }
-                        if (json.tags.Collider !== undefined) {
-                            for (var c = 0; c < json.tags.Collider.length; c++) {
-                                this.obstacles.push(this.scene.getObjectByProperty('uuid', json.tags.Collider[c]));
-                            }
-                        }
-                    }
-                }.bind(this)
-            );
-
-            var sceneLightsURL = 'assets/' + location.asset + 'LightsConfig.json';
-            $.getJSON(sceneLightsURL,
-                function onSuccess(json) {
-                    if (json.spotlights !== undefined) {
-                        $.each(json.spotlights, function (key, value) {
-                            var spotLight = this.scene.getObjectByProperty('uuid', key);
-                            var target = new THREE.Object3D();
-                            target.position.set(value[0], value[1], value[2]);
-                            spotLight.target = target;
-                            this.scene.add(target);
-                        }.bind(this));
-                    }
-                }.bind(this)
-            );
-
-            // Spawn an Avatar
-            var spawnPoint = this.scene.getObjectByName('SpawnPoint');
-            this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, location.avatarLift, spawnPoint.position.z), spawnPoint.rotation.clone());
-            this.scene.add(this.avatar);
-
-            // Find stuff bar to make it interactable
-            var stuffBar = this.scene.getObjectByName("LibraryStuffBar1");
-            if (stuffBar != null) {
-                var stuffObject = new Stuff(this, new THREE.Vector3(stuffBar.position.x, stuffBar.position.y, stuffBar.position.z), stuffBar);
-                stuffBar.parent.add(stuffObject);
-                this.interactable.push(stuffObject.body);
-            }
-
-            // Create Warp to different dimension (other library)
-            var warpPoint = this.scene.getObjectByName('WarpPoint');
-            this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, location.avatarLift, warpPoint.position.z), warpPoint.rotation.clone());
-            this.scene.add(this.warp);
-            this.interactable.push(this.warp.body);
-
-            // Creare HemisphereLight
-            var hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
-            this.scene.add(hemiLight);
-
-            // Create SkyShader
-            var sky = new THREE.Sky();
-            var uniforms = sky.uniforms;
-            uniforms.turbidity.value = 2;
-            uniforms.rayleigh.value = 2.333;
-            uniforms.luminance.value = 1;
-            uniforms.mieCoefficient.value = 0.005;
-            uniforms.mieDirectionalG.value = 0.882;
-            var sunPosition = new THREE.Vector3();
-            var distance = 400000;
-            var inclination = 0.335;
-            var azimuth = 0.1514;
-            var theta = Math.PI * (inclination - 0.5);
-            var phi = 2 * Math.PI * (azimuth - 0.5);
-            sunPosition.x = distance * Math.cos(phi);
-            sunPosition.y = distance * Math.sin(phi) * Math.sin(theta);
-            sunPosition.z = distance * Math.sin(phi) * Math.cos(theta);
-            uniforms.sunPosition.value = sunPosition;
-            this.scene.add(sky.mesh);
-
-            // Launch rendering cycle
-            clock = new THREE.Clock();
-            this.initFrameRateUI();
-            this.ready = true;
-            loadCallback();
-        }.bind(this),
-
-        function onProgress(progress) {
-            progressCallback(progress.loaded, progress.total);
-        },
-
-        function onError(error) {
-            console.log('Error when loading scene ' + sceneURL + ' : ' + error.message);
-        }
-    );
-};
 
 Library.prototype.cleanup = function () {
     this.ready = false;
@@ -172,22 +52,12 @@ Library.prototype.cleanup = function () {
     this.blurEnabled = false;
 };
 
-Library.prototype.initFrameRateUI = function () {
-    this.stats = new Stats();
-    this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    // Place the fps metter in the left bottom
-    this.stats.dom.style.top = 'auto';
-    this.stats.dom.style.left = '0px';
-    this.stats.dom.style.bottom = '0px';
-    document.body.appendChild(this.stats.dom);
-};
-
 Library.prototype.render = function () {
     requestAnimationFrame(this.render.bind(this));
     if (this.ready) {
         // Update clock
-        var elapsedTime = clock.getElapsedTime();
-        var delta = clock.getDelta();
+        var elapsedTime = this.clock.getElapsedTime();
+        var delta = this.clock.getDelta();
         // Update stuff
         this.controls.update();
         this.stats.update();
@@ -199,6 +69,158 @@ Library.prototype.render = function () {
         }
         else this.renderer.render(this.scene, this.activeCamera);
     }
+};
+
+Library.prototype.loadLibrary = function (location, progressCallback, loadCallback) {
+    this.location = location;
+    this.pathfinder.loadMap();
+    var loader = new THREE.ObjectLoader();
+    var sceneURL = 'assets/' + location.asset + '.json';
+    loader.load(sceneURL,
+        function onLoad(object) {
+            this.cleanup();
+            this.scene = object;
+
+            // Set Camera
+            this.mainCamera = this.scene.getObjectByName("Camera");
+            this.activeCamera = this.mainCamera;
+
+            // Set up minor things
+            this.configureEnvironment();
+            this.configureInteractiveObjects();
+
+            // Set OrbitControls
+            this.configureControls();
+
+            // Set Collisions
+            this.loadCollisionData();
+
+            // Spawn an Avatar
+            var spawnPoint = this.scene.getObjectByName('SpawnPoint');
+            this.avatar = new Avatar(this, new THREE.Vector3(spawnPoint.position.x, location.avatarLift, spawnPoint.position.z), spawnPoint.rotation.clone());
+            this.scene.add(this.avatar);
+
+            // Launch rendering cycle
+            this.addStats();
+            this.ready = true;
+            loadCallback();
+
+        }.bind(this),
+
+        function onProgress(progress) {
+            progressCallback(progress.loaded, progress.total);
+        },
+
+        function onError(error) {
+            console.log('Error when loading scene ' + sceneURL + ' : ' + error.message);
+        }
+    );
+};
+
+Library.prototype.configureControls = function () {
+    this.controls = new THREE.OrbitControls(this.mainCamera, this.canvas.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.25;
+    this.controls.enableZoom = true;
+    this.controls.minDistance = 10;
+    this.controls.maxDistance = 100;
+    this.controls.maxPolarAngle = Math.PI / 2.1;
+    this.controls.rotateSpeed = 0.2;
+};
+
+Library.prototype.configureEnvironment = function () {
+    // Camera
+    this.mainCamera.aspect = window.innerWidth / window.innerHeight;
+    this.mainCamera.far = 2000000;
+    this.mainCamera.updateProjectionMatrix();
+    if (this.scene.fog != null) this.renderer.setClearColor(this.scene.fog.color);
+
+    // Add HemisphereLight
+    var hemiLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+    this.scene.add(hemiLight);
+
+    // Add SkyShader
+    var sky = new THREE.Sky();
+    var uniforms = sky.uniforms;
+    uniforms.turbidity.value = 2;
+    uniforms.rayleigh.value = 2.333;
+    uniforms.luminance.value = 1;
+    uniforms.mieCoefficient.value = 0.005;
+    uniforms.mieDirectionalG.value = 0.882;
+    var sunPosition = new THREE.Vector3();
+    var distance = 400000;
+    var inclination = 0.335;
+    var azimuth = 0.1514;
+    var theta = Math.PI * (inclination - 0.5);
+    var phi = 2 * Math.PI * (azimuth - 0.5);
+    sunPosition.x = distance * Math.cos(phi);
+    sunPosition.y = distance * Math.sin(phi) * Math.sin(theta);
+    sunPosition.z = distance * Math.sin(phi) * Math.cos(theta);
+    uniforms.sunPosition.value = sunPosition;
+    this.scene.add(sky.mesh);
+};
+
+Library.prototype.configureInteractiveObjects = function () {
+    // Find stuff bar to make it interactable
+    var stuffBar = this.scene.getObjectByName("LibraryStuffBar1");
+    if (stuffBar != null) {
+        var stuffObject = new Stuff(this, new THREE.Vector3(stuffBar.position.x, stuffBar.position.y, stuffBar.position.z), stuffBar);
+        stuffBar.parent.add(stuffObject);
+        this.interactable.push(stuffObject.body);
+    }
+
+    // Create Warp to different dimension (other library)
+    var warpPoint = this.scene.getObjectByName('WarpPoint');
+    this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, location.avatarLift, warpPoint.position.z), warpPoint.rotation.clone());
+    this.scene.add(this.warp);
+    this.interactable.push(this.warp.body);
+};
+
+Library.prototype.loadCollisionData = function () {
+    var sceneTagsURL = 'assets/' + this.location.asset + 'Tags.json';
+    $.getJSON(sceneTagsURL,
+        function onSuccess(json) {
+            if (json.tags !== undefined) {
+                if (json.tags.Ground !== undefined) {
+                    for (var g = 0; g < json.tags.Ground.length; g++) {
+                        this.grounds.push(this.scene.getObjectByProperty('uuid', json.tags.Ground[g]));
+                    }
+                }
+                if (json.tags.Collider !== undefined) {
+                    for (var c = 0; c < json.tags.Collider.length; c++) {
+                        this.obstacles.push(this.scene.getObjectByProperty('uuid', json.tags.Collider[c]));
+                    }
+                }
+            }
+        }.bind(this)
+    );
+};
+
+Library.prototype.loadLightData = function () {
+    var sceneLightsURL = 'assets/' + location.asset + 'LightsConfig.json';
+    $.getJSON(sceneLightsURL,
+        function onSuccess(json) {
+            if (json.spotlights !== undefined) {
+                $.each(json.spotlights, function (key, value) {
+                    var spotLight = this.scene.getObjectByProperty('uuid', key);
+                    var target = new THREE.Object3D();
+                    target.position.set(value[0], value[1], value[2]);
+                    spotLight.target = target;
+                    this.scene.add(target);
+                }.bind(this));
+            }
+        }.bind(this)
+    );
+};
+
+Library.prototype.addStats = function () {
+    this.stats = new Stats();
+    this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    // Place the fps metter in the left bottom
+    this.stats.dom.style.top = 'auto';
+    this.stats.dom.style.left = '0px';
+    this.stats.dom.style.bottom = '0px';
+    document.body.appendChild(this.stats.dom);
 };
 
 Library.prototype.enableBlur = function () {
