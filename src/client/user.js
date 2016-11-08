@@ -67,11 +67,6 @@ User.prototype.syncDown = function() {
 
 User.prototype.syncUp = function() {
     if (this.entity != null) {
-        /*var transform = this.entity.component("Placeable");
-        //transform.attribute('transform').value.setPosition(this.position.clone());
-        var value = transform.attribute('transform').value;
-        value.setPosition(this.position.clone());
-        transform.attribute('transform').set(value);*/
         var userPosition = this.position.clone();
         this.entity.exec(EntityAction.Server, "UserPositionUpdate", [JSON.stringify({ 
             x : userPosition.x, 

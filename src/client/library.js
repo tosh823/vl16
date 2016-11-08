@@ -28,9 +28,9 @@ function Library(app, canvas) {
         function onConnected() {
             console.log('Connected to Tundra server');
             this.disableBlur();
-
             Tundra.scene.onEntityCreated(this, this.onEntityCreated.bind(this));
             Tundra.scene.onEntityRemoved(this, this.onEntityRemoved.bind(this));
+            Tundra.scene.onEntityAction(this, this.onEntityAction.bind(this));
         }.bind(this),
         function onDisconnected() {
             console.log('Disconnected from server');
@@ -78,8 +78,10 @@ Library.prototype.render = function () {
         this.controls.update();
         if (this.stats != null) this.stats.update();
         if (this.users != null) this.users.map(function (user, index) {
-            user.update(delta, elapsedTime);
+            //user.syncDown();
+            user.animate(elapsedTime);
         });
+        if (this.avatar != null) this.avatar.update(delta, elapsedTime);
         //this.avatar.update(delta, elapsedTime);
         this.warp.update(delta, elapsedTime);
         // Render stuff
@@ -121,39 +123,53 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
     );
 };
 
-Library.prototype.loadUsers = function () {
-
-};
-
-Library.prototype.onEntityCreated = function(entity) {
+Library.prototype.onEntityCreated = function (entity) {
     console.log('Added entity [' + entity.id + '] - ' + entity.name);
     var clientName = 'User-' + this.tundra.client.connectionId;
     if (entity.name == clientName) {
         // If we are the connected user, create instance of Avatar
-        this.addAvatar(entity);
+        this.addAvatar(entity, true);
     }
     else {
-        // Otherwise, create instance of User for other user
-        this.addUser(entity);
+        // Otherwise, create instance of hollow avatars
+        this.addAvatar(entity, false);
     }
 };
 
-Library.prototype.onEntityRemoved = function(entity) {
+Library.prototype.onEntityRemoved = function (entity) {
     console.log('Removed entity [' + entity.id + '] - ' + entity.name);
     removeUser(entity);
 };
 
-Library.prototype.addUser = function (entity) {
-    var user = new User(this, entity);
-    this.users.push(user);
-    this.scene.add(user);
+Library.prototype.onEntityAction = function(action) {
+    switch (action.name) {
+        case 'UserPositionNotify':
+            var data = JSON.parse(action.parameters[0]);
+            this.updateUser(data);
+            break;
+    }
 };
 
-Library.prototype.addAvatar = function (entity) {
-    this.avatar = new Avatar(this, entity);
-    this.users.push(this.avatar);
-    this.scene.add(this.avatar);
+Library.prototype.addAvatar = function (entity, own) {
+    if (own == true) {
+        this.avatar = new Avatar(this, entity);
+        this.scene.add(this.avatar);
+    }
+    else {
+        var avatar = new Avatar(this, entity);
+        this.users.push(avatar);
+        this.scene.add(avatar);
+    }
 };
+
+Library.prototype.updateUser = function(data) {
+    for (var i = 0; i < this.users.length; i++) {
+        if (data.enitityName == this.users[i].entity.name) {
+            this.users[i].position.set(data.posX, data.posY, data.posZ);
+            break;
+        }
+    }
+}
 
 Library.prototype.removeUser = function (entity) {
     var found = null;
