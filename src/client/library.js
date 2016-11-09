@@ -5,7 +5,6 @@ var Pathfinder = require('./pathfinder');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
 var Client = require('./client');
-var User = require('./user');
 require('OrbitControls');
 require('EffectComposer');
 require('SkyShader');
@@ -28,6 +27,7 @@ function Library(app, canvas) {
         function onConnected() {
             console.log('Connected to Tundra server');
             this.disableBlur();
+            // Hook to server's events
             Tundra.scene.onEntityCreated(this, this.onEntityCreated.bind(this));
             Tundra.scene.onEntityRemoved(this, this.onEntityRemoved.bind(this));
             Tundra.scene.onEntityAction(this, this.onEntityAction.bind(this));
@@ -37,7 +37,8 @@ function Library(app, canvas) {
         },
         function onError(error) {
             console.log('Error while connecting to server');
-        }
+            this.addAvatar(null, true);
+        }.bind(this)
     );
     this.clock = new THREE.Clock();
     this.ready = false; // flag that used to decide, do we need to render a scene or not
@@ -101,6 +102,9 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.scene = object;
             this.mainCamera = this.scene.getObjectByName("Camera");
             this.activeCamera = this.mainCamera;
+
+            // Load collisions and configure things
+            this.loadCollisionData();
             this.configureEnvironment();
             this.configureInteractiveObjects();
 
@@ -169,7 +173,7 @@ Library.prototype.updateUser = function(data) {
             break;
         }
     }
-}
+};
 
 Library.prototype.removeUser = function (entity) {
     var found = null;
@@ -307,6 +311,11 @@ Library.prototype.enableBlur = function () {
 
 Library.prototype.disableBlur = function () {
     this.blurEnabled = false;
+};
+
+Library.prototype.getSpawnPoint = function() {
+    var spawnPoint = this.scene.getObjectByName('SpawnPoint');
+    return spawnPoint.position.clone();
 };
 
 Library.prototype.findPath = function (destination) {

@@ -213,6 +213,10 @@ Avatar.prototype.syncDown = function () {
             this.position.set(position.x, position.y, position.z);
         }
     }
+    else {
+        var spawnPoint = this.library.getSpawnPoint();
+        this.position.set(spawnPoint.x, spawnPoint.y, spawnPoint.z);
+    }
 };
 
 Avatar.prototype.syncUp = function () {

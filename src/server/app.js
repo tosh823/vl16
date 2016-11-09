@@ -1,12 +1,23 @@
 
-// Server-side script that handles client connection,
-// creates and removes entities
+// Server-side script
+// Written by scripts from other sources since I haven't found any clear documentation or reference:
+// https://github.com/playsign/fidemo/blob/master/js/server/user-presence.js
+// https://github.com/realXtend/tundra/blob/tundra2/bin/scenes/Avatar/simpleavatar.js
+// Found problems:
+// Not possible to use 'this' reference, so making an object is useless
+// The flow of sync is only server -> client, not backwards
+// Client can only call actions, so don't change entities on client, it is useless
+
+// run the server with
+// Tundra --server --headless --port 8080 --protocol tcp --file data/assets/vl/scene.txml
 
 if (server.IsRunning()) {
     server.UserConnected.connect(onConnected);
     server.UserDisconnected.connect(onDisconnected);
 }
 
+// When user connects, create entity for him
+// and spawn it on specific place
 function onConnected(connID, user) {
     var userEntityName = 'User-' + connID;
     var userEntity = scene.CreateEntity(scene.NextFreeId(), ["Placeable"]);
@@ -24,6 +35,7 @@ function onConnected(connID, user) {
     print("Created entity for " + connID);
 };
 
+// Update certain entity position
 function updateEntity (entityID, position) {
     var userEntity = scene.EntityById(entityID);
     var placeable = userEntity.placeable;
@@ -34,6 +46,7 @@ function updateEntity (entityID, position) {
     placeable.transform = transform;
 };
 
+// When user disconnects, delete his entity from scene as well
 function onDisconnected(connID, user) {
     var userEntityName = 'User-' + connID;
     var userEntity = scene.EntityByName(userEntityName);
@@ -43,6 +56,9 @@ function onDisconnected(connID, user) {
     }
 };
 
+// Callback on action from entity
+// Updates location of entity on server and 
+// Notifies client about it
 function onUserPositionUpdated(data) {
     var connID = server.ActionSender().id;
     var newPosition = JSON.parse(data);
