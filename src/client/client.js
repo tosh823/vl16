@@ -1,5 +1,6 @@
 
 function Client(onConnected, onDisconnected, onError) {
+    this.online = false;
     this.client = new TundraClient({
         Tundra: {
             polymer: (typeof Polymer === "function"),
@@ -17,9 +18,12 @@ function Client(onConnected, onDisconnected, onError) {
             }
         }
     });
-    this.client.onConnected(null, onConnected);
-    this.client.onDisconnected(null, onDisconnected);
-    this.client.onConnectionError(null, onError);
+    this.onConnectedCallback = onConnected;
+    this.onDisconnectedCallback = onDisconnected;
+    this.onConnectionErrorCallback = onError;
+    this.client.onConnected(this, this.onConnected);
+    this.client.onDisconnected(this, this.onDisconnected);
+    this.client.onConnectionError(this, this.onConnectionError);
 };
 
 Client.prototype.constructor = Client;
@@ -29,19 +33,19 @@ Client.prototype.connect = function() {
 };
 
 Client.prototype.onConnected = function () {
-    console.log('Client connected');
+    console.log('Connected to Tundra server');
+    this.online = true;
+    if (this.onConnectedCallback != null) this.onConnectedCallback();
 };
 
 Client.prototype.onConnectionError = function(event) {
-    console.log('Connection error');
+    console.log('Cannot connect to Tundra server');
+    if (this.onConnectionErrorCallback != null) this.onConnectionErrorCallback(event);
 };
 
 Client.prototype.onDisconnected = function () {
-    console.log('Client disconnected');
-};
-
-Client.prototype.onUpdate = function (frame) {
-
+    console.log('Disconnected from Tundra server');
+    if (this.onDisconnectedCallback != null) this.onDisconnectedCallback();
 };
 
 module.exports = Client;

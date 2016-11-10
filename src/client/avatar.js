@@ -10,6 +10,7 @@ function Avatar(library, entity) {
     this.entity = entity;
     this.syncDown();
     this.height = this.position.y;
+    console.log('Location: ' + this.library.location.asset + ' and height of avatar = ' + this.height);
 
     // Create body
     this.psAttributes = {
@@ -207,9 +208,10 @@ Avatar.prototype.checkInteractables = function () {
 
 Avatar.prototype.syncDown = function () {
     if (this.entity != null) {
-        var transform = this.entity.component("Placeable");
-        if (transform != null) {
-            var position = transform.attribute('transform').value.pos;
+        var placeable = this.entity.placeable;
+        if (placeable != null) {
+            var position = placeable.transform.pos;
+            console.log('Initialized with position ' + JSON.stringify(position));
             this.position.set(position.x, position.y, position.z);
         }
     }

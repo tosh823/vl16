@@ -25,18 +25,14 @@ function Library(app, canvas) {
     this.pathfinder = new Pathfinder(this);
     this.tundra = new Client(
         function onConnected() {
-            console.log('Connected to Tundra server');
             this.disableBlur();
             // Hook to server's events
             Tundra.scene.onEntityCreated(this, this.onEntityCreated.bind(this));
             Tundra.scene.onEntityRemoved(this, this.onEntityRemoved.bind(this));
             Tundra.scene.onEntityAction(this, this.onEntityAction.bind(this));
         }.bind(this),
-        function onDisconnected() {
-            console.log('Disconnected from server');
-        },
+        null,
         function onError(error) {
-            console.log('Error while connecting to server');
             this.addAvatar(null, true);
         }.bind(this)
     );
@@ -49,10 +45,20 @@ function Library(app, canvas) {
 Library.prototype.constructor = Library;
 
 Library.prototype.cleanup = function () {
-    this.scene = null;
-    this.mainCamera = null;
-    this.activeCamera = null;
-    this.controls = null;
+    // If we not the first time, remove created objects
+    if (this.scene != null) {
+        // Remove own avatar
+        this.scene.remove(this.avatar);
+        // Remove user object from scene
+        this.users.map(function (user) {
+            this.scene.remove(user);
+        }.bind(this));
+        // Remove interactive objects
+        this.interactable.map(function (item) {
+            this.scene.remove(item.parent);
+        }.bind(this));
+    }
+    // Reset renderer and post-effect composer
     this.renderer = new THREE.WebGLRenderer({
         canvas: this.canvas.domElement,
         alpha: true
@@ -60,13 +66,19 @@ Library.prototype.cleanup = function () {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer = new THREE.EffectComposer(this.renderer);
     this.viewMode = VIEW_MODE.ORBIT;
+    // Empty all arrays
     this.grounds = [];
     this.obstacles = [];
     this.interactable = [];
     this.users = [];
-
+    // Reset all flags and objects
     this.blurEnabled = false;
     this.ready = false;
+    this.avatar = null;
+    this.mainCamera = null;
+    this.activeCamera = null;
+    this.controls = null;
+    this.scene = null;
 };
 
 Library.prototype.render = function () {
@@ -79,11 +91,9 @@ Library.prototype.render = function () {
         this.controls.update();
         if (this.stats != null) this.stats.update();
         if (this.users != null) this.users.map(function (user, index) {
-            //user.syncDown();
             user.animate(elapsedTime);
         });
         if (this.avatar != null) this.avatar.update(delta, elapsedTime);
-        //this.avatar.update(delta, elapsedTime);
         this.warp.update(delta, elapsedTime);
         // Render stuff
         if (this.blurEnabled) this.composer.render();
@@ -94,8 +104,9 @@ Library.prototype.render = function () {
 Library.prototype.loadLibrary = function (location, progressCallback, loadCallback) {
     this.location = location;
     this.pathfinder.loadMap();
-    var loader = new THREE.ObjectLoader();
+    if (this.tundra.online) this.notifyLocationChange();
     var sceneURL = 'assets/' + location.asset + '.json';
+    var loader = new THREE.ObjectLoader();
     loader.load(sceneURL,
         function onLoad(object) {
             this.cleanup();
@@ -110,6 +121,10 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 
             // Set OrbitControls
             this.configureControls();
+
+            // If we connected to server, load peers in this location,
+            // including ourselves
+            if (this.tundra.online) this.loadUsers();
 
             this.addStats();
             this.ready = true;
@@ -128,28 +143,40 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 };
 
 Library.prototype.onEntityCreated = function (entity) {
-    console.log('Added entity [' + entity.id + '] - ' + entity.name);
-    var clientName = 'User-' + this.tundra.client.connectionId;
-    if (entity.name == clientName) {
-        // If we are the connected user, create instance of Avatar
-        this.addAvatar(entity, true);
+    // Add user if only he is in the same location as we
+    if (entity.group == this.location.asset) {
+        console.log('Added entity [' + entity.id + '] - ' + entity.name);
+        var clientName = 'User-' + this.tundra.client.connectionId;
+        if (entity.name == clientName) {
+            // If we are the connected user, create instance of Avatar
+            this.addAvatar(entity, true);
+        }
+        else {
+            // Otherwise, create instance of hollow avatars
+            this.addAvatar(entity, false);
+        }
     }
     else {
-        // Otherwise, create instance of hollow avatars
-        this.addAvatar(entity, false);
+        console.log('Rejected entity [' + entity.id + '] - ' + entity.name);
     }
 };
 
 Library.prototype.onEntityRemoved = function (entity) {
-    console.log('Removed entity [' + entity.id + '] - ' + entity.name);
-    removeUser(entity);
+    if (entity.group == this.location.asset) {
+        console.log('Removed entity [' + entity.id + '] - ' + entity.name);
+        removeUser(entity);
+    }
 };
 
-Library.prototype.onEntityAction = function(action) {
+Library.prototype.onEntityAction = function (action) {
     switch (action.name) {
         case 'UserPositionNotify':
             var data = JSON.parse(action.parameters[0]);
             this.updateUser(data);
+            break;
+        case 'UserLocationNotify':
+            var data = JSON.parse(action.parameters[0]);
+            this.checkUser(data);
             break;
     }
 };
@@ -166,12 +193,27 @@ Library.prototype.addAvatar = function (entity, own) {
     }
 };
 
-Library.prototype.updateUser = function(data) {
+Library.prototype.updateUser = function (data) {
+    // If not in our location, dropping
+    if (data.locationName != this.location.asset) return;
     for (var i = 0; i < this.users.length; i++) {
-        if (data.enitityName == this.users[i].entity.name) {
+        if (data.entityName == this.users[i].entity.name) {
             this.users[i].position.set(data.posX, data.posY, data.posZ);
             break;
         }
+    }
+};
+
+Library.prototype.checkUser = function (data) {
+    console.log('received location event');
+    var entity = Tundra.scene.entityByName(data.entityName);
+    if (data.locationName != this.location.asset) {
+        // User leaving this location, remove him
+        this.removeUser(entity);
+    }
+    else {
+        // User coming to this location, add him to lists
+        this.onEntityCreated(entity);
     }
 };
 
@@ -184,7 +226,23 @@ Library.prototype.removeUser = function (entity) {
         }
     }
     if (found != null) {
+        this.scene.remove(this.users[found]);
         this.users.splice(found, 1);
+    }
+};
+
+Library.prototype.notifyLocationChange = function () {
+    // Notify that we moved here too
+    this.avatar.entity.exec(EntityAction.Server, 'UserLocationUpdate', {
+        destination: this.location.asset
+    });
+};
+
+Library.prototype.loadUsers = function () {
+    // Load other existing users in this location
+    for (var i = 0; i < Tundra.scene.entities.length; i++) {
+        var entity = Tundra.scene.entities[i];
+        this.onEntityCreated(entity);
     }
 };
 
@@ -313,7 +371,7 @@ Library.prototype.disableBlur = function () {
     this.blurEnabled = false;
 };
 
-Library.prototype.getSpawnPoint = function() {
+Library.prototype.getSpawnPoint = function () {
     var spawnPoint = this.scene.getObjectByName('SpawnPoint');
     return spawnPoint.position.clone();
 };
