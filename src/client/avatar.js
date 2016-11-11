@@ -8,10 +8,44 @@ function Avatar(library, entity) {
     // Set position and height
     this.library = library;
     this.entity = entity;
+
+    // Create camera
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.6, 1000);
+    this.add(this.camera);
+
+    // UI
+    this.overlay = null; // Reference to interface
+
+    // Instances of event listeners
+    this.onMouseMoveEvent = null;
+    this.onMouseDownEvent = null;
+    this.onMouseUpEvent = null;
+    this.onClickEvent = null;
+    this.onKeyDownEvent = null;
+    this.onKeyUpEvent = null;
+
+    this.enabled = false;
+    this.uiShown = false;
+    this.cursorShown = false; // Store this flag in order to reduce overlay methods calls
+
+    // X - left/right motion
+    // Z - forward/back motion
+    this.moveVector = new THREE.Vector3(0, 0, 0);
+    this.speed = 0.1;
+    // Raycasters
+    this.directionCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 0.9);
+    this.groundCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 3);
+
+    // Place avatar
     this.syncDown();
     this.height = this.position.y;
-    console.log('Location: ' + this.library.location.asset + ' and height of avatar = ' + this.height);
+    this.configureBody();
+}
 
+Avatar.prototype = Object.create(THREE.Object3D.prototype);
+Avatar.prototype.constructor = Avatar;
+
+Avatar.prototype.configureBody = function () {
     // Create body
     this.psAttributes = {
         startSize: [],
@@ -47,37 +81,7 @@ function Avatar(library, entity) {
             this.add(this.body);
         }.bind(this)
     );
-
-    // Create camera
-    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.6, 1000);
-    this.add(this.camera);
-
-    // UI
-    this.overlay = null; // Reference to interface
-
-    // Instances of event listeners
-    this.onMouseMoveEvent = null;
-    this.onMouseDownEvent = null;
-    this.onMouseUpEvent = null;
-    this.onClickEvent = null;
-    this.onKeyDownEvent = null;
-    this.onKeyUpEvent = null;
-
-    this.enabled = false;
-    this.uiShown = false;
-    this.cursorShown = false; // Store this flag in order to reduce overlay methods calls
-
-    // X - left/right motion
-    // Z - forward/back motion
-    this.moveVector = new THREE.Vector3(0, 0, 0);
-    this.speed = 0.1;
-    // Raycasters
-    this.directionCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 0.9);
-    this.groundCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 3);
-}
-
-Avatar.prototype = Object.create(THREE.Object3D.prototype);
-Avatar.prototype.constructor = Avatar;
+};
 
 Avatar.prototype.onMouseMove = function (event) {
     if (this.enabled) {
@@ -209,27 +213,37 @@ Avatar.prototype.checkInteractables = function () {
 Avatar.prototype.syncDown = function () {
     if (this.entity != null) {
         var placeable = this.entity.placeable;
-        if (placeable != null) {
-            var position = placeable.transform.pos;
-            console.log('Initialized with position ' + JSON.stringify(position));
-            this.position.set(position.x, position.y, position.z);
-        }
+        var position = placeable.transform.pos;
+        console.log('Entity [' + this.entity.id + '] synced with position ' + JSON.stringify(position));
+        this.position.set(position.x, position.y, position.z);
     }
     else {
+        // For offline using
         var spawnPoint = this.library.getSpawnPoint();
-        this.position.set(spawnPoint.x, spawnPoint.y, spawnPoint.z);
+        this.position.set(spawnPoint.x, this.library.location.avatarLift, spawnPoint.z);
     }
 };
 
-Avatar.prototype.syncUp = function () {
+Avatar.prototype.emitUpdatePosition = function () {
     if (this.entity != null) {
         var userPosition = this.position.clone();
-        this.entity.exec(EntityAction.Server, "UserPositionUpdate", {
+        this.entity.exec(EntityAction.Server, 'updateUser', {
+            location: this.library.location.asset,
             x: userPosition.x,
             y: userPosition.y,
             z: userPosition.z
         });
     }
+};
+
+Avatar.prototype.emitLocationChange = function () {
+    var spawn = this.library.getSpawnPoint();
+    this.entity.exec(EntityAction.Server, 'updateUser', {
+        location: this.library.location.asset,
+        x: spawn.x,
+        y: spawn.y,
+        z: spawn.z
+    });
 };
 
 Avatar.prototype.update = function (delta, time) {
@@ -245,7 +259,7 @@ Avatar.prototype.update = function (delta, time) {
             var zShift = this.moveVector.z * this.speed;
             this.translateX(xShift);
             this.translateZ(zShift);
-            this.syncUp();
+            this.emitUpdatePosition();
         }
     }
     this.animate(time);

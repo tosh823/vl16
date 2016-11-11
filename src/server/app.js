@@ -23,11 +23,6 @@ var RitaharjuSpawn = {
     z: -16.16
 };
 
-if (server.IsRunning()) {
-    server.UserConnected.connect(onConnected);
-    server.UserDisconnected.connect(onDisconnected);
-}
-
 // When user connects, create entity for him
 // and spawn it on specific place
 function onConnected(connID, user) {
@@ -37,60 +32,33 @@ function onConnected(connID, user) {
     userEntity.SetName(userEntityName);
     userEntity.group = "MainLibrary";
 
-    updateEntity(userEntity.id, MainLibrarySpawn);
+    userEntity.placeable.SetPosition(MainLibrarySpawn);
 
-    userEntity.Action('UserPositionUpdate').Triggered.connect(onUserPositionUpdated);
-    userEntity.Action('UserLocationUpdate').Triggered.connect(onMoveToLocation);
+    userEntity.Action('updateUser').Triggered.connect(onUserUpdated);
+    userEntity.Action('changeLocation').Triggered.connect(onUserChangedLocation);
+
     print('Created entity [' + connID + ']');
-};
-
-// Update certain entity position
-function updateEntity(entityID, position) {
-    var userEntity = scene.EntityById(entityID);
-    var placeable = userEntity.placeable;
-    //var placeable = entity.placeable;
-    var transform = placeable.transform;
-    transform.pos.x = position.x;
-    transform.pos.y = position.y;
-    transform.pos.z = position.z;
-    placeable.transform = transform;
 };
 
 // Callback on action from entity
 // Updates location of entity on server and 
 // Notifies client about it
-function onUserPositionUpdated(json) {
-    var connID = server.ActionSender().id;
-    var newPosition = JSON.parse(json);
-    var userEntityName = 'User-' + connID;
-    var userEntity = scene.EntityByName(userEntityName);
-    if (userEntity != null) {
-        updateEntity(userEntity.id, newPosition);
-        // 4 for peers
-        userEntity.Exec(4, 'UserPositionNotify', JSON.stringify({
-            entityName: userEntityName,
-            locationName: userEntity.group,
-            posX: newPosition.x,
-            posY: newPosition.y,
-            posZ: newPosition.z
-        }));
-    }
-};
-
-function onMoveToLocation(json) {
+function onUserUpdated(json) {
     var connID = server.ActionSender().id;
     var data = JSON.parse(json);
     var userEntityName = 'User-' + connID;
     var userEntity = scene.EntityByName(userEntityName);
-    if (data.destination != null) {
-        userEntity.group = data.destination;
-        var spawn = getSpawnInLocation(data.destination);
-        updateEntity(userEntity.id, spawn);
-        userEntity.Exec(4, 'UserLocationNotify', JSON.stringify({
+    if (userEntity != null) {
+        userEntity.placeable.SetPosition(data.x, data.y, data.z);
+        userEntity.group = data.location;
+        // 4 for peers
+        userEntity.Exec(4, 'userUpdated', JSON.stringify({
             entityName: userEntityName,
-            locationName: userEntity.group
+            location: userEntity.group,
+            posX: data.x,
+            posY: data.y,
+            posZ: data.z
         }));
-        print('Entity [' + connID + '] moved to ' + data.destination + ', spawned in ' + JSON.stringify(spawn));
     }
 };
 
@@ -103,6 +71,23 @@ function onDisconnected(connID, user) {
         print('Removed entity[' + connID + ']');
     }
 };
+
+function onUserChangedLocation(json) {
+    var connID = server.ActionSender().id;
+    var data = JSON.parse(json);
+    var userEntityName = 'User-' + connID;
+    var userEntity = scene.EntityByName(userEntityName);
+    if (userEntity != null) {
+        var departure = userEntity.group;
+        var arrival = data.location;
+        var spawnPoint = getSpawnInLocation(arrival);
+        userEntity.Exec(4, 'userChangedLocation', JSON.stringify({
+            entityName: userEntityName,
+            from: departure,
+            to: arrival
+        }));
+    }
+}
 
 function getSpawnInLocation(location) {
     var spawn;
@@ -119,3 +104,9 @@ function getSpawnInLocation(location) {
     }
     return spawn;
 };
+
+// Run server
+if (server.IsRunning()) {
+    server.UserConnected.connect(onConnected);
+    server.UserDisconnected.connect(onDisconnected);
+}
