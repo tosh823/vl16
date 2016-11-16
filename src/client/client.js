@@ -40,11 +40,13 @@ Client.prototype.onConnected = function () {
 
 Client.prototype.onConnectionError = function(event) {
     console.log('Cannot connect to Tundra server');
+    this.online = false;
     if (this.onConnectionErrorCallback != null) this.onConnectionErrorCallback(event);
 };
 
 Client.prototype.onDisconnected = function () {
     console.log('Disconnected from Tundra server');
+    this.online = false;
     if (this.onDisconnectedCallback != null) this.onDisconnectedCallback();
 };
 

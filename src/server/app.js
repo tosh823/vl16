@@ -37,7 +37,7 @@ function onConnected(connID, user) {
     userEntity.Action('updateUser').Triggered.connect(onUserUpdated);
     userEntity.Action('changeLocation').Triggered.connect(onUserChangedLocation);
 
-    print('Created entity [' + connID + ']');
+    print('Created entity for connection ' + connID);
 };
 
 // Callback on action from entity
@@ -50,11 +50,8 @@ function onUserUpdated(json) {
     var userEntity = scene.EntityByName(userEntityName);
     if (userEntity != null) {
         userEntity.placeable.SetPosition(data.x, data.y, data.z);
-        userEntity.group = data.location;
         // 4 for peers
         userEntity.Exec(4, 'userUpdated', JSON.stringify({
-            entityName: userEntityName,
-            location: userEntity.group,
             posX: data.x,
             posY: data.y,
             posZ: data.z
@@ -68,7 +65,7 @@ function onDisconnected(connID, user) {
     var userEntity = scene.EntityByName(userEntityName);
     if (userEntity != null) {
         scene.RemoveEntity(userEntity.id);
-        print('Removed entity[' + connID + ']');
+        print('Removed entity for connection ' + connID);
     }
 };
 
@@ -80,14 +77,19 @@ function onUserChangedLocation(json) {
     if (userEntity != null) {
         var departure = userEntity.group;
         var arrival = data.location;
+        userEntity.group = arrival;
+        // Setting position of the unit doesn't work in this case
+        // So, I am setting it manually on client
+        // Why? Fuck you, that's why, said Tundra
         var spawnPoint = getSpawnInLocation(arrival);
+        userEntity.placeable.SetPosition(spawnPoint.x, spawnPoint.y, spawnPoint.z);
+        // 4 for peers
         userEntity.Exec(4, 'userChangedLocation', JSON.stringify({
-            entityName: userEntityName,
             from: departure,
             to: arrival
         }));
     }
-}
+};
 
 function getSpawnInLocation(location) {
     var spawn;

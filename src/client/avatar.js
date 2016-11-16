@@ -2,7 +2,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Overlay = require('./components/Overlay.jsx');
 
-function Avatar(library, entity) {
+function Avatar(library, entity, atSpawn = false) {
     THREE.Object3D.call(this);
 
     // Set position and height
@@ -37,7 +37,7 @@ function Avatar(library, entity) {
     this.groundCaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 3);
 
     // Place avatar
-    this.syncDown();
+    this.syncDown(atSpawn);
     this.height = this.position.y;
     this.configureBody();
 }
@@ -210,11 +210,16 @@ Avatar.prototype.checkInteractables = function () {
     }
 };
 
-Avatar.prototype.syncDown = function () {
+Avatar.prototype.syncDown = function (atSpawn) {
     if (this.entity != null) {
         var placeable = this.entity.placeable;
         var position = placeable.transform.pos;
-        console.log('Entity [' + this.entity.id + '] synced with position ' + JSON.stringify(position));
+        if (atSpawn) {
+            var spawnPoint = this.library.getSpawnPoint();
+            position = spawnPoint;
+            position.y = this.library.location.avatarLift;
+        }
+        console.log(this.entity.name + ' instanciated with position ' + JSON.stringify(position));
         this.position.set(position.x, position.y, position.z);
     }
     else {
@@ -228,7 +233,6 @@ Avatar.prototype.emitUpdatePosition = function () {
     if (this.entity != null) {
         var userPosition = this.position.clone();
         this.entity.exec(EntityAction.Server, 'updateUser', {
-            location: this.library.location.asset,
             x: userPosition.x,
             y: userPosition.y,
             z: userPosition.z
@@ -237,12 +241,8 @@ Avatar.prototype.emitUpdatePosition = function () {
 };
 
 Avatar.prototype.emitLocationChange = function () {
-    var spawn = this.library.getSpawnPoint();
-    this.entity.exec(EntityAction.Server, 'updateUser', {
+    this.entity.exec(EntityAction.Server, 'changeLocation', {
         location: this.library.location.asset,
-        x: spawn.x,
-        y: spawn.y,
-        z: spawn.z
     });
 };
 

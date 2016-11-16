@@ -27,17 +27,22 @@ function Library(app, canvas) {
         function onConnected() {
             this.disableBlur();
             // Hook to server's events
-            Tundra.scene.onEntityCreated(this, this.onEntityCreated.bind(this));
-            Tundra.scene.onEntityRemoved(this, this.onEntityRemoved.bind(this));
+            Tundra.scene.onEntityCreated(this, this.addUserPresence.bind(this));
+            Tundra.scene.onEntityRemoved(this, this.removeUserPresence.bind(this));
             Tundra.scene.onEntityAction(this, this.onEntityAction.bind(this));
         }.bind(this),
-        null,
+        function onDisconnected() {
+            this.localOnly = true;
+        }.bind(this),
         function onError(error) {
-            this.addAvatar(null, true);
+            this.disableBlur();
+            this.createOfflinePresence();
+            this.localOnly = true;
         }.bind(this)
     );
     this.clock = new THREE.Clock();
     this.ready = false; // flag that used to decide, do we need to render a scene or not
+    this.localOnly = false;
     this.render();
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
 }
@@ -124,6 +129,7 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 
             // If we connected to server, load peers in this location
             if (this.tundra.online) this.loadUsers();
+            if (this.localOnly) this.createOfflinePresence();
 
             this.addStats();
             this.ready = true;
@@ -141,83 +147,94 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
     );
 };
 
-Library.prototype.onEntityCreated = function (entity) {
+Library.prototype.createOfflinePresence = function () {
+    this.avatar = new Avatar(this, null, true);
+    this.scene.add(this.avatar);
+};
+
+Library.prototype.addUserPresence = function (entity, atSpawn = false) {
     // Add user if only he is in the same location as we
     if (entity.group == this.location.asset) {
-        this.addAvatar(entity);
-        console.log('Added entity [' + entity.id + '] - ' + entity.name);
+        if (this.isClient(entity.name)) {
+            this.avatar = new Avatar(this, entity, true);
+            this.scene.add(this.avatar);
+        }
+        else {
+            var avatar = new Avatar(this, entity, atSpawn);
+            this.users.push(avatar);
+            this.scene.add(avatar);
+        }
+        console.log(entity.name + ' joined ' + this.location.asset + ' location');
+    }
+};
+
+Library.prototype.removeUserPresence = function (entity) {
+    if (this.isClient(entity.name)) {
+        this.scene.remove(this.avatar);
+        this.avatar = null;
+        console.log(entity.name + ' left ' + this.location.asset + ' location');
     }
     else {
-        console.log('Rejected entity [' + entity.id + '] - ' + entity.name);
+        var found = this.findUserPresence(entity);
+        if (found != null) {
+            this.scene.remove(this.users[found]);
+            this.users.splice(found, 1);
+            console.log(entity.name + ' left ' + this.location.asset + ' location');
+        }
     }
 };
 
-Library.prototype.onEntityRemoved = function (entity) {
-    if (entity.group == this.location.asset) {
-        console.log('Removed entity [' + entity.id + '] - ' + entity.name);
-        removeUser(entity);
-    }
-};
-
-Library.prototype.onEntityAction = function (action) {
-    var data = JSON.parse(action.parameters[0]);
-    switch (action.name) {
-        case 'userUpdated':
-            this.updateUser(data);
-            break;
-        case 'userChangedLocation':
-            
-            break;
-    }
-};
-
-Library.prototype.addAvatar = function (entity) {
-    var clientName = 'User-' + this.tundra.client.connectionId;
-    if (clientName == entity.name) {
-        this.avatar = new Avatar(this, entity);
-        this.scene.add(this.avatar);
-    }
-    else {
-        var avatar = new Avatar(this, entity);
-        this.users.push(avatar);
-        this.scene.add(avatar);
-    }
-};
-
-Library.prototype.updateUser = function (data) {
-    // If not in our location, dropping
-    var found = this.findUserByEntityName(data.entityName);
-    if (found != null) {
-        this.users[found].position.set(data.posX, data.posY, data.posZ);
-    }
-};
-
-Library.prototype.removeUser = function (entity) {
-    var found = this.findUserByEntityName(entity.name);
-    if (found != null) {
-        this.scene.remove(this.users[found]);
-        this.users.splice(found, 1);
-    }
-};
-
-Library.prototype.loadUsers = function () {
-    // Load other existing users in this location
-    var clientName = 'User-' + this.tundra.client.connectionId;
-    for (var i = 0; i < Tundra.scene.entities.length; i++) {
-        var entity = Tundra.scene.entities[i];
-        if (entity.name != clientName) this.onEntityCreated(entity);
-    }
-};
-
-Library.prototype.findUserByEntityName = function (entityName) {
+Library.prototype.findUserPresence = function (entity) {
     var found = null;
     for (var i = 0; i < this.users.length; i++) {
-        if (entityName == this.users[i].entity.name) {
+        if (entity.id == this.users[i].entity.id) {
             found = i;
             break;
         }
     }
     return found;
+};
+
+Library.prototype.updateUserPresence = function (action) {
+    if (action.entity.group != this.location.asset || this.isClient(action.entity.name)) return;
+    var found = this.findUserPresence(action.entity);
+    if (found != null) {
+        var data = JSON.parse(action.parameters[0]);
+        this.users[found].position.set(data.posX, data.posY, data.posZ);
+    }
+};
+
+Library.prototype.onEntityAction = function (action) {
+    switch (action.name) {
+        case 'userUpdated':
+            this.updateUserPresence(action);
+            break;
+        case 'userChangedLocation':
+            var data = JSON.parse(action.parameters[0]);
+            if (data.to == this.location.asset) {
+                // user entered location
+                if (!this.isClient(action.entity.name)) this.addUserPresence(action.entity, true);
+            }
+            else if (data.from == this.location.asset) {
+                // user left location
+                this.removeUserPresence(action.entity);
+            }
+            break;
+    }
+};
+
+Library.prototype.isClient = function (entityName) {
+    var clientName = 'User-' + this.tundra.client.connectionId;
+    if (entityName == clientName) return true;
+    else return false;
+};
+
+Library.prototype.loadUsers = function () {
+    // Load other existing users in this location
+    for (var i = 0; i < Tundra.scene.entities.length; i++) {
+        var entity = Tundra.scene.entities[i];
+        this.addUserPresence(entity);
+    }
 };
 
 Library.prototype.configureControls = function () {
