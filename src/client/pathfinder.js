@@ -11,64 +11,12 @@ Pathfinder.prototype.loadMap = function () {
         function onSuccess(json) {
             //this.nodes = json;
             this.map = {};
-            json['wayPoints'].map(function(value, index) {
-                this.map[value.name] = value.links;
+            json['wayPoints'].map(function (value, index) {
+                this.map[value.name] = value;
             }.bind(this));
             console.log('Loaded map of ' + json.length + ' waypoints');
         }.bind(this)
     );
-};
-
-// Delete this method later if not needed
-Pathfinder.prototype.findPathOld = function(start, destination) {
-    if (this.map == null) {
-        console.log('Pathfinder does not have a map.');
-        return null;
-    }
-    // Preparation
-    var visitedNodes = {};
-    var visitedNodesCount = 0;
-    var distances = {};
-    var route = {};
-    for (var node in this.map) {
-        distances[node] = Number.MAX_SAFE_INTEGER;
-        route[node] = start;
-        visitedNodes[node] = false;
-    }
-    nodes[start].distance = 0;
-    distances[start] = 0;
-    // Dijkstra’s algorithm
-    var checkNode = function (node) {
-        var nodeDistance = distances[node];
-        for (var child in this.map[node]) {
-            if (visitedNodes[child] == true) continue;
-            var distance = this.map[node][child] + nodeDistance;
-            if (distances[child] > distance) {
-                distances[child] = distance;
-                route[child] = node;
-            }
-        }
-    }.bind(this)
-
-    while (visitedNodesCount < Object.keys(this.map).length) {
-        // Searching for closest non-visited node
-        var minValue = Number.MAX_SAFE_INTEGER;
-        var closestNode = null;
-        for (var node in this.map) {
-            if (visitedNodes[node] == true) continue;
-            if (distances[node] < minValue) {
-                closestNode = node;
-                minValue = distances[node];
-            }
-        }
-        if (closestNode != null) {
-            visitedNodes[closestNode] = true;
-            visitedNodesCount++;
-            checkNode(closestNode);
-        }
-    }
-
-    console.log(distances);
 };
 
 Pathfinder.prototype.findPath = function (start, destination) {
@@ -82,7 +30,7 @@ Pathfinder.prototype.findPath = function (start, destination) {
     var visitedNodesCount = 0;
     for (var node in this.map) {
         nodes[node] = {};
-        nodes[node].links = this.map[node];
+        nodes[node].links = this.map[node].links;
         nodes[node].distance = Number.MAX_SAFE_INTEGER;
         nodes[node].closestNode = start;
         nodes[node].visited = false;
@@ -131,6 +79,56 @@ Pathfinder.prototype.findPath = function (start, destination) {
     console.log(route);
 
     return route;
+};
+
+Pathfinder.prototype.findShelf = function (book) {
+    var code = book.locations[0].callNumber;
+    console.log('Must find shelf for ' + code);
+    var splitted = code.split(' ');
+    if (splitted[0] != 'AIK') {
+        console.log('The book is not in adult department');
+        return null;
+    }
+    var number = splitted[1];
+    var symbol = splitted[2];
+    var collection = book.locations[0].collection;
+    var hits = [];
+    for (var node in this.map) {
+        var wayPoint = this.map[node];
+        if (wayPoint.shelfFrom != null && wayPoint.shelfFrom != '') {
+            // Here we go, the shelf containing info
+            var shelfFromSplitted = wayPoint.shelfFrom.split('|');
+            var shelfToSplitted = wayPoint.shelfTo.split('|');
+            // Assuming the from and to are equal lengths
+            for (var index = 0; index < shelfFromSplitted.length; index++) {
+                var codeFrom = shelfFromSplitted[index].split(' ');
+                var codeTo = shelfToSplitted[index].split(' ');
+                if (number >= codeFrom[0] && number <= codeTo[0]) {
+                    // We have number hit, moving on
+                    if (codeFrom[1] != null) {
+                        // Compare symbolic part
+                        var startCondition = ((codeFrom[1] == '>') ? true : (symbol >= codeFrom[1]));
+                        var endCondition = ((codeTo[1] == '<') ? true : (symbol <= codeTo[1]));
+                        if (startCondition && endCondition) {
+                            // We have symbolic hit, moving on
+                            if (codeFrom[2] == null && collection == null) {
+                                // No collection, direct hit!
+                                hits.push(node);
+                            }
+                            else {
+                                // Compare collection part
+                                if (collection == codeFrom[2]) hits.push(node);
+                            }
+                        }
+                    }
+                    else {
+                        hits.push(node);
+                    }
+                }
+            }
+        }
+    }
+    console.log('Found ' + JSON.stringify(hits));
 };
 
 Pathfinder.prototype.indexOf = function (key) {

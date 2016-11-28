@@ -54,7 +54,13 @@ App.prototype.renderControlPanel = function () {
 App.prototype.renderSearchPanel = function (query) {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   this.searchPanel = ReactDOM.render(React.createElement(SearchPanel, {
-    search: query
+    search: query,
+    onCheckPath: function(book) {
+      this.vl.findBookShelf(book);
+    }.bind(this),
+    onShowPath: function(shelf) {
+      this.vl.findPath(shelf);
+    }.bind(this)
   }), document.getElementById('ui'));
 };
 

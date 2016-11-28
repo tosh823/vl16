@@ -367,11 +367,9 @@ Library.prototype.getSpawnPoint = function () {
     return spawnPoint.position.clone();
 };
 
-Library.prototype.findBookPath = function(book) {
+Library.prototype.findBookShelf = function(book) {
     var shelf = this.pathfinder.findShelf(book);
-    if (shelf != null) {
-        
-    }
+    return shelf;
 };
 
 Library.prototype.findPath = function (destination) {

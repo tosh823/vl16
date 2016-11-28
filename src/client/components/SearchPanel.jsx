@@ -58,6 +58,16 @@ var SearchPanel = React.createClass({
         }.bind(this));
     },
 
+    onPathClick: function(event) {
+        var shelf = this.props.onCheckPath(this.state.selectedBook);
+        if (shelf != null) {
+            //this.props.onShowPath(shelf);
+        }
+        else {
+
+        }
+    },
+
     hide: function () {
         this.setState({
             isVisible: false
@@ -138,7 +148,7 @@ var SearchPanel = React.createClass({
                                                     return <p className="card-text m-l-1" key={index}>{value.callNumber}</p>
                                                 })
                                             }
-                                            <a href="#" className="btn btn-primary">Find path</a>
+                                            <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
                                         </div>
                                     }
                                 </div>
