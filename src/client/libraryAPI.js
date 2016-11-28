@@ -81,8 +81,12 @@ LibraryAPI.prototype.getBook = function (href, onRequestFinished) {
             var library = $(element).find('.location').children('div');
             var libraryName = $(library).text().trim();
             if (libraryName == 'Oulun kaupungin pääkirjasto') {
+                // Location fetching
                 var location = $(element).find('.call_no');
                 book['locations'].push($(location).text().trim());
+                // Collection fetching
+                var collection = $(element).find('.collection');
+                if (collection != null || book['collection'] != null) book['collection'] = collection;
             }
         });
         console.log(book);

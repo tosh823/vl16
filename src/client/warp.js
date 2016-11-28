@@ -1,4 +1,4 @@
-var THREE = require('three');
+//var THREE = require('three');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var LocationDialog = require('./components/LocationDialog.jsx');

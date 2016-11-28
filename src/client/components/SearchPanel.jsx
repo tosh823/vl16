@@ -88,14 +88,15 @@ var SearchPanel = React.createClass({
                                     <h5 className="card-title">Results for <em>{'"' + this.props.search + '"'}</em></h5>
                                     {(this.state.isLoading ?
                                         <div>
-                                            <p className="card-text">Please wait, request may take up to several seconds</p>
+                                            <p className="card-text">Please wait, request may take up to several seconds...</p>
                                             <div className="text-xs-center">
                                                 <i className="fa fa-spinner fa-3x fa-spin" aria-hidden="true"></i>
                                             </div>
                                         </div>
                                         :
                                         <div>
-                                            <p className="card-text">Click on item to see addition information</p>
+                                            <p className="card-text">Found {this.state.books.length} books.</p>
+                                            <p className="card-text">Click on item to see addition information.</p>
                                             <SearchResultsListView books={this.state.books} onBookClick={this.onBookClick} />
                                         </div>
                                     )}
@@ -105,7 +106,7 @@ var SearchPanel = React.createClass({
                                     <h5 className="card-title">{this.state.selectedBook.title}</h5>
                                     {this.state.isLoading ?
                                         <div>
-                                            <p className="card-text">Please wait, requesting additional information about selected book</p>
+                                            <p className="card-text">Please wait, requesting additional information about selected book...</p>
                                             <div className="text-xs-center">
                                                 <i className="fa fa-spinner fa-3x fa-spin" aria-hidden="true"></i>
                                             </div>
@@ -115,9 +116,12 @@ var SearchPanel = React.createClass({
                                             <p className="card-text">Authors: {this.state.selectedBook.authors.join('; ')}</p>
                                             <p className="card-text">Publisher: {this.state.selectedBook.publisher.join(' ')}</p>
                                             <p className="card-text">{this.state.selectedBook.type}</p>
+                                            <p className="card-text">Collection: {this.state.selectedBook.collection}</p>
                                             <p className="card-text">Details: {this.state.selectedBook.description}</p>
                                             <p className="card-text">Language: {this.state.selectedBook.language}</p>
                                             <p className="card-text">ISBN: {this.state.selectedBook.isbn}</p>
+                                            <p className="card-text">Call numbers: {this.state.selectedBook.locations.join(' - ')}</p>
+                                            <a href="#" className="btn btn-primary">Find path</a>
                                         </div>
                                     }
                                 </div>
