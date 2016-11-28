@@ -8,6 +8,7 @@ var SearchPanel = React.createClass({
         return {
             isVisible: true,
             renderSearch: true,
+            renderBack: false,
             isLoading: true,
             selectedBook: null,
             books: []
@@ -21,12 +22,22 @@ var SearchPanel = React.createClass({
             isLoading: true
         });
         var api = new LibraryAPI();
-        api.search(this.props.search, function (data) {
+        api.search(this.props.search, function (itemList, data) {
             // Hide spinner
-            this.setState({
-                isLoading: false,
-                books: data
-            });
+            if (itemList == true) {
+                this.setState({
+                    isLoading: false,
+                    renderSearch: true,
+                    books: data
+                });
+            }
+            else {
+                this.setState({
+                    isLoading: false,
+                    renderSearch: false,
+                    selectedBook: data[0]
+                });
+            }
         }.bind(this));
     },
 
@@ -40,6 +51,7 @@ var SearchPanel = React.createClass({
         api.getBook(book.href, function (data) {
             // Hide spinner
             this.setState({
+                renderBack: true,
                 isLoading: false,
                 selectedBook: data
             });
@@ -52,9 +64,10 @@ var SearchPanel = React.createClass({
         });
     },
 
-    back: function() {
+    back: function () {
         this.setState({
-            renderSearch: true
+            renderSearch: true,
+            renderBack: false
         });
     },
 
@@ -71,7 +84,7 @@ var SearchPanel = React.createClass({
                 <div className="col-xs-3 flex-xs-top">
                     <div className="card m-t-1 m-r-1">
                         <div className="card-header">
-                            {!this.state.renderSearch ?
+                            {this.state.renderBack ?
                                 <button type="button" className="close pull-xs-left m-r-1" aria-label="Back" onClick={this.back}>
                                     <i className="fa fa-arrow-left" aria-hidden="true"></i>
                                 </button>
@@ -116,11 +129,15 @@ var SearchPanel = React.createClass({
                                             <p className="card-text">Authors: {this.state.selectedBook.authors.join('; ')}</p>
                                             <p className="card-text">Publisher: {this.state.selectedBook.publisher.join(' ')}</p>
                                             <p className="card-text">{this.state.selectedBook.type}</p>
-                                            <p className="card-text">Collection: {this.state.selectedBook.collection}</p>
                                             <p className="card-text">Details: {this.state.selectedBook.description}</p>
                                             <p className="card-text">Language: {this.state.selectedBook.language}</p>
                                             <p className="card-text">ISBN: {this.state.selectedBook.isbn}</p>
-                                            <p className="card-text">Call numbers: {this.state.selectedBook.locations.join(' - ')}</p>
+                                            <p className="card-text">Locations:</p>
+                                            {
+                                                this.state.selectedBook.locations.map(function(value, index){
+                                                    return <p className="card-text m-l-1" key={index}>{value.callNumber}</p>
+                                                })
+                                            }
                                             <a href="#" className="btn btn-primary">Find path</a>
                                         </div>
                                     }
