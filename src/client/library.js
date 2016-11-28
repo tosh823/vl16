@@ -367,6 +367,13 @@ Library.prototype.getSpawnPoint = function () {
     return spawnPoint.position.clone();
 };
 
+Library.prototype.findBookPath = function(book) {
+    var shelf = this.pathfinder.findShelf(book);
+    if (shelf != null) {
+        
+    }
+};
+
 Library.prototype.findPath = function (destination) {
     // Remove previously drawn path if existed
     if (this.path != null) this.scene.remove(this.path);
