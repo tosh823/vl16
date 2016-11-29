@@ -76,8 +76,6 @@ Pathfinder.prototype.findPath = function (start, destination) {
     }
     route.reverse();
 
-    console.log(route);
-
     return route;
 };
 
@@ -129,6 +127,7 @@ Pathfinder.prototype.findShelf = function (book) {
         }
     }
     console.log('Found ' + JSON.stringify(hits));
+    return hits;
 };
 
 Pathfinder.prototype.indexOf = function (key) {

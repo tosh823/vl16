@@ -56,7 +56,7 @@ App.prototype.renderSearchPanel = function (query) {
   this.searchPanel = ReactDOM.render(React.createElement(SearchPanel, {
     search: query,
     onCheckPath: function(book) {
-      this.vl.findBookShelf(book);
+      return this.vl.findBookShelf(book);
     }.bind(this),
     onShowPath: function(shelf) {
       this.vl.findPath(shelf);

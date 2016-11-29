@@ -367,7 +367,7 @@ Library.prototype.getSpawnPoint = function () {
     return spawnPoint.position.clone();
 };
 
-Library.prototype.findBookShelf = function(book) {
+Library.prototype.findBookShelf = function (book) {
     var shelf = this.pathfinder.findShelf(book);
     return shelf;
 };
@@ -384,18 +384,22 @@ Library.prototype.findPath = function (destination) {
     var lineGeometry = new THREE.Geometry();
     for (var i = 0; i < route.length; i++) {
         var wayPoint = this.scene.getObjectByName(route[i]);
-        lineGeometry.vertices.push(wayPoint.position.clone());
+        var position = wayPoint.position.clone();
+        lineGeometry.vertices.push(position);
     }
     var lineMaterial = new THREE.LineDashedMaterial({
         color: 0x4286f4,
         scale: 1,
-        dashSize: 3,
-        gapSize: 1,
+        dashSize: 0.5,
+        gapSize: 0.2,
         fog: true
     });
     lineGeometry.computeLineDistances();
     this.path = new THREE.Line(lineGeometry, lineMaterial);
     this.scene.add(this.path);
+    setTimeout(function() {
+        if (this.path != null) this.scene.remove(this.path);
+    }.bind(this), 60000);
 };
 
 Library.prototype.getClosestWayPoint = function () {
@@ -404,11 +408,15 @@ Library.prototype.getClosestWayPoint = function () {
     var minDistance = Number.MAX_SAFE_INTEGER;
     var closestWayPoint = null;
     for (var i = 0; i < navigation.children.length; i++) {
-        var distance = navigation.children[i].position.distanceTo(avatarPos);
-        if (distance < minDistance) {
-            closestWayPoint = navigation.children[i];
-            minDistance = distance;
+        var floor = navigation.children[i];
+        for (var j = 0; j < floor.children.length; j++) {
+            var distance = floor.children[j].position.distanceTo(avatarPos);
+            if (distance < minDistance) {
+                closestWayPoint = floor.children[j];
+                minDistance = distance;
+            }
         }
+
     }
     console.log('Closest point is ' + closestWayPoint.name);
     return closestWayPoint;

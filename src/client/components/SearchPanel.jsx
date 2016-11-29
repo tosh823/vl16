@@ -10,6 +10,7 @@ var SearchPanel = React.createClass({
             renderSearch: true,
             renderBack: false,
             isLoading: true,
+            findPathClicked: false,
             selectedBook: null,
             books: []
         };
@@ -58,23 +59,26 @@ var SearchPanel = React.createClass({
         }.bind(this));
     },
 
-    onPathClick: function(event) {
+    onPathClick: function (event) {
         var shelf = this.props.onCheckPath(this.state.selectedBook);
-        if (shelf != null) {
-            //this.props.onShowPath(shelf);
+        console.log(shelf);
+        if (shelf != null && shelf.length > 0) {
+            this.props.onShowPath(shelf[0]);
         }
         else {
-
+            console.log('Cannot find the path');
         }
     },
 
     hide: function () {
         this.setState({
-            isVisible: false
+            isVisible: false,
+            renderBack: false
         });
     },
 
     back: function () {
+        // Return to search results and resetting everything back to normal
         this.setState({
             renderSearch: true,
             renderBack: false
@@ -118,7 +122,7 @@ var SearchPanel = React.createClass({
                                         </div>
                                         :
                                         <div>
-                                            <p className="card-text">Found {this.state.books.length} books.</p>
+                                            <p className="card-text">Found {this.state.books.length}books.</p>
                                             <p className="card-text">Click on item to see addition information.</p>
                                             <SearchResultsListView books={this.state.books} onBookClick={this.onBookClick} />
                                         </div>
@@ -144,11 +148,18 @@ var SearchPanel = React.createClass({
                                             <p className="card-text">ISBN: {this.state.selectedBook.isbn}</p>
                                             <p className="card-text">Locations:</p>
                                             {
-                                                this.state.selectedBook.locations.map(function(value, index){
+                                                this.state.selectedBook.locations.map(function (value, index) {
                                                     return <p className="card-text m-l-1" key={index}>{value.callNumber}</p>
                                                 })
                                             }
-                                            <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
+                                            <div className="row">
+                                                <div className="col-xs">
+                                                    <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
+                                                </div>
+                                                <div className="col-xs-9">
+                                                    <p className="card-text">Message</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     }
                                 </div>
