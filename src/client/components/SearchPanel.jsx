@@ -10,7 +10,8 @@ var SearchPanel = React.createClass({
             renderSearch: true,
             renderBack: false,
             isLoading: true,
-            findPathClicked: false,
+            pathAvailable: true,
+            pathMessage: '',
             selectedBook: null,
             books: []
         };
@@ -61,19 +62,27 @@ var SearchPanel = React.createClass({
 
     onPathClick: function (event) {
         var shelf = this.props.onCheckPath(this.state.selectedBook);
-        console.log(shelf);
         if (shelf != null && shelf.length > 0) {
             this.props.onShowPath(shelf[0]);
+            this.setState({
+                pathAvailable: true,
+                pathMessage: 'Success! The route is built.'
+            });
         }
         else {
             console.log('Cannot find the path');
+            this.setState({
+                pathAvailable: false,
+                pathMessage: 'Sorry, we can provide route for this book.'
+            });
         }
     },
 
     hide: function () {
         this.setState({
             isVisible: false,
-            renderBack: false
+            renderBack: false,
+            pathMessage: ''
         });
     },
 
@@ -81,7 +90,8 @@ var SearchPanel = React.createClass({
         // Return to search results and resetting everything back to normal
         this.setState({
             renderSearch: true,
-            renderBack: false
+            renderBack: false,
+            pathMessage: ''
         });
     },
 
@@ -140,24 +150,25 @@ var SearchPanel = React.createClass({
                                         </div>
                                         :
                                         <div>
-                                            <p className="card-text">Authors: {this.state.selectedBook.authors.join('; ')}</p>
-                                            <p className="card-text">Publisher: {this.state.selectedBook.publisher.join(' ')}</p>
-                                            <p className="card-text">{this.state.selectedBook.type}</p>
-                                            <p className="card-text">Details: {this.state.selectedBook.description}</p>
-                                            <p className="card-text">Language: {this.state.selectedBook.language}</p>
-                                            <p className="card-text">ISBN: {this.state.selectedBook.isbn}</p>
-                                            <p className="card-text">Locations:</p>
-                                            {
-                                                this.state.selectedBook.locations.map(function (value, index) {
-                                                    return <p className="card-text m-l-1" key={index}>{value.callNumber}</p>
-                                                })
-                                            }
-                                            <div className="row">
+                                            <ul className="list-group">
+                                                <li className="list-group-item">Authors: {this.state.selectedBook.authors.join('; ')}</li>
+                                                <li className="list-group-item">Publisher: {this.state.selectedBook.publisher.join(' ')}</li>
+                                                <li className="list-group-item">{this.state.selectedBook.type}</li>
+                                                <li className="list-group-item">Details: {this.state.selectedBook.description}</li>
+                                                <li className="list-group-item">Language: {this.state.selectedBook.language}</li>
+                                                <li className="list-group-item">ISBN: {this.state.selectedBook.isbn}</li>
+                                                <li className="list-group-item">Location: {Object.values(this.state.selectedBook.locations[0]).join(' ')}</li>
+                                            </ul>
+                                            <div className="row m-t-1">
                                                 <div className="col-xs">
-                                                    <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
+                                                    {this.state.pathAvailable ?
+                                                        <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
+                                                        :
+                                                        <button type="button" className="btn btn-primary" onClick={this.onPathClick} disabled>Find path</button>
+                                                    }
                                                 </div>
                                                 <div className="col-xs-9">
-                                                    <p className="card-text">Message</p>
+                                                    <p className="h4"><strong>{this.state.pathMessage}</strong></p>
                                                 </div>
                                             </div>
                                         </div>

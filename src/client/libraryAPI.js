@@ -1,4 +1,3 @@
-
 var LibraryAPI = function () {
     this.host = 'https://koha.outikirjastot.fi';
     this.searchReq = '/cgi-bin/koha/opac-search.pl?idx=&q=';
@@ -52,6 +51,7 @@ LibraryAPI.prototype._parseSearchResultsPage = function (page) {
         var href = $(titleA).attr('href');
         var author = $(authorSpan).text();
         var materialType = $(materialSpan).children('img').attr('alt');
+        if (materialType !== 'kirja') return true;
         var language = $(languageSpan).children('img').attr('alt');
         var publisher = $(publisherSpan).text();
         searchResults.push({
@@ -115,7 +115,28 @@ LibraryAPI.prototype._parseBookDetailsPage = function (page) {
             book['locations'].push(locationModel);
         }
     });
+    book['locations'] = this._removeDuplicates(book);
     return book;
+};
+
+LibraryAPI.prototype._removeDuplicates = function (book) {
+    var locations = book.locations;
+    // Removing duplicates
+    var duplicates = [];
+    for (var index = 0; (index < locations.length) && (!duplicates.includes(index)); index++) {
+        var currentLocation = locations[index];
+        for (var other = 0; (other < locations.length) && (other != index); other++) {
+            var otherLocation = locations[other];
+            var callNumbersEqual = (currentLocation.callNumber === otherLocation.callNumber);
+            var collExist = (currentLocation.collection != null) && (otherLocation.collection != null);
+            var collEqual = (currentLocation.collection === otherLocation.collection);
+            if (callNumbersEqual && (!collExist || (collExist && collEqual))) duplicates.push(other);
+        }
+    }
+    duplicates.forEach(function(value) {
+        locations.splice(value, 1);
+    });
+    return locations;
 };
 
 module.exports = LibraryAPI;
