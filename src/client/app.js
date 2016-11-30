@@ -28,7 +28,7 @@ App.prototype.renderNavBar = function () {
     onNavigation: function () {
       this.renderControlPanel();
     }.bind(this),
-    onChangeMode: function() {
+    onChangeMode: function () {
       this.vl.switchViewMode();
     }.bind(this),
     onAbout: function () {
@@ -55,11 +55,20 @@ App.prototype.renderSearchPanel = function (query) {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   this.searchPanel = ReactDOM.render(React.createElement(SearchPanel, {
     search: query,
-    onCheckPath: function(book) {
+    onCheckPath: function (book) {
       return this.vl.findBookShelf(book);
     }.bind(this),
-    onShowPath: function(shelf) {
+    onShowPath: function (shelf) {
       this.vl.findPath(shelf);
+    }.bind(this)
+  }), document.getElementById('ui'));
+};
+
+App.prototype.renderLoginPanel = function () {
+  ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+  ReactDOM.render(React.createElement(LoginDialog, {
+    onOnlineCallback: function () {
+      this.vl.tundra.connect();
     }.bind(this)
   }), document.getElementById('ui'));
 };
@@ -80,17 +89,7 @@ App.prototype.loadInitialLocation = function () {
     function onLoad() {
       loading.hide();
       this.vl.enableBlur();
-      ReactDOM.render(
-        React.createElement(
-          LoginDialog,
-          {
-            onOnlineCallback: function () {
-              this.vl.tundra.connect();
-            }.bind(this)
-          }
-        ),
-        document.getElementById('ui')
-      );
+      this.renderLoginPanel();
     }.bind(this)
   );
 };
