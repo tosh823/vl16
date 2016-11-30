@@ -35,7 +35,7 @@ Client.prototype.connect = function() {
 Client.prototype.onConnected = function () {
     console.log('Connected to Tundra server');
     this.online = true;
-    if (this.onConnectedCallback != null) this.onConnectedCallback();
+    if (this.onConnectedCallback != null) this.onConnectedCallback(this.client.connectionId);
 };
 
 Client.prototype.onConnectionError = function(event) {

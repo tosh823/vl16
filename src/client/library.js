@@ -23,26 +23,10 @@ function Library(app, canvas) {
     this.app = app;
     this.canvas = new Canvas(canvas);
     this.pathfinder = new Pathfinder(this);
-    this.tundra = new Client(
-        function onConnected() {
-            this.disableBlur();
-            // Hook to server's events
-            Tundra.scene.onEntityCreated(this, this.addUserPresence.bind(this));
-            Tundra.scene.onEntityRemoved(this, this.removeUserPresence.bind(this));
-            Tundra.scene.onEntityAction(this, this.onEntityAction.bind(this));
-        }.bind(this),
-        function onDisconnected() {
-            this.localOnly = true;
-        }.bind(this),
-        function onError(error) {
-            this.disableBlur();
-            this.createOfflinePresence();
-            this.localOnly = true;
-        }.bind(this)
-    );
     this.clock = new THREE.Clock();
     this.ready = false; // flag that used to decide, do we need to render a scene or not
-    this.localOnly = false;
+    this.isOffline = true;
+    this.connectionId = null;
     this.render();
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
 }
@@ -109,7 +93,7 @@ Library.prototype.render = function () {
 Library.prototype.loadLibrary = function (location, progressCallback, loadCallback) {
     this.location = location;
     this.pathfinder.loadMap();
-    if (this.tundra.online) this.avatar.emitLocationChange();
+    if (this.avatar != null && !this.isOffline) this.avatar.emitLocationChange();
     var sceneURL = 'assets/' + location.asset + '.json';
     var loader = new THREE.ObjectLoader();
     loader.load(sceneURL,
@@ -128,8 +112,9 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.configureControls();
 
             // If we connected to server, load peers in this location
-            if (this.tundra.online) this.loadUsers();
-            if (this.localOnly) this.createOfflinePresence();
+            // Else create offline presence
+            if (this.isOffline) this.createOfflinePresence();
+            else this.loadUsers();
 
             this.addStats();
             this.ready = true;
@@ -224,7 +209,7 @@ Library.prototype.onEntityAction = function (action) {
 };
 
 Library.prototype.isClient = function (entityName) {
-    var clientName = 'User-' + this.tundra.client.connectionId;
+    var clientName = 'User-' + this.connectionId;
     if (entityName == clientName) return true;
     else return false;
 };
@@ -397,7 +382,7 @@ Library.prototype.findPath = function (destination) {
     lineGeometry.computeLineDistances();
     this.path = new THREE.Line(lineGeometry, lineMaterial);
     this.scene.add(this.path);
-    setTimeout(function() {
+    setTimeout(function () {
         if (this.path != null) this.scene.remove(this.path);
     }.bind(this), 60000);
 };
@@ -462,6 +447,27 @@ Library.prototype.setStandardViewCallbacks = function () {
             this.viewOrbitMode();
         }.bind(this)
     );
+};
+
+Library.prototype.onConnectedToServer = function (connectionId) {
+    // Hook to server's events
+    Tundra.scene.onEntityCreated(this, this.addUserPresence.bind(this));
+    Tundra.scene.onEntityRemoved(this, this.removeUserPresence.bind(this));
+    Tundra.scene.onEntityAction(this, this.onEntityAction.bind(this));
+    this.connectionId = connectionId;
+    this.disableBlur();
+};
+
+Library.prototype.onDisconnectedFromServer = function () {
+    this.isOffline = true;
+    this.connectionId = null;
+    this.disableBlur();
+};
+
+Library.prototype.onConnectionError = function (error) {
+    this.isOffline = true;
+    this.connectionId = null;
+    this.disableBlur();
 };
 
 Library.prototype.onWindowResize = function () {
