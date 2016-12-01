@@ -405,7 +405,6 @@ Library.prototype.getClosestWayPoint = function () {
                 minDistance = distance;
             }
         }
-
     }
     console.log('Closest point is ' + closestWayPoint.name);
     return closestWayPoint;
