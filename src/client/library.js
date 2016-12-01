@@ -469,6 +469,7 @@ Library.prototype.onDisconnectedFromServer = function () {
 Library.prototype.onConnectionError = function (error) {
     this.isOffline = true;
     this.disableBlur();
+    this.createOfflinePresence();
 };
 
 Library.prototype.onWindowResize = function () {

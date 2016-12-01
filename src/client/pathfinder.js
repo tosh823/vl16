@@ -14,7 +14,7 @@ Pathfinder.prototype.loadMap = function () {
             json['wayPoints'].map(function (value, index) {
                 this.map[value.name] = value;
             }.bind(this));
-            console.log('Loaded map of ' + json.length + ' waypoints');
+            console.log('Loaded map of ' + json['wayPoints'].length + ' waypoints');
         }.bind(this)
     );
 };
