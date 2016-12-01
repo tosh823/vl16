@@ -19,8 +19,8 @@ var LoginDialog = React.createClass({
 
     onButtonClick: function (event) {
         var client = new Client(
-            function onConnect(connectionId) {
-                this.props.onConnect(connectionId);
+            function onConnect() {
+                this.props.onConnect();
                 this.setState({
                     statusText: "Successfully connected to server!"
                 });

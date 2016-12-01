@@ -26,6 +26,7 @@ function Library(app, canvas) {
     this.clock = new THREE.Clock();
     this.ready = false; // flag that used to decide, do we need to render a scene or not
     this.isOffline = true;
+    this.firstTime = true;
     this.connectionId = null;
     this.render();
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -113,13 +114,16 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
 
             // If we connected to server, load peers in this location
             // Else create offline presence
-            if (this.isOffline) this.createOfflinePresence();
-            else this.loadUsers();
+            if (!this.firstTime) {
+                if (this.isOffline) this.createOfflinePresence();
+                else this.loadUsers();
+            }
 
             this.addStats();
             this.ready = true;
 
             loadCallback();
+            this.firstTime = false;
         }.bind(this),
 
         function onProgress(progress) {
@@ -209,7 +213,7 @@ Library.prototype.onEntityAction = function (action) {
 };
 
 Library.prototype.isClient = function (entityName) {
-    var clientName = 'User-' + this.connectionId;
+    var clientName = 'User-' + Tundra.client.connectionId;
     if (entityName == clientName) return true;
     else return false;
 };
@@ -449,24 +453,21 @@ Library.prototype.setStandardViewCallbacks = function () {
     );
 };
 
-Library.prototype.onConnectedToServer = function (connectionId) {
+Library.prototype.onConnectedToServer = function () {
     // Hook to server's events
     Tundra.scene.onEntityCreated(this, this.addUserPresence.bind(this));
     Tundra.scene.onEntityRemoved(this, this.removeUserPresence.bind(this));
     Tundra.scene.onEntityAction(this, this.onEntityAction.bind(this));
-    this.connectionId = connectionId;
     this.disableBlur();
 };
 
 Library.prototype.onDisconnectedFromServer = function () {
     this.isOffline = true;
-    this.connectionId = null;
     this.disableBlur();
 };
 
 Library.prototype.onConnectionError = function (error) {
     this.isOffline = true;
-    this.connectionId = null;
     this.disableBlur();
 };
 
