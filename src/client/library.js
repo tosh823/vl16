@@ -277,10 +277,9 @@ Library.prototype.configureInteractiveObjects = function () {
         stuffBar.parent.add(stuffObject);
         this.interactable.push(stuffObject.body);
     }
-
     // Create Warp to different dimension (other library)
     var warpPoint = this.scene.getObjectByName('WarpPoint');
-    this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, location.avatarLift, warpPoint.position.z), warpPoint.rotation.clone());
+    this.warp = new Warp(this, new THREE.Vector3(warpPoint.position.x, this.location.avatarLift, warpPoint.position.z), warpPoint.rotation.clone());
     this.scene.add(this.warp);
     this.interactable.push(this.warp.body);
 };
