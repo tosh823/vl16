@@ -23,7 +23,8 @@ function Stuff(library, position, originObject) {
     var planeMaterial = new THREE.MeshBasicMaterial({
         color: 0x4286f4,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.5,
+        visible: false
     });
     this.display = new THREE.Mesh(planeGeometry, planeMaterial);
     this.add(this.display);
@@ -60,6 +61,7 @@ Stuff.prototype.update = function (delta, time) {
 };
 
 Stuff.prototype.makeCall = function (video) {
+    this.display.material.visible = true;
     navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
     navigator.getMedia(
         {
@@ -102,20 +104,20 @@ Stuff.prototype.makeCall = function (video) {
 
 Stuff.prototype.chatOnKeyDown = function (event) {
     if (event.key == 'Escape') {
-        console.log('Escape was pressed');
+        // Reset panel material
+        var planeMaterial = new THREE.MeshBasicMaterial({
+            color: 0x4286f4,
+            transparent: true,
+            opacity: 0.5,
+            visible: false
+        });
+        this.display.material = planeMaterial;
         // Stop the stream
         this.stream.stop();
         // Entering point lock
         this.library.canvas.enterPointerLock(null);
         this.library.avatar.enableFirstPersonControl();
         this.library.avatar.lookAt(this.display);
-        // Reset panel material
-        var planeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x4286f4,
-            transparent: true,
-            opacity: 0.5
-        });
-        this.display.material = planeMaterial;
         this.library.setStandardViewCallbacks();
     }
 };

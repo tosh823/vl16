@@ -7,6 +7,8 @@ var Overlay = React.createClass({
             isVisible: true,
             showCursor: false,
             cursor: "fa fa-hand-pointer-o cursor",
+            cursorText: "",
+            bottomText: "Press SPACE to show interface",
             withNavBar: false,
         };
     },
@@ -20,20 +22,23 @@ var Overlay = React.createClass({
     hideCursor: function() {
         this.setState({
             showCursor: false,
+            bottomText: "Press SPACE to show interface",
         });
     },
 
     showPointCursor: function() {
         this.setState({
             cursor: "fa fa-hand-pointer-o cursor",
-            showCursor: true
+            showCursor: true,
+            bottomText: "Click MOUSE to interact with an object",
         });
     },
     
     showGrabCursor: function() {
         this.setState({
             cursor: "fa fa-hand-rock-o cursor",
-            showCursor: true
+            showCursor: true,
+            bottomText: "Release MOUSE to interact with an object",
         });
     },
 
@@ -60,13 +65,13 @@ var Overlay = React.createClass({
                         <div className="h4">
                             {this.state.showCursor ? <i className={this.state.cursor} aria-hidden="true"></i> : null}
                         </div>
-                        <p className="h4">Label</p>
+                        <p className="h4">{this.state.cursorText}</p>
                     </div>
                 </div>
                 <div className="row flex-items-xs-center">
                     <div className="col-xs-6 flex-xs-bottom">
                         <div className="h4 text-xs-center">
-                            Press SPACE to show interface
+                            {this.state.bottomText}
                         </div>
                     </div>
                 </div>
