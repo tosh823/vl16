@@ -28,6 +28,7 @@ build/Release
 
 # Compiled bundle files
 build/bundle.*
+build/dashboard.*
 build/assets/*
 !build/assets/info.txt
 
