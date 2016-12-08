@@ -4,7 +4,6 @@ var Stuff = require('./stuff');
 var Pathfinder = require('./pathfinder');
 var Warp = require('./warp');
 var Canvas = require('./canvas');
-var Client = require('./client');
 require('OrbitControls');
 require('EffectComposer');
 require('SkyShader');

@@ -1,5 +1,5 @@
 var React = require('react');
-var Client = require('../client');
+var Client = require('../tundraClient');
 
 var LoginDialog = React.createClass({
 

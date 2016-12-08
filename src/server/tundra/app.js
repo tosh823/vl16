@@ -27,6 +27,7 @@ var RitaharjuSpawn = {
 // and spawn it on specific place
 function onConnected(connID, user) {
     var userEntityName = 'User-' + connID;
+    print(user);
     var userEntity = scene.CreateEntity(scene.NextFreeId(), ['Name', 'Placeable']);
     userEntity.SetTemporary(true);
     userEntity.SetName(userEntityName);

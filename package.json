@@ -10,7 +10,8 @@
     "watch-client": "watchify -t [ babelify --presets [ react ] --extensions .jsx] src/client/main.js -o build/bundle.js --debug --verbose",
     "watch-dashboard": "watchify -t [ babelify --presets [ react ] --extensions .jsx] src/client/dashboard.js -o build/dashboard.js --debug --verbose",
     "watch": "npm run watch-client",
-    "start": "npm run build && http-server -o --cors ./build"
+    "start": "npm run build && http-server -o --cors ./build",
+    "server": "node src/server/video/server.js"
   },
   "repository": {
     "type": "git",
@@ -26,16 +27,17 @@
   },
   "homepage": "https://github.com/tosh823/vl16#readme",
   "dependencies": {
-    "babel-preset-react": "^6.11.1",
-    "babelify": "^7.3.0",
     "react": "^15.3.0",
-    "react-dom": "^15.3.0"
+    "react-dom": "^15.3.0",
+    "socket.io": "^1.7.1"
   },
   "devDependencies": {
     "browserify": "^13.1.0",
     "browserify-shim": "^3.8.12",
     "http-server": "^0.9.0",
-    "watchify": "^3.7.0"
+    "watchify": "^3.7.0",
+    "babel-preset-react": "^6.11.1",
+    "babelify": "^7.3.0"
   },
   "browser": {
     "three": "./src/client/lib/three.min.js",
