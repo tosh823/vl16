@@ -16,18 +16,20 @@ function handler (req, res) {
 io.on('connection', function (socket) {
   console.log((new Date().toLocaleString()) + ': Socket [' + socket.id + '] connected.');
 
-  socket.on('newUser', function(payload) {
+  socket.on('newUser', function(payload, callback) {
       var time = new Date().toLocaleString();
       session.users[socket.id] = {
           joinTime: time
       };
+      callback();
   });
 
-  socket.on('newAdmin', function(payload) {
+  socket.on('newAdmin', function(payload, callback) {
       var time = new Date().toLocaleString();
       session.admins[socket.id] = {
           joinTime: time
-      }
+      };
+      callback();
   });
 
   socket.on('disconnect', function() {

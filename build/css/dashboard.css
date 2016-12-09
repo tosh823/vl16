@@ -2,6 +2,23 @@ html {
     overflow-x: hidden;
 }
 
+.indicator {
+    font-size: 0.5em;
+    vertical-align: middle;
+}
+
+.green {
+    color: green;
+}
+
+.orange {
+    color: darkorange;
+}
+
+.red {
+    color: red;
+}
+
 .card {
     overflow:hidden;
 }
