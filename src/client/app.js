@@ -23,22 +23,15 @@ App.prototype.vl = null;
 App.prototype.initWS = function() {
   this.ws = new WebSocket(
     function onConnected() {
-        var receiveTime = new Date().toLocaleString();
-        console.log(receiveTime + ': Connected to server.');
         this.navBar.setOnlineIndicator();
         this.ws.joinAsUser(function() {
             console.log('Joined as user');
         });
     }.bind(this),
     function onDisconnected() {
-        var receiveTime = new Date().toLocaleString();
-        console.log(receiveTime + ': Disconnected from server.');
         this.navBar.setOfflineIndicator();
     }.bind(this),
     function onError(error) {
-        var receiveTime = new Date().toLocaleString();
-        console.log(receiveTime + ': Connection failure.');
-        console.log(error);
         this.navBar.setOfflineIndicator();
     }.bind(this)
   );

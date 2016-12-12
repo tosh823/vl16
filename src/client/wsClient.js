@@ -14,9 +14,28 @@ Client.prototype.connect = function () {
         reconnection: true
     };
     this.socket = new io(url, options);
-    this.socket.io.on('connect_error', this.onErrorCallback);
-    this.socket.on('connect', this.onConnectedCallback);
-    this.socket.on('disconnect', this.onDisconnectedCallback);
+    this.socket.io.on('connect_error', this.onConnectionError.bind(this));
+    this.socket.on('connect', this.onConnected.bind(this));
+    this.socket.on('disconnect', this.onDisconnected.bind(this));
+};
+
+Client.prototype.onConnected = function () {
+    var receiveTime = new Date().toLocaleString();
+    console.log(receiveTime + ': Connected to server.');
+    if (this.onConnectedCallback != null) this.onConnectedCallback();
+};
+
+Client.prototype.onDisconnected = function () {
+    var receiveTime = new Date().toLocaleString();
+    console.log(receiveTime + ': Disconnected from server.');
+    if (this.onDisconnectedCallback != null) this.onDisconnectedCallback();
+};
+
+Client.prototype.onConnectionError = function (error) {
+    var receiveTime = new Date().toLocaleString();
+    console.log(receiveTime + ': Connection failure.');
+    console.log(error);
+    if (this.onErrorCallback != null) this.onErrorCallback(error);
 };
 
 Client.prototype.joinAsUser = function (callback) {

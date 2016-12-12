@@ -9,6 +9,10 @@ var HomeContent = React.createClass({
         };
     },
 
+    componentDidMount: function () {
+        
+    },
+
     render: function () {
         return (this.state.isVisible ?
             <div>

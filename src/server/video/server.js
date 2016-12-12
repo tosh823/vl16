@@ -19,8 +19,23 @@ io.on('connection', function (socket) {
   socket.on('newUser', function(payload, callback) {
       var time = new Date().toLocaleString();
       session.users[socket.id] = {
-          joinTime: time
+          joinTime: time,
+          lastUpdated: time,
+          location: 'Pääkirjasto'
       };
+      Object.keys(session.admins).map(function(adminID) {
+          var socketID = socket.id;
+          io.to(adminID).emit('userJoined', {
+              socketID: session.users[socket.id]
+          });
+      });
+      callback();
+  });
+
+  socket.on('updateUser', function(payload, callback) {
+      var updateTime = new Date().toLocaleString();
+      sessions.users[socket.id].lastUpdated = updateTime;
+      sessions.users[socket.id].location = payload.location;
       callback();
   });
 
