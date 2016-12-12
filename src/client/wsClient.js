@@ -9,7 +9,7 @@ function Client(onConnectCallback, onDisconnectCallback, onErrorCallback) {
 Client.prototype.constructor = Client;
 
 Client.prototype.connect = function () {
-    var url = 'http://localhost:8080';
+    var url = 'http://localhost:3333';
     var options = {
         reconnection: true
     };

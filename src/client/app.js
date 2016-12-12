@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Library = require('./library');
+var WebSocket = require('./wsClient');
 var config = require('./config');
 var LoginDialog = require('./components/LoginDialog.jsx');
 var LoadingScreen = require('./components/LoadingScreen.jsx');
@@ -13,10 +14,36 @@ function App(canvas, defaultLocation) {
   this.vl = new Library(this, canvas);
   this.currentLocation = defaultLocation;
   this.renderNavBar();
+  this.initWS();
 }
 
 App.prototype.constructor = App;
 App.prototype.vl = null;
+
+App.prototype.initWS = function() {
+  this.ws = new WebSocket(
+    function onConnected() {
+        var receiveTime = new Date().toLocaleString();
+        console.log(receiveTime + ': Connected to server.');
+        this.navBar.setOnlineIndicator();
+        this.ws.joinAsUser(function() {
+            console.log('Joined as user');
+        });
+    }.bind(this),
+    function onDisconnected() {
+        var receiveTime = new Date().toLocaleString();
+        console.log(receiveTime + ': Disconnected from server.');
+        this.navBar.setOfflineIndicator();
+    }.bind(this),
+    function onError(error) {
+        var receiveTime = new Date().toLocaleString();
+        console.log(receiveTime + ': Connection failure.');
+        console.log(error);
+        this.navBar.setOfflineIndicator();
+    }.bind(this)
+  );
+  this.ws.connect();
+};
 
 App.prototype.renderNavBar = function () {
   ReactDOM.unmountComponentAtNode(document.getElementById('page-header'));

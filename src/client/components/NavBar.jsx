@@ -6,7 +6,8 @@ var NavBar = React.createClass({
     getInitialState: function () {
         return {
             isVisible: true,
-            currentLocation: this.props.location
+            currentLocation: this.props.location,
+            indicator: "orange"
         };
     },
 
@@ -25,6 +26,24 @@ var NavBar = React.createClass({
     setCurrentLocation: function (location) {
         this.setState({
             currentLocation: location
+        });
+    },
+
+    setWaitingIndicator: function () {
+        this.setState({
+            indicator: "orange"
+        });
+    },
+
+    setOnlineIndicator: function () {
+        this.setState({
+            indicator: "green"
+        });
+    },
+
+    setOfflineIndicator: function () {
+        this.setState({
+            indicator: "red"
         });
     },
 
@@ -60,7 +79,7 @@ var NavBar = React.createClass({
     render: function () {
         return (this.state.isVisible ?
             <nav className="navbar navbar-full navbar-light bg-faded">
-                <a className="navbar-brand" href="#">Virtual Library</a>
+                <a className="navbar-brand" href="#">Virtual Library <i className={"fa fa-circle indicator " + this.state.indicator} aria-hidden="true"></i></a>
                 <ul className="nav navbar-nav">
                     <li className="nav-item">
                         <a className="nav-link" href="http://www.ouka.fi/oulu/library" target="_blank">Home</a>
