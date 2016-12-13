@@ -5,12 +5,22 @@ var HomeContent = React.createClass({
 
     getInitialState: function () {
         return {
-            isVisible: true
+            isVisible: true,
+            userCount: 0,
+            adminCount: 0
         };
     },
 
-    componentDidMount: function () {
-        
+    updateUsers: function(userCount) {
+        this.setState({
+            userCount: userCount
+        });
+    },
+
+    updateAdmins: function(adminCount) {
+        this.setState({
+            adminCount: adminCount
+        });
     },
 
     render: function () {
@@ -23,10 +33,10 @@ var HomeContent = React.createClass({
                 </div>
                 <div className="row flex-items-xs-center">
                     <div className="col-xs-2">
-                        <InfoCard />
+                        <InfoCard title="Users" text={this.state.userCount} icon="fa-user" />
                     </div>
                     <div className="col-xs-2">
-                        <InfoCard />
+                        <InfoCard title="Admins" text={this.state.adminCount} icon="fa-user-secret"/>
                     </div>
                     <div className="col-xs-2">
                         <InfoCard />

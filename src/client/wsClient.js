@@ -4,6 +4,16 @@ function Client(onConnectCallback, onDisconnectCallback, onErrorCallback) {
     this.onConnectedCallback = onConnectCallback;
     this.onDisconnectedCallback = onDisconnectCallback;
     this.onErrorCallback = onErrorCallback;
+    this.servers = {
+        iceServers: [{
+            url: "stun:numb.viagenie.ca"
+        },
+        {
+            url: "turn:numb.viagenie.ca",
+            credential: 'kriogen1',
+            username: 'ayli.veaynim@gmail.com'
+        }]
+    }
 }
 
 Client.prototype.constructor = Client;

@@ -5,6 +5,7 @@ var HomeContent = require('./components/dashboard/HomeContent.jsx');
 
 function Dashboard() {
     this.users = {};
+    this.admins = {};
     this.ws = new Client(
         function onConnected() {
             $('#login-indicator').removeClass('orange red').addClass('green');
@@ -28,8 +29,41 @@ Dashboard.prototype.start = function () {
 
     this.ws.connect();
     this.ws.socket.on('userJoined', function (data) {
-        this.users[Object.keys(data)[0]] = data.socketID;
-        console.log(this.users);
+        this.users[data.socketID] = data.userData;
+        if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
+    }.bind(this));
+
+    this.ws.socket.on('adminJoined', function (data) {
+        this.admins[data.socketID] = data.adminData;
+        if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
+    }.bind(this));
+
+    this.ws.socket.on('userLeft', function(data) {
+        delete this.user[data.socketID];
+        if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
+    }.bind(this));
+
+    this.ws.socket.on('adminLeft', function(data) {
+        delete this.admins[data.socketID];
+        if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
+    }.bind(this));
+
+    this.ws.socket.on('userUpdated', function (data) {
+        this.users[data.socketID] = data.userData;
+    }.bind(this));
+
+    this.ws.socket.on('users', function(data) {
+        for (var key in data) {
+            this.users[key] = data[key];
+        }
+        if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
+    }.bind(this));
+
+    this.ws.socket.on('admins', function(data) {
+        for (var key in data) {
+            this.admins[key] = data[key];
+        }
+        if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
 };
 
