@@ -1,10 +1,17 @@
 var io = require('socket.io-client');
+require('webrtc-adapter');
 
 function Client(onConnectCallback, onDisconnectCallback, onErrorCallback) {
     this.onConnectedCallback = onConnectCallback;
     this.onDisconnectedCallback = onDisconnectCallback;
     this.onErrorCallback = onErrorCallback;
-    this.servers = {
+    this.room = null;
+}
+
+Client.prototype.constructor = Client;
+
+Client.prototype._createRTCPeerConnection = function() {
+    var servers = {
         iceServers: [{
             url: "stun:numb.viagenie.ca"
         },
@@ -14,9 +21,12 @@ function Client(onConnectCallback, onDisconnectCallback, onErrorCallback) {
             username: 'ayli.veaynim@gmail.com'
         }]
     }
-}
+    this.peerConnection = new RTCPeerConnection(servers);
+};
 
-Client.prototype.constructor = Client;
+Client.prototype._signalOtherPeer = function() {
+    
+};
 
 Client.prototype.connect = function () {
     var url = 'http://localhost:3333';
@@ -27,6 +37,16 @@ Client.prototype.connect = function () {
     this.socket.io.on('connect_error', this.onConnectionError.bind(this));
     this.socket.on('connect', this.onConnected.bind(this));
     this.socket.on('disconnect', this.onDisconnected.bind(this));
+    this.scoket.on('joinRoom', function (roomID) {
+        // We joined the room with client
+        this.room = roomID;
+        // Start signalling
+    }.bind(this));
+    this.socket.on('emptyRoom', function (roomID) {
+        // We initialized the call and joined empty room
+        this.room = roomID;
+        this._createRTCPeerConnection();
+    }.bind(this));
 };
 
 Client.prototype.onConnected = function () {
@@ -62,6 +82,40 @@ Client.prototype.joinAsAdmin = function (callback) {
             msg: 'Hello!'
         }, callback);
     }
+};
+
+Client.prototype.sendSDP = function (sdp) {
+    if (this.socket != null) {
+        this.socket.emit('sdp', {
+            room: this.room,
+            sdp: sdp
+        });
+    }
+};
+
+Client.prototype.sendICECandidate = function (candidate) {
+    if (this.socket != null) {
+        this.socket.emit('ice candidate', {
+            room: this.room,
+            candidate: candidate
+        });
+    }
+};
+
+Client.prototype.answerCall = function(room, onCall, onCallEnded) {
+    if (this.socket != null) {
+        this.socket.emit('createOrJoinRoom', room);
+    }
+};
+
+Client.prototype.requestCall = function (onCall, onCallEnded) {
+    if (this.socket != null) {
+        this.socket.emit('createOrJoinRoom', null);
+    }
+};
+
+Client.prototype.stopCall = function() {
+
 };
 
 module.exports = Client;
