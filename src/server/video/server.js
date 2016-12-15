@@ -35,6 +35,22 @@ io.on('connection', function (socket) {
         callback();
     });
 
+    socket.on('newAdmin', function (payload, callback) {
+        var time = new Date().toLocaleString();
+        session.admins[socket.id] = {
+            joinTime: time
+        };
+        // Notify other admins about new adming client
+        Object.keys(session.admins).map(function (adminID) {
+            var socketID = socket.id;
+            io.to(adminID).emit('adminJoined', {
+                socketID: socket.id,
+                adminData: session.admins[socket.id]
+            });
+        });
+        callback();
+    });
+
     socket.on('updateUser', function (payload, callback) {
         var updateTime = new Date().toLocaleString();
         sessions.users[socket.id].lastUpdated = updateTime;
@@ -49,23 +65,12 @@ io.on('connection', function (socket) {
         callback();
     });
 
-    socket.on('newAdmin', function (payload, callback) {
-        var time = new Date().toLocaleString();
-        session.admins[socket.id] = {
-            joinTime: time
-        };
-        // Send list of current users and admins to new admin client
+    socket.on('requestUsers', function(payload) {
         io.to(socket.id).emit('users', session.users);
+    });
+
+    socket.on('requestAdmins', function(payload) {
         io.to(socket.id).emit('admins', session.admins);
-        // Notify other admins about new adming client
-        Object.keys(session.admins).map(function (adminID) {
-            var socketID = socket.id;
-            io.to(adminID).emit('adminJoined', {
-                socketID: socket.id,
-                adminData: session.admins[socket.id]
-            });
-        });
-        callback();
     });
 
     socket.on('sdp', function (data) {

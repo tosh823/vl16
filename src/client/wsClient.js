@@ -37,10 +37,9 @@ Client.prototype.connect = function () {
     this.socket.io.on('connect_error', this.onConnectionError.bind(this));
     this.socket.on('connect', this.onConnected.bind(this));
     this.socket.on('disconnect', this.onDisconnected.bind(this));
-    this.scoket.on('joinRoom', function (roomID) {
+    this.socket.on('joinRoom', function (roomID) {
         // We joined the room with client
         this.room = roomID;
-        // Start signalling
     }.bind(this));
     this.socket.on('emptyRoom', function (roomID) {
         // We initialized the call and joined empty room
@@ -66,6 +65,18 @@ Client.prototype.onConnectionError = function (error) {
     console.log(receiveTime + ': Connection failure.');
     console.log(error);
     if (this.onErrorCallback != null) this.onErrorCallback(error);
+};
+
+Client.prototype.requestUsers = function() {
+    if (this.socket != null) {
+        this.socket.emit('requestUsers');
+    }
+};
+
+Client.prototype.requestAdmins = function() {
+    if (this.socket != null) {
+        this.socket.emit('requestAdmins');
+    }
 };
 
 Client.prototype.joinAsUser = function (callback) {

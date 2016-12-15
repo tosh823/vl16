@@ -25,7 +25,6 @@ function Dashboard() {
 Dashboard.prototype.contstructor = Dashboard;
 Dashboard.prototype.start = function () {
     console.log('Hello VL Dashboard!');
-    this.renderHome();
 
     this.ws.connect();
     this.ws.socket.on('userJoined', function (data) {
@@ -39,7 +38,7 @@ Dashboard.prototype.start = function () {
     }.bind(this));
 
     this.ws.socket.on('userLeft', function(data) {
-        delete this.user[data.socketID];
+        delete this.users[data.socketID];
         if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
     }.bind(this));
 
@@ -65,11 +64,15 @@ Dashboard.prototype.start = function () {
         }
         if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
+
+    this.renderHome();
 };
 
 Dashboard.prototype.renderHome = function () {
     ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
     this.home = ReactDOM.render(React.createElement(HomeContent), document.getElementById('ui'));
+    this.ws.requestUsers();
+    this.ws.requestAdmins();
 }
 
 var instance = new Dashboard();
