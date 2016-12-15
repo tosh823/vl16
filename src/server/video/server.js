@@ -65,11 +65,11 @@ io.on('connection', function (socket) {
         callback();
     });
 
-    socket.on('requestUsers', function(payload) {
+    socket.on('requestUsers', function (payload) {
         io.to(socket.id).emit('users', session.users);
     });
 
-    socket.on('requestAdmins', function(payload) {
+    socket.on('requestAdmins', function (payload) {
         io.to(socket.id).emit('admins', session.admins);
     });
 
@@ -100,6 +100,15 @@ io.on('connection', function (socket) {
         if (clients.length == 0) {
             socket.join(roomID);
             io.to(roomID).emit('emptyRoom', roomID);
+            var createdTime = new Date().toLocaleString();
+            Object.keys(session.admins).map(function (adminID) {
+                var socketID = socket.id;
+                io.to(adminID).emit('roomCreated', {
+                    roomID: roomID,
+                    socketID: socket.id,
+                    createdTime: createdTime
+                });
+            });
         }
         else if (clients.length == 1) {
             socket.join(roomID);
@@ -109,6 +118,7 @@ io.on('connection', function (socket) {
         else {
             socket.emit('fullRoom', roomID);
         }
+
     });
 
     socket.on('disconnect', function () {

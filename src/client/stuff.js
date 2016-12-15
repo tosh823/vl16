@@ -50,7 +50,8 @@ Stuff.prototype.interact = function () {
             this.library.setStandardViewCallbacks();
         }.bind(this),
         onMakeCall: function () {
-            this.makeCall(document.getElementById('webcam'));
+            this.library.app.ws.requestCall();
+            //this.makeCall(document.getElementById('webcam'));
         }.bind(this)
     }), document.getElementById('ui_modal'));
     this.stuffDialog.show();

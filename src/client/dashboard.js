@@ -2,10 +2,12 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Client = require('./wsClient');
 var HomeContent = require('./components/dashboard/HomeContent.jsx');
+var ChatContent = require('./components/dashboard/ChatContent.jsx');
 
 function Dashboard() {
     this.users = {};
     this.admins = {};
+    this.rooms = [];
     this.ws = new Client(
         function onConnected() {
             $('#login-indicator').removeClass('orange red').addClass('green');
@@ -65,6 +67,16 @@ Dashboard.prototype.start = function () {
         if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
 
+    this.ws.socket.on('roomCreated', function(data) {
+        var newRoom = {
+            roomID: data.roomID,
+            createdTime: data.createdTime,
+            user: data.socketID
+        };
+        this.rooms.push(newRoom);
+        if (this.chat != null) this.chat.updateRooms(this.rooms);
+    }.bind(this));
+
     this.renderHome();
 };
 
@@ -73,10 +85,37 @@ Dashboard.prototype.renderHome = function () {
     this.home = ReactDOM.render(React.createElement(HomeContent), document.getElementById('ui'));
     this.ws.requestUsers();
     this.ws.requestAdmins();
-}
+};
+
+Dashboard.prototype.renderChat = function() {
+    ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+    this.chat = ReactDOM.render(React.createElement(ChatContent), document.getElementById('ui'));
+};
 
 var instance = new Dashboard();
 instance.start();
+
+$('#brand').click(function(e) {
+    instance.renderHome();
+});
+
+$('#home').click(function(e) {
+    instance.renderHome();
+});
+
+$('#users').click(function(e) {
+    
+});
+
+$('#chat').click(function(e) {
+    instance.renderChat();
+});
+
+$('#settings').click(function(e) {
+
+});
+
+
 
 
 
