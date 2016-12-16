@@ -74,22 +74,23 @@ io.on('connection', function (socket) {
     });
 
     socket.on('sdp', function (data) {
-        socket.to(data.room).emit('sdpReceived', data.sdp);
+        io.to(data.room).emit('sdpReceived', data.sdp);
     });
 
     socket.on('iceCandidate', function (data) {
-        socket.to(data.room).emit('iceCandidateReceived', data.candidate);
+        io.to(data.room).emit('iceCandidateReceived', data.candidate);
     });
 
     socket.on('createOrJoinRoom', function (room) {
         // join room
+        console.log(new Date().toLocaleString() + ': Received request from socket [' + socket.id + '] to join room [' + room + ']');
         var existingRoom = io.sockets.adapter.rooms[room];
-        var clients = [];
+        var clients = 0;
         var roomID;
 
         if (existingRoom) {
             // Fetch data about a room
-            clients = Object.keys(existingRoom);
+            clients = existingRoom.length;
             roomID = room;
         }
         else {
@@ -97,28 +98,30 @@ io.on('connection', function (socket) {
             roomID = hashids.encode(new Date().getTime());
         }
 
-        if (clients.length == 0) {
+        var time = new Date().toLocaleString();
+        if (clients == 0) {
             socket.join(roomID);
             io.to(roomID).emit('emptyRoom', roomID);
-            var createdTime = new Date().toLocaleString();
+            console.log(time + ': Socket [' + socket.id + '] joined empty room [' + roomID + '].');
             Object.keys(session.admins).map(function (adminID) {
                 var socketID = socket.id;
                 io.to(adminID).emit('roomCreated', {
                     roomID: roomID,
                     socketID: socket.id,
-                    createdTime: createdTime
+                    createdTime: time
                 });
             });
         }
-        else if (clients.length == 1) {
+        else if (clients == 1) {
             socket.join(roomID);
-            socket.to(roomID).emit('joinRoom', roomID, clients.length + 1);
+            io.to(roomID).emit('joinRoom', roomID);
+            console.log(time + ': Socket [' + socket.id + '] joined room [' + roomID + '].');
         }
         // only allow 2 users max per room
         else {
-            socket.emit('fullRoom', roomID);
+            console.log(time + ': Room [' + roomID + '] is full.');
+            io.emit('fullRoom', roomID);
         }
-
     });
 
     socket.on('disconnect', function () {
@@ -133,6 +136,12 @@ io.on('connection', function (socket) {
         }
         else if (session.admins[socket.id] != null) {
             delete session.admins[socket.id];
+            Object.keys(session.admins).map(function (adminID) {
+                var socketID = socket.id;
+                io.to(adminID).emit('adminLeft', {
+                    socketID: socket.id
+                });
+            });
         }
         console.log((new Date().toLocaleString()) + ': Socket [' + socket.id + '] disconnected.');
     });

@@ -6,11 +6,12 @@ function Client(onConnectCallback, onDisconnectCallback, onErrorCallback) {
     this.onDisconnectedCallback = onDisconnectCallback;
     this.onErrorCallback = onErrorCallback;
     this.room = null;
+    this.isCallInitializer = false;
 }
 
 Client.prototype.constructor = Client;
 
-Client.prototype._createRTCPeerConnection = function() {
+Client.prototype._createRTCPeerConnection = function () {
     var servers = {
         iceServers: [{
             url: "stun:numb.viagenie.ca"
@@ -22,10 +23,46 @@ Client.prototype._createRTCPeerConnection = function() {
         }]
     }
     this.peerConnection = new RTCPeerConnection(servers);
+    this.peerConnection.createDataChannel('Test channel');
+    this.peerConnection.onicecandidate = function (event) {
+        if (event.candidate) {
+            this.sendICECandidate(event.candidate);
+        }
+    }.bind(this)
+    this.peerConnection.onaddstream = function (data) {
+        console.log(data);
+    }
 };
 
-Client.prototype._signalOtherPeer = function() {
-    
+Client.prototype._createOffer = function () {
+    this.peerConnection.createOffer().then(function (offer) {
+        console.log('Create SDP offer ' + offer);
+        return this.peerConnection.setLocalDescription(offer);
+    }.bind(this)).then(function () {
+        this.sendSDP(this.peerConnection.localDescription);
+    }.bind(this)).catch(function (error) {
+        console.log(error);
+    });
+};
+
+Client.prototype._respondToOffer = function () {
+    this.peerConnection.createAnswer().then(function (offer) {
+        console.log('Sending SDP answer ' + offer);
+        return this.peerConnection.setLocalDescription(offer);
+    }.bind(this)).then(function () {
+        this.sendSDP(this.peerConnection.localDescription);
+    }.bind(this)).catch(function (error) {
+        console.log(error);
+    });
+};
+
+Client.prototype._onSDPReceived = function (sdp) {
+    console.log(sdp);
+    this.peerConnection.setRemoteDescription(sdp).then(function () {
+        if (this.isCallInitializer) this._respondToOffer();
+    }.bind(this)).catch(function (error) {
+        console.log(error);
+    });
 };
 
 Client.prototype.connect = function () {
@@ -37,14 +74,28 @@ Client.prototype.connect = function () {
     this.socket.io.on('connect_error', this.onConnectionError.bind(this));
     this.socket.on('connect', this.onConnected.bind(this));
     this.socket.on('disconnect', this.onDisconnected.bind(this));
+    // Rooms
     this.socket.on('joinRoom', function (roomID) {
         // We joined the room with client
+        console.log('Someone joined my room [' + roomID + '].');
         this.room = roomID;
+        this._createRTCPeerConnection();
+        this._createOffer();
     }.bind(this));
     this.socket.on('emptyRoom', function (roomID) {
         // We initialized the call and joined empty room
+        console.log('Me joined my room [' + roomID + '].');
         this.room = roomID;
+        this.isCallInitializer = true;
         this._createRTCPeerConnection();
+    }.bind(this));
+
+    // RTC
+    this.socket.on('sdpReceived', function (sdp) {
+        this._onSDPReceived(sdp);
+    }.bind(this));
+    this.socket.on('iceCandidateReceived', function (candidate) {
+        this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }.bind(this));
 };
 
@@ -67,13 +118,13 @@ Client.prototype.onConnectionError = function (error) {
     if (this.onErrorCallback != null) this.onErrorCallback(error);
 };
 
-Client.prototype.requestUsers = function() {
+Client.prototype.requestUsers = function () {
     if (this.socket != null) {
         this.socket.emit('requestUsers');
     }
 };
 
-Client.prototype.requestAdmins = function() {
+Client.prototype.requestAdmins = function () {
     if (this.socket != null) {
         this.socket.emit('requestAdmins');
     }
@@ -106,14 +157,14 @@ Client.prototype.sendSDP = function (sdp) {
 
 Client.prototype.sendICECandidate = function (candidate) {
     if (this.socket != null) {
-        this.socket.emit('ice candidate', {
+        this.socket.emit('iceCandidate', {
             room: this.room,
             candidate: candidate
         });
     }
 };
 
-Client.prototype.answerCall = function(room, onCall, onCallEnded) {
+Client.prototype.answerCall = function (room, onCall, onCallEnded) {
     if (this.socket != null) {
         this.socket.emit('createOrJoinRoom', room);
     }
@@ -125,7 +176,13 @@ Client.prototype.requestCall = function (onCall, onCallEnded) {
     }
 };
 
-Client.prototype.stopCall = function() {
+Client.prototype.declineCall = function (room) {
+    if (this.socket != null) {
+        this.socket.emit('kickRoom', room);
+    }
+};
+
+Client.prototype.stopCall = function () {
 
 };
 

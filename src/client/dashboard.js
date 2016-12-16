@@ -89,7 +89,12 @@ Dashboard.prototype.renderHome = function () {
 
 Dashboard.prototype.renderChat = function() {
     ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
-    this.chat = ReactDOM.render(React.createElement(ChatContent), document.getElementById('ui'));
+    this.chat = ReactDOM.render(React.createElement(ChatContent, {
+        onAnswerCall: this.ws.answerCall.bind(this.ws),
+        onDeclineCall: this.ws.declineCall.bind(this.ws)
+    }), document.getElementById('ui'));
+    // Artificically request call
+    this.ws.requestCall();
 };
 
 var instance = new Dashboard();
