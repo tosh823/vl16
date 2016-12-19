@@ -74,11 +74,11 @@ io.on('connection', function (socket) {
     });
 
     socket.on('sdp', function (data) {
-        io.to(data.room).emit('sdpReceived', data.sdp);
+        socket.broadcast.to(data.room).emit('sdpReceived', data.sdp);
     });
 
     socket.on('iceCandidate', function (data) {
-        io.to(data.room).emit('iceCandidateReceived', data.candidate);
+        socket.broadcast.to(data.room).emit('iceCandidateReceived', data.candidate);
     });
 
     socket.on('createOrJoinRoom', function (room) {

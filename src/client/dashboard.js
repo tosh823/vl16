@@ -93,8 +93,6 @@ Dashboard.prototype.renderChat = function() {
         onAnswerCall: this.ws.answerCall.bind(this.ws),
         onDeclineCall: this.ws.declineCall.bind(this.ws)
     }), document.getElementById('ui'));
-    // Artificically request call
-    this.ws.requestCall();
 };
 
 var instance = new Dashboard();
@@ -109,7 +107,7 @@ $('#home').click(function(e) {
 });
 
 $('#users').click(function(e) {
-    
+    instance.ws.requestCall();
 });
 
 $('#chat').click(function(e) {

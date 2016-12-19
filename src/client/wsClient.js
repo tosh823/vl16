@@ -39,6 +39,7 @@ Client.prototype._createOffer = function () {
         console.log('Create SDP offer ' + offer);
         return this.peerConnection.setLocalDescription(offer);
     }.bind(this)).then(function () {
+        console.log('Set local description.');
         this.sendSDP(this.peerConnection.localDescription);
     }.bind(this)).catch(function (error) {
         console.log(error);
@@ -47,9 +48,10 @@ Client.prototype._createOffer = function () {
 
 Client.prototype._respondToOffer = function () {
     this.peerConnection.createAnswer().then(function (offer) {
-        console.log('Sending SDP answer ' + offer);
+        console.log('Create SDP answer ' + offer);
         return this.peerConnection.setLocalDescription(offer);
     }.bind(this)).then(function () {
+        console.log('Set local description.');
         this.sendSDP(this.peerConnection.localDescription);
     }.bind(this)).catch(function (error) {
         console.log(error);
@@ -57,9 +59,9 @@ Client.prototype._respondToOffer = function () {
 };
 
 Client.prototype._onSDPReceived = function (sdp) {
-    console.log(sdp);
     this.peerConnection.setRemoteDescription(sdp).then(function () {
-        if (this.isCallInitializer) this._respondToOffer();
+        console.log('Set remote description.');
+        if (!this.isCallInitializer) this._respondToOffer();
     }.bind(this)).catch(function (error) {
         console.log(error);
     });
@@ -80,21 +82,21 @@ Client.prototype.connect = function () {
         console.log('Someone joined my room [' + roomID + '].');
         this.room = roomID;
         this._createRTCPeerConnection();
-        this._createOffer();
+        if (this.isCallInitializer) this._createOffer();
     }.bind(this));
     this.socket.on('emptyRoom', function (roomID) {
         // We initialized the call and joined empty room
         console.log('Me joined my room [' + roomID + '].');
         this.room = roomID;
         this.isCallInitializer = true;
-        this._createRTCPeerConnection();
     }.bind(this));
 
     // RTC
     this.socket.on('sdpReceived', function (sdp) {
-        this._onSDPReceived(sdp);
+        this._onSDPReceived(new RTCSessionDescription(sdp));
     }.bind(this));
     this.socket.on('iceCandidateReceived', function (candidate) {
+        console.log('Received ICE.');
         this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }.bind(this));
 };
