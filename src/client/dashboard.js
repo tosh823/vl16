@@ -107,7 +107,7 @@ $('#home').click(function(e) {
 });
 
 $('#users').click(function(e) {
-    instance.ws.requestCall();
+    
 });
 
 $('#chat').click(function(e) {

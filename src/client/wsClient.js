@@ -13,25 +13,21 @@ Client.prototype.constructor = Client;
 
 Client.prototype._createRTCPeerConnection = function () {
     var servers = {
-        iceServers: [{
-            url: "stun:numb.viagenie.ca"
-        },
-        {
-            url: "turn:numb.viagenie.ca",
-            credential: 'kriogen1',
-            username: 'ayli.veaynim@gmail.com'
+        'iceServers': [{
+            'url': 'stun:stun.l.google.com:19302'
         }]
     }
     this.peerConnection = new RTCPeerConnection(servers);
-    this.peerConnection.createDataChannel('Test channel');
+    this.peerConnection.addStream(this.stream);
     this.peerConnection.onicecandidate = function (event) {
         if (event.candidate) {
             this.sendICECandidate(event.candidate);
         }
-    }.bind(this)
+    }.bind(this);
     this.peerConnection.onaddstream = function (data) {
-        console.log(data);
-    }
+        if (this.onAddStreamCallback != null) this.onAddStreamCallback(data.stream);
+    }.bind(this);
+    if (this.isCallInitializer) this._createOffer();
 };
 
 Client.prototype._createOffer = function () {
@@ -82,7 +78,6 @@ Client.prototype.connect = function () {
         console.log('Someone joined my room [' + roomID + '].');
         this.room = roomID;
         this._createRTCPeerConnection();
-        if (this.isCallInitializer) this._createOffer();
     }.bind(this));
     this.socket.on('emptyRoom', function (roomID) {
         // We initialized the call and joined empty room
@@ -166,15 +161,19 @@ Client.prototype.sendICECandidate = function (candidate) {
     }
 };
 
-Client.prototype.answerCall = function (room, onCall, onCallEnded) {
+Client.prototype.answerCall = function (room, stream, onAddStream) {
     if (this.socket != null) {
         this.socket.emit('createOrJoinRoom', room);
+        this.stream = stream;
+        this.onAddStreamCallback = onAddStream;
     }
 };
 
-Client.prototype.requestCall = function (onCall, onCallEnded) {
+Client.prototype.requestCall = function (stream, onAddStream) {
     if (this.socket != null) {
         this.socket.emit('createOrJoinRoom', null);
+        this.stream = stream;
+        this.onAddStreamCallback = onAddStream;
     }
 };
 

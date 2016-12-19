@@ -6,7 +6,9 @@ var ChatContent = React.createClass({
         return {
             isVisible: true,
             isCalling: false,
-            pendingCalls: []
+            pendingCalls: [],
+            ownStream: '',
+            guestStream: ''
         };
     },
 
@@ -30,16 +32,26 @@ var ChatContent = React.createClass({
         });
     },
 
+    streamCall: function (stream) {
+        this.setState({
+            guestStream: URL.createObjectURL(stream)
+        })
+    },
+
     answerCall: function (event) {
         var roomID = event.target.dataset.room;
-        this.props.onAnswerCall(roomID, 
-            function onCall() {
-
-            },
-            function onCallEnded() {
-
-            }
-        );
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        }).then(function (stream) {
+            this.setState({
+                isCalling: true,
+                ownStream: URL.createObjectURL(stream)
+            });
+            this.props.onAnswerCall(roomID, stream, this.streamCall);
+        }.bind(this)).catch(function (error) {
+            console.log(error);
+        });
     },
 
     declineCall: function (event) {
@@ -75,13 +87,23 @@ var ChatContent = React.createClass({
                         <h1 className="display-1 m-l-1">Chat</h1>
                     </div>
                 </div>
-                <div className="row flex-items-xs-center">
-                    {this.state.isCalling ?
-                        <div className="col-xs-6">
-                            <video>
-                            </video>
+                {this.state.isCalling ?
+                    <div>
+                        <div className="row flex-items-xs-center">
+                            <div className="col-xs-6">
+                                <div className="embed-responsive embed-responsive-16by9">
+                                    <video autoPlay id="webcam" src={this.state.guestStream}/>
+                                </div>
+                            </div>
+                            <div className="col-xs-4">
+                                <div className="embed-responsive embed-responsive-16by9"> 
+                                    <video autoPlay id="webcam-self" src={this.state.ownStream}/>
+                                </div>
+                            </div>
                         </div>
-                        :
+                    </div>
+                    :
+                    <div className="row flex-items-xs-center">
                         <div className="col-xs-8">
                             <table className="table table-striped table-hover">
                                 <thead>
@@ -98,8 +120,8 @@ var ChatContent = React.createClass({
                                 </tbody>
                             </table>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
             :
             null

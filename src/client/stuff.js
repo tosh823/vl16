@@ -50,8 +50,7 @@ Stuff.prototype.interact = function () {
             this.library.setStandardViewCallbacks();
         }.bind(this),
         onMakeCall: function () {
-            this.library.app.ws.requestCall();
-            //this.makeCall(document.getElementById('webcam'));
+            this.makeCall(document.getElementById('webcam'));
         }.bind(this)
     }), document.getElementById('ui_modal'));
     this.stuffDialog.show();
@@ -63,44 +62,33 @@ Stuff.prototype.update = function (delta, time) {
 
 Stuff.prototype.makeCall = function (video) {
     this.display.material.visible = true;
-    navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
-    navigator.getMedia(
-        {
-            video: true,
-            audio: false
-        },
-        function (stream) {
-            // Render webcam video to panel
-            var texture = new THREE.VideoTexture(video);
-            texture.minFilter = THREE.LinearFilter;
-            texture.magFilter = THREE.LinearFilter;
-            texture.format = THREE.RGBFormat;
-            this.display.material = new THREE.MeshLambertMaterial({
-                map: texture,
-                color: 0xffffff
-            });
-            this.stream = stream;
-            // Close modal
-            this.stuffDialog.hide(false);
-            // Look at display
-            this.library.avatar.lookAt(this.display);
-            // Set streaming
-            if (navigator.mozGetUserMedia) {
-                video.mozSrcObject = stream;
-            }
-            else {
-                var vendorURL = window.URL || window.webkitURL;
-                video.src = vendorURL.createObjectURL(stream);
-            }
-            this.charOnKeyDownInstance = this.chatOnKeyDown.bind(this);
-            window.addEventListener('keydown', this.charOnKeyDownInstance, false);
-            video.play();
-        }.bind(this),
-        function (err) {
-            console.log("An error occured! " + err);
-            if (this.charOnKeyDownInstance != null) window.removeEventListener('keydown', this.charOnKeyDownInstance, false);
-        }
-    );
+    navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+    }).then(function (stream) {
+        this.library.app.ws.requestCall(stream);
+        // Render webcam video to panel
+        var texture = new THREE.VideoTexture(video);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.format = THREE.RGBFormat;
+        this.display.material = new THREE.MeshLambertMaterial({
+            map: texture,
+            color: 0xffffff
+        });
+        this.stream = stream;
+        // Close modal
+        this.stuffDialog.hide(false);
+        // Look at display
+        this.library.avatar.lookAt(this.display);
+        // Set streaming
+        video.srcObject = stream;
+        this.charOnKeyDownInstance = this.chatOnKeyDown.bind(this);
+        window.addEventListener('keydown', this.charOnKeyDownInstance, false);
+        video.play();
+    }.bind(this)).catch(function (error) {
+        if (this.charOnKeyDownInstance != null) window.removeEventListener('keydown', this.charOnKeyDownInstance, false);
+    }.bind(this));
 };
 
 Stuff.prototype.chatOnKeyDown = function (event) {
