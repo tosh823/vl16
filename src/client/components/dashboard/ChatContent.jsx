@@ -7,6 +7,7 @@ var ChatContent = React.createClass({
             isVisible: true,
             isCalling: false,
             pendingCalls: [],
+            currentRoomID: null,
             ownStream: '',
             guestStream: ''
         };
@@ -46,6 +47,7 @@ var ChatContent = React.createClass({
         }).then(function (stream) {
             this.setState({
                 isCalling: true,
+                currentRoomID: roomID,
                 ownStream: URL.createObjectURL(stream)
             });
             this.props.onAnswerCall(roomID, stream, this.streamCall);
@@ -66,12 +68,12 @@ var ChatContent = React.createClass({
                 <td>{call.user}</td>
                 <td>{call.createdTime}</td>
                 <td>
-                    <button type="button" className="btn btn-success" data-room={call.roomID} onClick={this.answerCall}>
+                    <button type="button" className="btn btn-success btn-sm" data-room={call.roomID} onClick={this.answerCall}>
                         <i className="fa fa-phone" aria-hidden="true"></i>
                     </button>
                 </td>
                 <td>
-                    <button type="button" className="btn btn-danger" data-room={call.roomID} onClick={this.declineCall}>
+                    <button type="button" className="btn btn-danger btn-sm" data-room={call.roomID} onClick={this.declineCall}>
                         <i className="fa fa-times" aria-hidden="true"></i>
                     </button>
                 </td>
@@ -88,18 +90,19 @@ var ChatContent = React.createClass({
                     </div>
                 </div>
                 {this.state.isCalling ?
-                    <div>
-                        <div className="row flex-items-xs-center">
-                            <div className="col-xs-6">
-                                <div className="embed-responsive embed-responsive-16by9">
-                                    <video autoPlay id="webcam" src={this.state.guestStream}/>
-                                </div>
+                    <div className="row flex-items-xs-center">
+                        <div className="col-xs-5 flex-xs-top text-xs-center">
+                            <p className="h4">Client</p>
+                            <div className="embed-responsive embed-responsive-16by9">
+                                <video autoPlay id="webcam" src={this.state.guestStream} />
                             </div>
-                            <div className="col-xs-4">
-                                <div className="embed-responsive embed-responsive-16by9"> 
-                                    <video autoPlay id="webcam-self" src={this.state.ownStream}/>
-                                </div>
+                        </div>
+                        <div className="col-xs-3 flex-xs-top text-xs-center">
+                            <p className="h4">Own</p>
+                            <div className="embed-responsive embed-responsive-16by9">
+                                <video autoPlay id="webcam-self" src={this.state.ownStream} />
                             </div>
+                            <button type="button" className="btn btn-outline-danger m-t-1" data-room={this.state.currentRoomID} onClick={this.declineCall}>Decline</button>
                         </div>
                     </div>
                     :
@@ -119,6 +122,11 @@ var ChatContent = React.createClass({
                                     {this.state.pendingCalls.map(this.renderTableRow)}
                                 </tbody>
                             </table>
+                            {this.state.pendingCalls.length == 0 ?
+                                <p className="text-xs-center">There are no call requests at the moment.</p>
+                                :
+                                null
+                            }
                         </div>
                     </div>
                 }

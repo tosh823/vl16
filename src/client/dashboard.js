@@ -3,6 +3,7 @@ var ReactDOM = require('react-dom');
 var Client = require('./wsClient');
 var HomeContent = require('./components/dashboard/HomeContent.jsx');
 var ChatContent = require('./components/dashboard/ChatContent.jsx');
+var UsersContent = require('./components/dashboard/UsersContent.jsx');
 
 function Dashboard() {
     this.users = {};
@@ -32,6 +33,7 @@ Dashboard.prototype.start = function () {
     this.ws.socket.on('userJoined', function (data) {
         this.users[data.socketID] = data.userData;
         if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
+        if (this.people != null) this.people.updateUsers(this.users);
     }.bind(this));
 
     this.ws.socket.on('adminJoined', function (data) {
@@ -42,6 +44,7 @@ Dashboard.prototype.start = function () {
     this.ws.socket.on('userLeft', function(data) {
         delete this.users[data.socketID];
         if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
+        if (this.people != null) this.people.updateUsers(this.users);
     }.bind(this));
 
     this.ws.socket.on('adminLeft', function(data) {
@@ -51,6 +54,7 @@ Dashboard.prototype.start = function () {
 
     this.ws.socket.on('userUpdated', function (data) {
         this.users[data.socketID] = data.userData;
+        if (this.people != null) this.people.updateUsers(this.users);
     }.bind(this));
 
     this.ws.socket.on('users', function(data) {
@@ -95,6 +99,12 @@ Dashboard.prototype.renderChat = function() {
     }), document.getElementById('ui'));
 };
 
+Dashboard.prototype.renderUsers = function() {
+    ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+    this.people = ReactDOM.render(React.createElement(UsersContent), document.getElementById('ui'));
+    this.people.updateUsers(this.users);
+};
+
 var instance = new Dashboard();
 instance.start();
 
@@ -107,7 +117,7 @@ $('#home').click(function(e) {
 });
 
 $('#users').click(function(e) {
-    
+    instance.renderUsers();
 });
 
 $('#chat').click(function(e) {
