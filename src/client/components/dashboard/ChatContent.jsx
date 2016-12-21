@@ -13,10 +13,20 @@ var ChatContent = React.createClass({
         };
     },
 
-    getDefaultProps: function () {
-        return {
+    stream: null,
 
-        };
+    _isMounted: false,
+
+    componentDidMount: function() {
+        this._isMounted = true;
+    },
+
+    componentWillUnmount: function() {
+        this._isMounted = false;
+    },
+
+    elementMounted: function() {
+        return this._isMounted;
     },
 
     addRoom: function (room) {
@@ -45,6 +55,7 @@ var ChatContent = React.createClass({
             video: true,
             audio: true
         }).then(function (stream) {
+            this.stream = stream;
             this.setState({
                 isCalling: true,
                 currentRoomID: roomID,
@@ -58,7 +69,14 @@ var ChatContent = React.createClass({
 
     declineCall: function (event) {
         var roomID = event.target.dataset.room;
+        if (this.stream != null) this.stream.stop();
         this.props.onDeclineCall(roomID);
+        this.setState({
+            isCalling: false,
+            currentRoomID: null,
+            ownStream: '',
+            guestStream: ''
+        });
     },
 
     renderTableRow: function (call, index) {
@@ -92,7 +110,7 @@ var ChatContent = React.createClass({
                 {this.state.isCalling ?
                     <div className="row flex-items-xs-center">
                         <div className="col-xs-5 flex-xs-top text-xs-center">
-                            <p className="h4">Client</p>
+                            <p className="h4">Client</p>``
                             <div className="embed-responsive embed-responsive-16by9">
                                 <video autoPlay id="webcam" src={this.state.guestStream} />
                             </div>

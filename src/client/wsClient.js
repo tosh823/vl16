@@ -27,6 +27,9 @@ Client.prototype._createRTCPeerConnection = function () {
     this.peerConnection.onaddstream = function (data) {
         if (this.onAddStreamCallback != null) this.onAddStreamCallback(data.stream);
     }.bind(this);
+    this.peerConnection.onremovestream = function (data) {
+        if (this.onRemoveStreamCallback != null) this.onRemoveStreamCallback(data.stream);
+    }.bind(this);
     if (this.isCallInitializer) this._createOffer();
 };
 
@@ -85,7 +88,12 @@ Client.prototype.connect = function () {
         this.room = roomID;
         this.isCallInitializer = true;
     }.bind(this));
-
+    this.socket.on('leftRoom', function() {
+        // Reset all
+        this.room = null;
+        this.isCallInitializer = false;
+        this.peerConnection.close();
+    }.bind(this));
     // RTC
     this.socket.on('sdpReceived', function (sdp) {
         this._onSDPReceived(new RTCSessionDescription(sdp));
@@ -161,30 +169,39 @@ Client.prototype.sendICECandidate = function (candidate) {
     }
 };
 
-Client.prototype.answerCall = function (room, stream, onAddStream) {
+Client.prototype.answerCall = function (room, stream, onAddStream, onRemoveStream) {
     if (this.socket != null) {
         this.socket.emit('createOrJoinRoom', room);
         this.stream = stream;
         this.onAddStreamCallback = onAddStream;
+        this.onRemoveStreamCallback = onRemoveStream;
     }
 };
 
-Client.prototype.requestCall = function (stream, onAddStream) {
+Client.prototype.requestCall = function (stream, onAddStream, onRemoveStream) {
     if (this.socket != null) {
         this.socket.emit('createOrJoinRoom', null);
         this.stream = stream;
         this.onAddStreamCallback = onAddStream;
+        this.onRemoveStreamCallback = onRemoveStream;
     }
 };
 
 Client.prototype.declineCall = function (room) {
     if (this.socket != null) {
-        this.socket.emit('kickRoom', room);
+        // Destroy room
+        this.socket.emit('destroyRoom', room);
     }
 };
 
 Client.prototype.stopCall = function () {
-
+    if (this.socket != null && this.room != null) {
+        // Leave room
+        this.socket.emit('leaveRoom', this.room);
+        this.room = null;
+        this.isCallInitializer = false;
+        if (this.peerConnection != null) this.peerConnection.close(); 
+    }
 };
 
 module.exports = Client;

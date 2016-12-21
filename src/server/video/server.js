@@ -124,6 +124,45 @@ io.on('connection', function (socket) {
         }
     });
 
+    socket.on('leaveRoom', function(room) {
+        var time = new Date().toLocaleString();
+        console.log(time + ': Received request from socket [' + socket.id + '] to leave room [' + room + ']');
+        socket.leave(room);
+        socket.broadcast.to(room).emit('leftRoom');
+        // Checking if it is empty
+        var existingRoom = io.sockets.adapter.rooms[room];
+        if (existingRoom && existingRoom.length == 0) {
+            Object.keys(session.admins).map(function (adminID) {
+                io.to(adminID).emit('roomDestroyed', {
+                    roomID: room,
+                    destroyedTime: time
+                });
+            });
+        }
+    });
+
+    socket.on('destroyRoom', function(room) {
+        var time = new Date().toLocaleString();
+        console.log(time + ': Received request from socket [' + socket.id + '] to destroy room [' + room + ']');
+        var existingRoom = io.sockets.adapter.rooms[room];
+        if (existingRoom) {
+            var copy = existingRoom.sockets;
+            for (var socketID in copy) {
+                io.of('/').connected[socketID].leave(room);
+                io.to(socketID).emit('leftRoom');
+            }
+            Object.keys(session.admins).map(function (adminID) {
+                io.to(adminID).emit('roomDestroyed', {
+                    roomID: room,
+                    destroyedTime: time
+                });
+            });
+        }
+        else {
+            console.log(time + ': Room [' + room + '] does not exist.');
+        }
+    });
+
     socket.on('disconnect', function () {
         if (session.users[socket.id] != null) {
             delete session.users[socket.id];

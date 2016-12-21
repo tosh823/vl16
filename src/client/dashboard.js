@@ -32,43 +32,43 @@ Dashboard.prototype.start = function () {
     this.ws.connect();
     this.ws.socket.on('userJoined', function (data) {
         this.users[data.socketID] = data.userData;
-        if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
-        if (this.people != null) this.people.updateUsers(this.users);
+        if (this.home != null && this.home.elementMounted()) this.home.updateUsers(Object.keys(this.users).length);
+        if (this.people != null && this.people.elementMounted()) this.people.updateUsers(this.users);
     }.bind(this));
 
     this.ws.socket.on('adminJoined', function (data) {
         this.admins[data.socketID] = data.adminData;
-        if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
+        if (this.home != null && this.home.elementMounted()) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
 
     this.ws.socket.on('userLeft', function(data) {
         delete this.users[data.socketID];
-        if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
-        if (this.people != null) this.people.updateUsers(this.users);
+        if (this.home != null && this.home.elementMounted()) this.home.updateUsers(Object.keys(this.users).length);
+        if (this.people != null && this.people.elementMounted()) this.people.updateUsers(this.users);
     }.bind(this));
 
     this.ws.socket.on('adminLeft', function(data) {
         delete this.admins[data.socketID];
-        if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
+        if (this.home != null && this.home.elementMounted()) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
 
     this.ws.socket.on('userUpdated', function (data) {
         this.users[data.socketID] = data.userData;
-        if (this.people != null) this.people.updateUsers(this.users);
+        if (this.people != null && this.people.elementMounted()) this.people.updateUsers(this.users);
     }.bind(this));
 
     this.ws.socket.on('users', function(data) {
         for (var key in data) {
             this.users[key] = data[key];
         }
-        if (this.home != null) this.home.updateUsers(Object.keys(this.users).length);
+        if (this.home != null && this.home.elementMounted()) this.home.updateUsers(Object.keys(this.users).length);
     }.bind(this));
 
     this.ws.socket.on('admins', function(data) {
         for (var key in data) {
             this.admins[key] = data[key];
         }
-        if (this.home != null) this.home.updateAdmins(Object.keys(this.admins).length);
+        if (this.home != null && this.home.elementMounted()) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
 
     this.ws.socket.on('roomCreated', function(data) {
@@ -78,7 +78,16 @@ Dashboard.prototype.start = function () {
             user: data.socketID
         };
         this.rooms.push(newRoom);
-        if (this.chat != null) this.chat.updateRooms(this.rooms);
+        if (this.chat != null && this.chat.elementMounted()) this.chat.updateRooms(this.rooms);
+    }.bind(this));
+
+    this.ws.socket.on('roomDestroyed', function(data) {
+        console.log('Room destroyed.');
+        var index = this.rooms.findIndex(function(element) {
+            if (element.roomID == data.roomID) return true;
+        });
+        this.rooms.splice(index, 1);
+        if (this.chat != null && this.chat.elementMounted()) this.chat.updateRooms(this.rooms);
     }.bind(this));
 
     this.renderHome();

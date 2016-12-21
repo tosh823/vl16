@@ -7,8 +7,22 @@ var HomeContent = React.createClass({
         return {
             isVisible: true,
             userCount: 0,
-            adminCount: 0
+            adminCount: 1
         };
+    },
+
+    _isMounted: false,
+
+    componentDidMount: function() {
+        this._isMounted = true;
+    },
+
+    componentWillUnmount: function() {
+        this._isMounted = false;
+    },
+
+    elementMounted: function() {
+        return this._isMounted;
     },
 
     updateUsers: function(userCount) {

@@ -9,6 +9,20 @@ var UsersContent = React.createClass({
         };
     },
 
+    _isMounted: false,
+
+    componentDidMount: function() {
+        this._isMounted = true;
+    },
+
+    componentWillUnmount: function() {
+        this._isMounted = false;
+    },
+
+    elementMounted: function() {
+        return this._isMounted;
+    },
+
     updateUsers: function(users) {
         var output = [];
         for (var id in users) {

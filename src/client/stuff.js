@@ -94,6 +94,7 @@ Stuff.prototype.makeCall = function (video) {
 Stuff.prototype.chatOnKeyDown = function (event) {
     if (event.key == 'Escape') {
         // Reset panel material
+        this.library.app.ws.stopCall();
         var planeMaterial = new THREE.MeshBasicMaterial({
             color: 0x4286f4,
             transparent: true,
