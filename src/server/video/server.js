@@ -7,7 +7,8 @@ var hashids = new Hashids();
 var PORT = 3333;
 var session = {
     users: {},
-    admins: {}
+    admins: {},
+    rooms: {}
 };
 
 function handler(req, res) {
@@ -73,6 +74,10 @@ io.on('connection', function (socket) {
         io.to(socket.id).emit('admins', session.admins);
     });
 
+    socket.on('requestRooms', function (payload) {
+        io.to(socket.id).emit('rooms', session.rooms);
+    });
+
     socket.on('sdp', function (data) {
         socket.broadcast.to(data.room).emit('sdpReceived', data.sdp);
     });
@@ -102,12 +107,16 @@ io.on('connection', function (socket) {
         if (clients == 0) {
             socket.join(roomID);
             io.to(roomID).emit('emptyRoom', roomID);
+            session.rooms[roomID] = {
+                creator: socket.id,
+                createdTime: time
+            };
             console.log(time + ': Socket [' + socket.id + '] joined empty room [' + roomID + '].');
             Object.keys(session.admins).map(function (adminID) {
                 var socketID = socket.id;
                 io.to(adminID).emit('roomCreated', {
                     roomID: roomID,
-                    socketID: socket.id,
+                    creator: socket.id,
                     createdTime: time
                 });
             });
@@ -124,24 +133,22 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on('leaveRoom', function(room) {
+    socket.on('leaveRoom', function (room) {
         var time = new Date().toLocaleString();
         console.log(time + ': Received request from socket [' + socket.id + '] to leave room [' + room + ']');
         socket.leave(room);
         socket.broadcast.to(room).emit('leftRoom');
-        // Checking if it is empty
-        var existingRoom = io.sockets.adapter.rooms[room];
-        if (existingRoom && existingRoom.length == 0) {
-            Object.keys(session.admins).map(function (adminID) {
-                io.to(adminID).emit('roomDestroyed', {
-                    roomID: room,
-                    destroyedTime: time
-                });
+
+        delete session.rooms[room];
+        Object.keys(session.admins).map(function (adminID) {
+            io.to(adminID).emit('roomDestroyed', {
+                roomID: room,
+                destroyedTime: time
             });
-        }
+        });
     });
 
-    socket.on('destroyRoom', function(room) {
+    socket.on('destroyRoom', function (room) {
         var time = new Date().toLocaleString();
         console.log(time + ': Received request from socket [' + socket.id + '] to destroy room [' + room + ']');
         var existingRoom = io.sockets.adapter.rooms[room];
@@ -151,6 +158,7 @@ io.on('connection', function (socket) {
                 io.of('/').connected[socketID].leave(room);
                 io.to(socketID).emit('leftRoom');
             }
+            delete session.rooms[room];
             Object.keys(session.admins).map(function (adminID) {
                 io.to(adminID).emit('roomDestroyed', {
                     roomID: room,

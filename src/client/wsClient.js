@@ -92,7 +92,8 @@ Client.prototype.connect = function () {
         // Reset all
         this.room = null;
         this.isCallInitializer = false;
-        this.peerConnection.close();
+        if (this.peerConnection != null) this.peerConnection.close();
+        if (this.onCallEndCallback != null) this.onCallEndCallback();
     }.bind(this));
     // RTC
     this.socket.on('sdpReceived', function (sdp) {
@@ -135,6 +136,12 @@ Client.prototype.requestAdmins = function () {
     }
 };
 
+Client.prototype.requestRooms = function () {
+    if (this.socket != null) {
+        this.socket.emit('requestRooms');
+    }
+};
+
 Client.prototype.joinAsUser = function (callback) {
     if (this.socket != null) {
         this.socket.emit('newUser', {
@@ -169,21 +176,23 @@ Client.prototype.sendICECandidate = function (candidate) {
     }
 };
 
-Client.prototype.answerCall = function (room, stream, onAddStream, onRemoveStream) {
+Client.prototype.answerCall = function (room, stream, onAddStream, onRemoveStream, onCallEnd) {
     if (this.socket != null) {
         this.socket.emit('createOrJoinRoom', room);
         this.stream = stream;
         this.onAddStreamCallback = onAddStream;
         this.onRemoveStreamCallback = onRemoveStream;
+        this.onCallEndCallback = onCallEnd;
     }
 };
 
-Client.prototype.requestCall = function (stream, onAddStream, onRemoveStream) {
+Client.prototype.requestCall = function (stream, onAddStream, onRemoveStream, onCallEnd) {
     if (this.socket != null) {
         this.socket.emit('createOrJoinRoom', null);
         this.stream = stream;
         this.onAddStreamCallback = onAddStream;
         this.onRemoveStreamCallback = onRemoveStream;
+        this.onCallEndCallback = onCallEnd;
     }
 };
 

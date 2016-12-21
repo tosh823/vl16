@@ -66,7 +66,6 @@ Stuff.prototype.makeCall = function (video) {
         video: true,
         audio: true
     }).then(function (stream) {
-        this.library.app.ws.requestCall(stream);
         // Render webcam video to panel
         var texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
@@ -82,34 +81,40 @@ Stuff.prototype.makeCall = function (video) {
         // Look at display
         this.library.avatar.lookAt(this.display);
         // Set streaming
-        video.srcObject = stream;
+        this.library.app.ws.requestCall(stream, function (stuff) {
+            video.srcObject = stuff;
+            video.play();
+        }.bind(this), null, this.stopCall.bind(this));
         this.charOnKeyDownInstance = this.chatOnKeyDown.bind(this);
         window.addEventListener('keydown', this.charOnKeyDownInstance, false);
-        video.play();
     }.bind(this)).catch(function (error) {
         if (this.charOnKeyDownInstance != null) window.removeEventListener('keydown', this.charOnKeyDownInstance, false);
     }.bind(this));
 };
 
 Stuff.prototype.chatOnKeyDown = function (event) {
-    if (event.key == 'Escape') {
-        // Reset panel material
-        this.library.app.ws.stopCall();
-        var planeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x4286f4,
-            transparent: true,
-            opacity: 0.5,
-            visible: false
-        });
-        this.display.material = planeMaterial;
-        // Stop the stream
-        this.stream.stop();
-        // Entering point lock
-        this.library.canvas.enterPointerLock(null);
-        this.library.avatar.enableFirstPersonControl();
-        this.library.avatar.lookAt(this.display);
-        this.library.setStandardViewCallbacks();
-    }
+    if (event.key == 'Escape') this.stopCall();
+};
+
+Stuff.prototype.stopCall = function () {
+    // Reset panel material
+    this.library.app.ws.stopCall();
+    var planeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x4286f4,
+        transparent: true,
+        opacity: 0.5,
+        visible: false
+    });
+    this.display.material = planeMaterial;
+    // Stop the stream
+    this.stream.stop();
+    // Entering point lock
+    this.library.canvas.enterPointerLock(null);
+    this.library.avatar.enableFirstPersonControl();
+    this.library.avatar.lookAt(this.display);
+    this.library.setStandardViewCallbacks();
+    // Remove ESC listener
+    window.removeEventListener('keydown', this.charOnKeyDownInstance, false);
 };
 
 module.exports = Stuff;

@@ -6,10 +6,16 @@ var ChatContent = React.createClass({
         return {
             isVisible: true,
             isCalling: false,
-            pendingCalls: [],
+            pendingCalls: this.props.rooms,
             currentRoomID: null,
             ownStream: '',
             guestStream: ''
+        };
+    },
+
+    getDefaultProps: function() {
+        return {
+            rooms: [],
         };
     },
 
@@ -46,7 +52,17 @@ var ChatContent = React.createClass({
     streamCall: function (stream) {
         this.setState({
             guestStream: URL.createObjectURL(stream)
-        })
+        });
+    },
+
+    stopCall: function() {
+        if (this.stream != null) this.stream.stop();
+        this.setState({
+            isCalling: false,
+            currentRoomID: null,
+            ownStream: '',
+            guestStream: ''
+        });
     },
 
     answerCall: function (event) {
@@ -61,7 +77,7 @@ var ChatContent = React.createClass({
                 currentRoomID: roomID,
                 ownStream: URL.createObjectURL(stream)
             });
-            this.props.onAnswerCall(roomID, stream, this.streamCall);
+            this.props.onAnswerCall(roomID, stream, this.streamCall, null, this.stopCall);
         }.bind(this)).catch(function (error) {
             console.log(error);
         });
@@ -83,7 +99,7 @@ var ChatContent = React.createClass({
         return (
             <tr key={index}>
                 <th scope="row">{index + 1}</th>
-                <td>{call.user}</td>
+                <td>{call.creator}</td>
                 <td>{call.createdTime}</td>
                 <td>
                     <button type="button" className="btn btn-success btn-sm" data-room={call.roomID} onClick={this.answerCall}>

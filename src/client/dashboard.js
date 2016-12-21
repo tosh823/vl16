@@ -41,13 +41,13 @@ Dashboard.prototype.start = function () {
         if (this.home != null && this.home.elementMounted()) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
 
-    this.ws.socket.on('userLeft', function(data) {
+    this.ws.socket.on('userLeft', function (data) {
         delete this.users[data.socketID];
         if (this.home != null && this.home.elementMounted()) this.home.updateUsers(Object.keys(this.users).length);
         if (this.people != null && this.people.elementMounted()) this.people.updateUsers(this.users);
     }.bind(this));
 
-    this.ws.socket.on('adminLeft', function(data) {
+    this.ws.socket.on('adminLeft', function (data) {
         delete this.admins[data.socketID];
         if (this.home != null && this.home.elementMounted()) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
@@ -57,36 +57,48 @@ Dashboard.prototype.start = function () {
         if (this.people != null && this.people.elementMounted()) this.people.updateUsers(this.users);
     }.bind(this));
 
-    this.ws.socket.on('users', function(data) {
+    this.ws.socket.on('users', function (data) {
         for (var key in data) {
             this.users[key] = data[key];
         }
         if (this.home != null && this.home.elementMounted()) this.home.updateUsers(Object.keys(this.users).length);
     }.bind(this));
 
-    this.ws.socket.on('admins', function(data) {
+    this.ws.socket.on('rooms', function (data) {
+        for (var key in data) {
+            this.rooms.push({
+                roomID: key,
+                createdTime: data[key].createdTime,
+                creator: data[key].creator
+            });
+        }
+        if (this.chat != null && this.chat.elementMounted()) this.chat.updateRooms(this.rooms);
+    }.bind(this));
+
+    this.ws.socket.on('admins', function (data) {
         for (var key in data) {
             this.admins[key] = data[key];
         }
         if (this.home != null && this.home.elementMounted()) this.home.updateAdmins(Object.keys(this.admins).length);
     }.bind(this));
 
-    this.ws.socket.on('roomCreated', function(data) {
+    this.ws.socket.on('roomCreated', function (data) {
         var newRoom = {
             roomID: data.roomID,
             createdTime: data.createdTime,
-            user: data.socketID
+            creator: data.creator
         };
         this.rooms.push(newRoom);
         if (this.chat != null && this.chat.elementMounted()) this.chat.updateRooms(this.rooms);
     }.bind(this));
 
-    this.ws.socket.on('roomDestroyed', function(data) {
-        console.log('Room destroyed.');
-        var index = this.rooms.findIndex(function(element) {
+    this.ws.socket.on('roomDestroyed', function (data) {
+        console.log(this.rooms);
+        var index = this.rooms.findIndex(function (element) {
             if (element.roomID == data.roomID) return true;
         });
         this.rooms.splice(index, 1);
+        console.log(this.rooms);
         if (this.chat != null && this.chat.elementMounted()) this.chat.updateRooms(this.rooms);
     }.bind(this));
 
@@ -98,17 +110,19 @@ Dashboard.prototype.renderHome = function () {
     this.home = ReactDOM.render(React.createElement(HomeContent), document.getElementById('ui'));
     this.ws.requestUsers();
     this.ws.requestAdmins();
+    this.ws.requestRooms();
 };
 
-Dashboard.prototype.renderChat = function() {
+Dashboard.prototype.renderChat = function () {
     ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
     this.chat = ReactDOM.render(React.createElement(ChatContent, {
+        rooms: this.rooms,
         onAnswerCall: this.ws.answerCall.bind(this.ws),
         onDeclineCall: this.ws.declineCall.bind(this.ws)
     }), document.getElementById('ui'));
 };
 
-Dashboard.prototype.renderUsers = function() {
+Dashboard.prototype.renderUsers = function () {
     ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
     this.people = ReactDOM.render(React.createElement(UsersContent), document.getElementById('ui'));
     this.people.updateUsers(this.users);
@@ -117,23 +131,23 @@ Dashboard.prototype.renderUsers = function() {
 var instance = new Dashboard();
 instance.start();
 
-$('#brand').click(function(e) {
+$('#brand').click(function (e) {
     instance.renderHome();
 });
 
-$('#home').click(function(e) {
+$('#home').click(function (e) {
     instance.renderHome();
 });
 
-$('#users').click(function(e) {
+$('#users').click(function (e) {
     instance.renderUsers();
 });
 
-$('#chat').click(function(e) {
+$('#chat').click(function (e) {
     instance.renderChat();
 });
 
-$('#settings').click(function(e) {
+$('#settings').click(function (e) {
 
 });
 
