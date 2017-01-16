@@ -168,7 +168,7 @@ var SearchPanel = React.createClass({
                                                     }
                                                 </div>
                                                 <div className="col-xs-9">
-                                                    <p className="h4"><strong>{this.state.pathMessage}</strong></p>
+                                                    <p className="h5">{this.state.pathMessage}</p>
                                                 </div>
                                             </div>
                                         </div>
