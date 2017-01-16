@@ -103,7 +103,7 @@ var NavBar = React.createClass({
                         <a className="nav-link" type="button" onClick={this.onNavigationClick}>Navigation</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" type="button" onClick={this.onModeClick}>Mode</a>
+                        <a className="nav-link" type="button" onClick={this.onModeClick}>Camera</a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link" type="button" onClick={this.onAboutClick}>About</a>
