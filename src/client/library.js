@@ -270,11 +270,18 @@ Library.prototype.configureEnvironment = function () {
 
 Library.prototype.configureInteractiveObjects = function () {
     // Find stuff bar to make it interactable
-    var stuffBar = this.scene.getObjectByName("LibraryStuffBar1");
-    if (stuffBar != null) {
-        var stuffObject = new Stuff(this, new THREE.Vector3(stuffBar.position.x, stuffBar.position.y, stuffBar.position.z), stuffBar);
-        stuffBar.parent.add(stuffObject);
-        this.interactable.push(stuffObject.body);
+    // TODO: Make it less hard-coded, for example, use config files
+    var stuffBars = [];
+    stuffBars.push(this.scene.getObjectByName("LibraryStuffBar1"));
+    stuffBars.push(this.scene.getObjectByName("LibraryStuffBar2"));
+    stuffBars.push(this.scene.getObjectByName("LibraryStuffBar3"));
+    for (var i = 0; i < stuffBars.length; i++) {
+        var stuffBar = stuffBars[i];
+        if (stuffBar != null) {
+            var stuffObject = new Stuff(this, new THREE.Vector3(stuffBar.position.x, stuffBar.position.y, stuffBar.position.z), stuffBar);
+            stuffBar.parent.add(stuffObject);
+            this.interactable.push(stuffObject.body);
+        }
     }
     // Create Warp to different dimension (other library)
     var warpPoint = this.scene.getObjectByName('WarpPoint');

@@ -5,7 +5,7 @@ var StuffDialog = React.createClass({
     getInitialState: function () {
         return {
             isVisible: false,
-            desciptionText: "Here is some test description"
+            desciptionText: "Here you can call someone from library stuff. Press Call button and wait a bit for your turn. If you want to end call, press ESC."
         };
     },
 
@@ -20,16 +20,20 @@ var StuffDialog = React.createClass({
         $('#modalDialog').modal('show');
     },
 
-    submit: function(event) {
-        this.props.onMakeCall();
-    },
-
-    hide: function(withCallback = true) {
+    submit: function (event) {
         $('#modalDialog').modal('hide');
         this.setState({
             isVisible: false
         });
-        if (withCallback) this.props.onClose();
+        this.props.onMakeCall();
+    },
+
+    close: function () {
+        $('#modalDialog').modal('hide');
+        this.setState({
+            isVisible: false
+        });
+        this.props.onClose();
     },
 
     render: function () {
@@ -38,7 +42,7 @@ var StuffDialog = React.createClass({
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.hide}>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.close}>
                                 <span aria-hidden="true">&times; </span>
                             </button>
                             <h4 className="modal-title">Service Point</h4>
@@ -47,12 +51,12 @@ var StuffDialog = React.createClass({
                             <p>{this.state.desciptionText}</p>
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.hide}>Close</button>
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.close}>Close</button>
                             <button type="button" className="btn btn-primary" onClick={this.submit}>Call</button>
                         </div>
                     </div>
                 </div>
-            </div> 
+            </div>
             : null
         );
     }

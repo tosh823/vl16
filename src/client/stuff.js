@@ -46,7 +46,6 @@ Stuff.prototype.interact = function () {
         onClose: function () {
             this.library.canvas.enterPointerLock(null);
             this.library.avatar.enableFirstPersonControl();
-            this.library.avatar.lookAt(this.display);
             this.library.setStandardViewCallbacks();
         }.bind(this),
         onMakeCall: function () {
@@ -76,8 +75,6 @@ Stuff.prototype.makeCall = function (video) {
             color: 0xffffff
         });
         this.stream = stream;
-        // Close modal
-        this.stuffDialog.hide(false);
         // Look at display
         this.library.avatar.lookAt(this.display);
         // Set streaming
@@ -97,8 +94,13 @@ Stuff.prototype.chatOnKeyDown = function (event) {
 };
 
 Stuff.prototype.stopCall = function () {
+    // Stop the stream
+    this.stream.stop();
     // Reset panel material
     this.library.app.ws.stopCall();
+    // Remove ESC listener
+    window.removeEventListener('keydown', this.charOnKeyDownInstance, false);
+    // Hide display
     var planeMaterial = new THREE.MeshBasicMaterial({
         color: 0x4286f4,
         transparent: true,
@@ -106,15 +108,10 @@ Stuff.prototype.stopCall = function () {
         visible: false
     });
     this.display.material = planeMaterial;
-    // Stop the stream
-    this.stream.stop();
     // Entering point lock
-    this.library.canvas.enterPointerLock(null);
     this.library.avatar.enableFirstPersonControl();
-    this.library.avatar.lookAt(this.display);
+    this.library.canvas.enterPointerLock(null);
     this.library.setStandardViewCallbacks();
-    // Remove ESC listener
-    window.removeEventListener('keydown', this.charOnKeyDownInstance, false);
 };
 
 module.exports = Stuff;
