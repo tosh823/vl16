@@ -87,6 +87,7 @@ App.prototype.renderSearchPanel = function (query) {
 App.prototype.renderLoginPanel = function () {
   ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
   ReactDOM.render(React.createElement(LoginDialog, {
+    tundra: false,
     onConnect: this.vl.onConnectedToServer.bind(this.vl),
     onError: this.vl.onConnectionError.bind(this.vl),
     onDisconnect: this.vl.onDisconnectedFromServer.bind(this.vl)

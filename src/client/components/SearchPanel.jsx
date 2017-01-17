@@ -91,7 +91,8 @@ var SearchPanel = React.createClass({
         this.setState({
             renderSearch: true,
             renderBack: false,
-            pathMessage: ''
+            pathMessage: '',
+            pathAvailable: true,
         });
     },
 

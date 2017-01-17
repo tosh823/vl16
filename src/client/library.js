@@ -1,3 +1,4 @@
+var THREE = require('three');
 var Stats = require('stats');
 var Avatar = require('./avatar');
 var Stuff = require('./stuff');

@@ -23,9 +23,7 @@ var LoginDialog = React.createClass({
         });
     },
 
-    onButtonClick: function (event) {
-        event.preventDefault();
-        if (this.state.connecting) return;
+    connectToTundra: function() {
         var client = new Client(
             function onConnect() {
                 this.props.onConnect();
@@ -62,6 +60,18 @@ var LoginDialog = React.createClass({
             buttonText: "Connecting"
         });
         client.connect();
+    },
+
+    proceedInOffline: function() {
+        this.props.onError(null);
+        this.close();
+    },
+
+    onButtonClick: function (event) {
+        event.preventDefault();
+        if (this.state.connecting) return;
+        if (this.props.tundra == true) this.connectToTundra();
+        else this.proceedInOffline();
     },
 
     render: function () {

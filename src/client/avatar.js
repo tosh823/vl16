@@ -1,3 +1,4 @@
+var THREE = require('three');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Overlay = require('./components/Overlay.jsx');
