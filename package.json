@@ -10,8 +10,7 @@
     "watch-client": "watchify -t [ babelify --presets [ react ] --extensions .jsx] src/client/main.js -o build/bundle.js --debug --verbose",
     "watch-dashboard": "watchify -t [ babelify --presets [ react ] --extensions .jsx] src/client/dashboard.js -o build/dashboard.js --debug --verbose",
     "watch": "npm run watch-client",
-    "start": "npm run build && http-server -o --cors ./build",
-    "server": "node src/server/video/server.js"
+    "start": "npm run build && http-server -o --cors ./build"
   },
   "repository": {
     "type": "git",
