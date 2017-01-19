@@ -9,6 +9,7 @@ var TopRightUI = require('./components/TopRightUI.jsx');
 var NavBar = require('./components/NavBar.jsx');
 var ControlPanel = require('./components/ControlPanel.jsx');
 var SearchPanel = require('./components/SearchPanel.jsx');
+var CallDialog = require('./components/CallDialog.jsx');
 
 function App(canvas, defaultLocation) {
   this.vl = new Library(this, canvas);
@@ -20,19 +21,19 @@ function App(canvas, defaultLocation) {
 App.prototype.constructor = App;
 App.prototype.vl = null;
 
-App.prototype.initWS = function() {
+App.prototype.initWS = function () {
   this.ws = new WebSocket(
     function onConnected() {
-        this.navBar.setOnlineIndicator();
-        this.ws.joinAsUser(function() {
-            console.log('Joined as user');
-        });
+      this.navBar.setOnlineIndicator();
+      this.ws.joinAsUser(function () {
+        console.log('Joined as user');
+      });
     }.bind(this),
     function onDisconnected() {
-        this.navBar.setOfflineIndicator();
+      this.navBar.setOfflineIndicator();
     }.bind(this),
     function onError(error) {
-        this.navBar.setOfflineIndicator();
+      this.navBar.setOfflineIndicator();
     }.bind(this)
   );
   this.ws.connect();
@@ -48,12 +49,15 @@ App.prototype.renderNavBar = function () {
     onNavigation: function () {
       this.renderControlPanel();
     }.bind(this),
-    onChangeMode: function () {
+    onChangeCamera: function () {
       this.vl.switchViewMode();
     }.bind(this),
     onAbout: function () {
 
-    },
+    }.bind(this),
+    onCall: function () {
+      this.renderCallPanel();
+    }.bind(this),
     onSearch: function (query) {
       this.renderSearchPanel(query);
     }.bind(this)
@@ -91,6 +95,14 @@ App.prototype.renderLoginPanel = function () {
     onConnect: this.vl.onConnectedToServer.bind(this.vl),
     onError: this.vl.onConnectionError.bind(this.vl),
     onDisconnect: this.vl.onDisconnectedFromServer.bind(this.vl)
+  }), document.getElementById('ui'));
+};
+
+App.prototype.renderCallPanel = function () {
+  ReactDOM.unmountComponentAtNode(document.getElementById('ui'));
+  ReactDOM.render(React.createElement(CallDialog, {
+    startCall: this.ws.requestCall.bind(this.ws),
+    stopCall: this.ws.stopCall.bind(this.ws)
   }), document.getElementById('ui'));
 };
 

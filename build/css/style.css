@@ -2,7 +2,7 @@ body {
     margin: 0;
 }
 
-video {
+#webcam {
     display: none;
 }
 

@@ -51,8 +51,12 @@ var NavBar = React.createClass({
         this.props.onWarpTo(config[event.target.id]);
     },
 
-    onModeClick(event) {
-        this.props.onChangeMode();
+    onCameraClick(event) {
+        this.props.onChangeCamera();
+    },
+
+    onCallClick(event) {
+        this.props.onCall();
     },
 
     onNavigationClick(event) {
@@ -103,7 +107,10 @@ var NavBar = React.createClass({
                         <a className="nav-link" type="button" onClick={this.onNavigationClick}>Navigation</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" type="button" onClick={this.onModeClick}>Camera</a>
+                        <a className="nav-link" type="button" onClick={this.onCameraClick}>Camera</a>
+                    </li>
+                    <li className="nav-item">
+                        <a className="nav-link" type="button" onClick={this.onCallClick}>Call</a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link" type="button" onClick={this.onAboutClick}>About</a>
