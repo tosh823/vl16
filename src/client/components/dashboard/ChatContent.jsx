@@ -56,7 +56,10 @@ var ChatContent = React.createClass({
     },
 
     stopCall: function() {
-        if (this.stream != null) this.stream.stop();
+        if (this.stream != null) {
+            this.stream.stop();
+            this.stream = null;
+        }
         this.setState({
             isCalling: false,
             currentRoomID: null,
@@ -85,7 +88,10 @@ var ChatContent = React.createClass({
 
     declineCall: function (event) {
         var roomID = event.target.dataset.room;
-        if (this.stream != null) this.stream.stop();
+        if (this.stream != null) {
+            this.stream.stop();
+            this.stream = null;
+        }
         this.props.onDeclineCall(roomID);
         this.setState({
             isCalling: false,
