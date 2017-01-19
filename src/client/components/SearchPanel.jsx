@@ -52,6 +52,7 @@ var SearchPanel = React.createClass({
         var api = new LibraryAPI();
         api.getBook(book.href, function (data) {
             // Hide spinner
+            console.log(data);
             this.setState({
                 renderBack: true,
                 isLoading: false,

@@ -9,7 +9,7 @@ var SearchResultsListItem = React.createClass({
     },
 
     componentDidMount: function() {
-    
+        
     },
 
     onItemClick: function(event) {

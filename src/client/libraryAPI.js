@@ -71,6 +71,7 @@ LibraryAPI.prototype._parseBookDetailsPage = function (page) {
     var bookInfo = $(page).find('#catalogue_detail_biblio').children('.tietue');
     var holdsInfo = $(page).find('.holdingst');
     book['title'] = $(bookInfo).find('.title').text();
+    book['cover'] = $(bookInfo).find('.jokunen_image_container').children('img').attr('src');
     book['authors'] = [];
     $(bookInfo).find('.author').find('span').each(function (index, element) {
         if ($(element).attr('property') == 'name') {
