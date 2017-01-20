@@ -112,7 +112,6 @@ App.prototype.loadInitialLocation = function () {
   this.vl.loadLibrary(this.currentLocation,
     function onProgress(loaded, total) {
       var ratio = Math.round(loaded / total * 100);
-      console.log("{" + loaded + "/" + total + "} = " + ratio);
       if (ratio >= 100) {
         loading.updateProgress(ratio, 'Setting things up');
       }
@@ -121,9 +120,9 @@ App.prototype.loadInitialLocation = function () {
       }
     },
     function onLoad() {
-      //loading.hide();
+      loading.hide();
       this.vl.enableBlur();
-      //this.renderLoginPanel();
+      this.renderLoginPanel();
     }.bind(this)
   );
 };

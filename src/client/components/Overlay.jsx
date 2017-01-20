@@ -56,20 +56,20 @@ var Overlay = React.createClass({
 
     render: function () {
 
-        var height = (this.state.withNavBar ? "row h-88 flex-items-xs-center": "row h-95 flex-items-xs-center");
+        var height = (this.state.withNavBar ? "row h-88 align-items-center justify-content-center": "row h-95 align-items-center justify-content-center");
 
         return (this.state.isVisible ?
             <div className="container overlay">
                 <div className={height}>
-                    <div className="col-xs-6 flex-xs-middle text-xs-center">
+                    <div className="col-xs-6 align-self-center text-xs-center">
                         <div className="h4">
                             {this.state.showCursor ? <i className={this.state.cursor} aria-hidden="true"></i> : null}
                         </div>
                         <p className="h4">{this.state.cursorText}</p>
                     </div>
                 </div>
-                <div className="row flex-items-xs-center">
-                    <div className="col-xs-6 flex-xs-bottom">
+                <div className="row align-items-center justify-content-center">
+                    <div className="col-xs-6 align-self-end">
                         <div className="h4 text-xs-center">
                             {this.state.bottomText}
                         </div>

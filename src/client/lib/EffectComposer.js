@@ -36,8 +36,6 @@ THREE.EffectComposer = function ( renderer, renderTarget ) {
 
 Object.assign( THREE.EffectComposer.prototype, {
 
-	constructor: THREE.EffectComposer,
-
 	swapBuffers: function() {
 
 		var tmp = this.readBuffer;

@@ -18,9 +18,9 @@ var SearchResultsListItem = React.createClass({
 
     render: function () {
         return (this.state.isVisible ?
-            <a href="#" className="list-group-item small" onClick={this.onItemClick}>
-                <p className="list-group-item-heading h6">{this.props.book.title}</p>
-                <p className="list-group-item-text">{this.props.book.author}</p>
+            <a href="#" className="list-group-item list-group-item-action flex-column align-items-start pb-0" onClick={this.onItemClick}>
+                <p className="h5">{this.props.book.title}</p>
+                <p>{this.props.book.author}</p>
             </a>
             : null
         );

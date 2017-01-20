@@ -126,8 +126,8 @@ Library.prototype.loadLibrary = function (location, progressCallback, loadCallba
             this.firstTime = false;
         }.bind(this),
 
-        function onProgress(progress) {
-            progressCallback(progress.loaded, progress.total);
+        function onProgress(xhr) {
+            if (xhr.lengthComputable == true) progressCallback(xhr.loaded, xhr.total);
         },
 
         function onError(error) {

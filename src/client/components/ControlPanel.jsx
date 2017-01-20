@@ -56,9 +56,9 @@ var ControlPanel = React.createClass({
         }
 
         return (this.state.isVisible ?
-            <div className="row flex-items-xs-right">
-                <div className="col-xs-3 flex-xs-top">
-                    <div className="card m-t-1 m-r-1">
+            <div className="row justify-content-end">
+                <div className="col-3 align-self-start">
+                    <div className="card mt-2 mr-2">
                         <div className="card-header">
                             Navigation
                             <button type="button" className="close" aria-label="Close" onClick={this.hide}>

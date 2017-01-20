@@ -37,8 +37,8 @@ var TopRightUI = React.createClass({
         }
 
         return (this.state.isVisible ?
-            <div className="row flex-items-xs-right stretch">
-                <div className="col-xs-3 m-t-1">
+            <div className="row justify-content-end stretch">
+                <div className="col-3 m-t-1">
                     <div className="card">
                         <div className="card-header">{this.props.libraryName}</div>
                         <div className="card-block">
