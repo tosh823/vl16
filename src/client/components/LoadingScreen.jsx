@@ -25,13 +25,15 @@ var LoadingScreen = React.createClass({
 
     render: function () {
         return (this.state.isVisible ?
-            <div className="row flex-items-xs-center stretch-y overlay" id="loading">
-                <div className="col-xs-6 flex-xs-middle">
-                    <div className="h4 text-xs-center">
+            <div className="row align-items-center justify-content-center stretch-y overlay" id="loading">
+                <div className="col-6 align-self-center">
+                    <div className="h4 text-center">
                         {this.state.message}&hellip;
                         <i className="fa fa-cog fa-spin fa-fw"></i>
                     </div>
-                    <progress className="progress progress-striped progress-animated" value={this.state.currentProgress} max="100" aria-describedby="example-caption-1"></progress>
+                    <div className="progress">
+                        <div className="progress-bar progress-bar-striped" role="progressbar" value={this.state.currentProgress} max="100"></div>
+                    </div>
                 </div>
             </div>
             : null

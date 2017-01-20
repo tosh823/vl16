@@ -48,9 +48,9 @@ var CallDialog = React.createClass({
 
     render: function () {
         return (this.state.isVisible ?
-            <div className="row flex-items-xs-center stretch-y">
-                <div className="col-xs-6 flex-xs-middle">
-                    <div className="card text-xs-center">
+            <div className="row align-items-center justify-content-center stretch-y">
+                <div className="col-xs-6 align-self-center">
+                    <div className="card text-center">
                         <div className="card-header">
                             Oulu City Library
                             <button type="button" className="close" aria-label="Close" onClick={this.close}>
