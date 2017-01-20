@@ -11,7 +11,6 @@ var SearchPanel = React.createClass({
             renderBack: false,
             isLoading: true,
             pathAvailable: true,
-            pathMessage: '',
             selectedBook: null,
             books: []
         };
@@ -46,15 +45,14 @@ var SearchPanel = React.createClass({
     onBookClick: function (book) {
         this.setState({
             renderSearch: false,
-            selectedBook: book,
-            isLoading: true
+            isLoading: true,
+            renderBack: true
         });
         var api = new LibraryAPI();
         api.getBook(book.href, function (data) {
             // Hide spinner
             console.log(data);
             this.setState({
-                renderBack: true,
                 isLoading: false,
                 selectedBook: data
             });
@@ -66,15 +64,12 @@ var SearchPanel = React.createClass({
         if (shelf != null && shelf.length > 0) {
             this.props.onShowPath(shelf[0]);
             this.setState({
-                pathAvailable: true,
-                pathMessage: 'Success! The route is built.'
+                pathAvailable: true
             });
         }
         else {
-            console.log('Cannot find the path');
             this.setState({
-                pathAvailable: false,
-                pathMessage: 'Sorry, we can provide route for this book.'
+                pathAvailable: false
             });
         }
     },
@@ -83,7 +78,6 @@ var SearchPanel = React.createClass({
         this.setState({
             isVisible: false,
             renderBack: false,
-            pathMessage: ''
         });
     },
 
@@ -92,7 +86,6 @@ var SearchPanel = React.createClass({
         this.setState({
             renderSearch: true,
             renderBack: false,
-            pathMessage: '',
             pathAvailable: true,
         });
     },
@@ -104,7 +97,6 @@ var SearchPanel = React.createClass({
     },
 
     render: function () {
-
         return (this.state.isVisible ?
             <div className="row flex-items-xs-right">
                 <div className="col-xs-3 flex-xs-top">
@@ -123,59 +115,9 @@ var SearchPanel = React.createClass({
                         </div>
                         {
                             (this.state.renderSearch ?
-                                <div className="card-block">
-                                    <h5 className="card-title">Results for <em>{'"' + this.props.search + '"'}</em></h5>
-                                    {(this.state.isLoading ?
-                                        <div>
-                                            <p className="card-text">Please wait, request may take up to several seconds...</p>
-                                            <div className="text-xs-center">
-                                                <i className="fa fa-spinner fa-3x fa-spin" aria-hidden="true"></i>
-                                            </div>
-                                        </div>
-                                        :
-                                        <div>
-                                            <p className="card-text">Found {this.state.books.length}books.</p>
-                                            <p className="card-text">Click on item to see addition information.</p>
-                                            <SearchResultsListView books={this.state.books} onBookClick={this.onBookClick} />
-                                        </div>
-                                    )}
-                                </div>
+                                this.renderListView()
                                 :
-                                <div className="card-block">
-                                    <h5 className="card-title">{this.state.selectedBook.title}</h5>
-                                    {this.state.isLoading ?
-                                        <div>
-                                            <p className="card-text">Please wait, requesting additional information about selected book...</p>
-                                            <div className="text-xs-center">
-                                                <i className="fa fa-spinner fa-3x fa-spin" aria-hidden="true"></i>
-                                            </div>
-                                        </div>
-                                        :
-                                        <div>
-                                            <ul className="list-group">
-                                                <li className="list-group-item">Authors: {this.state.selectedBook.authors.join('; ')}</li>
-                                                <li className="list-group-item">Publisher: {this.state.selectedBook.publisher.join(' ')}</li>
-                                                <li className="list-group-item">{this.state.selectedBook.type}</li>
-                                                <li className="list-group-item">Details: {this.state.selectedBook.description}</li>
-                                                <li className="list-group-item">Language: {this.state.selectedBook.language}</li>
-                                                <li className="list-group-item">ISBN: {this.state.selectedBook.isbn}</li>
-                                                <li className="list-group-item">Location: {Object.values(this.state.selectedBook.locations[0]).join(' ')}</li>
-                                            </ul>
-                                            <div className="row m-t-1">
-                                                <div className="col-xs">
-                                                    {this.state.pathAvailable ?
-                                                        <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
-                                                        :
-                                                        <button type="button" className="btn btn-primary" onClick={this.onPathClick} disabled>Find path</button>
-                                                    }
-                                                </div>
-                                                <div className="col-xs-9">
-                                                    <p className="h5">{this.state.pathMessage}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
+                                this.renderBook()
                             )
                         }
                     </div>
@@ -183,7 +125,88 @@ var SearchPanel = React.createClass({
             </div>
             : null
         );
-    }
+    },
+
+    renderListView: function () {
+        return (
+            <div className="card-block">
+                <h5 className="card-title">Results for <em>{'"' + this.props.search + '"'}</em></h5>
+                {(this.state.isLoading ?
+                    <div>
+                        <p className="card-text">Please wait, request may take up to several seconds...</p>
+                        <div className="text-xs-center">
+                            <i className="fa fa-spinner fa-3x fa-spin" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    :
+                    <div>
+                        <p className="card-text">Found {this.state.books.length}books.</p>
+                        <p className="card-text">Click on item to see addition information.</p>
+                        <SearchResultsListView books={this.state.books} onBookClick={this.onBookClick} />
+                    </div>
+                )}
+            </div>
+        );
+    },
+
+    renderBook: function () {
+        return (
+            <div className="card-block">
+                <h5 className="card-title">Details</h5>
+                {this.state.isLoading ?
+                    <div>
+                        <p className="card-text">Please wait, requesting additional information about selected book...</p>
+                        <div className="text-xs-center">
+                            <i className="fa fa-spinner fa-3x fa-spin" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    :
+                    <div>
+                        <div className="row">
+                            <div className="col-xs-4">
+                                <img className="img-fluid" src={this.state.selectedBook.cover} />
+                            </div>
+                            <div className="col-xs">
+                                <p className="h3">{this.state.selectedBook.title}</p>
+                                <p className="h5">By {this.state.selectedBook.authors.join(', ')}</p>
+                            </div>
+                        </div>
+                        <div className="row m-t-1">
+                            <div className="col-xs">
+                                <ul className="list-group">
+                                    <li className="list-group-item">Publisher: {this.state.selectedBook.publisher.join(' ')}</li>
+                                    <li className="list-group-item">Type: {this.state.selectedBook.type}</li>
+                                    <li className="list-group-item">Details: {this.state.selectedBook.description}</li>
+                                    <li className="list-group-item">Language: {this.state.selectedBook.language}</li>
+                                    <li className="list-group-item">ISBN: {this.state.selectedBook.isbn}</li>
+                                    <li className="list-group-item">Location: {Object.values(this.state.selectedBook.locations[0]).join(' ')}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        {this.state.pathAvailable ?
+                            <div className="row m-t-1">
+                                <div className="col-xs-4">
+                                    <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
+                                </div>
+                                <div className="col-xs text-center">
+                                    <p>Click to build route.</p>
+                                </div>
+                            </div>
+                            :
+                            <div className="row m-t-1">
+                                <div className="col-xs-4">
+                                    <button type="button" className="btn btn-primary" onClick={this.onPathClick} disabled>Find path</button>
+                                </div>
+                                <div className="col-xs text-center">
+                                    <p>Sorry, can't provide route for this book.</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        );
+    },
 
 });
 

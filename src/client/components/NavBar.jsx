@@ -89,7 +89,7 @@ var NavBar = React.createClass({
                         <a className="nav-link" href="http://www.ouka.fi/oulu/library" target="_blank">Home</a>
                     </li>
                     <li className="nav-item active btn-group">
-                        <a className="nav-link dropdown-toggle " type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a className="nav-link dropdown-toggle " href="#location_current" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {this.state.currentLocation.name}
                         </a>
 
@@ -97,23 +97,23 @@ var NavBar = React.createClass({
                             {
                                 Object.keys(config).map(function (value, index) {
                                     if (config[value] !== this.state.currentLocation) {
-                                        return <a className="dropdown-item" type="button" key={value} id={value} onClick={this.onLocationClick}>{config[value].name}</a>
+                                        return <a className="dropdown-item" href="#location_1" key={value} id={value} onClick={this.onLocationClick}>{config[value].name}</a>
                                     }
                                 }.bind(this))
                             }
                         </div>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" type="button" onClick={this.onNavigationClick}>Navigation</a>
+                        <a className="nav-link" href="#navigation" onClick={this.onNavigationClick}>Navigation</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" type="button" onClick={this.onCameraClick}>Camera</a>
+                        <a className="nav-link" href="#camera" onClick={this.onCameraClick}>Camera</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" type="button" onClick={this.onCallClick}>Call</a>
+                        <a className="nav-link" href="#call" onClick={this.onCallClick}>Call</a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" type="button" onClick={this.onAboutClick}>About</a>
+                        <a className="nav-link" href="#about" onClick={this.onAboutClick}>About</a>
                     </li>
                 </ul>
                 <form className="form-inline pull-xs-right">
