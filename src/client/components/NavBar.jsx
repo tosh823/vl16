@@ -92,7 +92,7 @@ var NavBar = React.createClass({
                         <li className="nav-item">
                             <a className="nav-link" href="http://www.ouka.fi/oulu/library" target="_blank">Home</a>
                         </li>
-                        <li className="nav-item active btn-group">
+                        <li className="nav-item dropdown active">
                             <a className="nav-link dropdown-toggle " href="#location_current" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 {this.state.currentLocation.name}
                             </a>

@@ -12,6 +12,10 @@ var CallDialog = React.createClass({
 
     stream: null,
 
+    componentDidMount: function () {
+
+    },
+
     close: function () {
         this.setState({
             isVisible: false
@@ -26,19 +30,21 @@ var CallDialog = React.createClass({
             // Render webcam video to panel
             this.stream = stream;
             // Set streaming
-            this.props.startCall(stream, function (stuffStream) {
-                this.setState({
-                    renderCall: true,
-                    stuffStream: URL.createObjectURL(stuffStream)
-                });
-            }.bind(this), null, this.stopCall);
+            this.props.startCall(stream, this.renderStream, null, this.stopCall);
         }.bind(this)).catch(function (error) {
             console.log(error);
         });
     },
 
+    renderStream: function (stream) {
+        this.setState({
+            renderCall: true,
+            stuffStream: URL.createObjectURL(stream)
+        });
+    },
+
     stopCall: function () {
-        if (this.stream != null) this.stream.stop();
+        //if (this.stream != null) this.stream.stop();
         this.setState({
             stuffStream: null,
             renderCall: false,
@@ -49,7 +55,7 @@ var CallDialog = React.createClass({
     render: function () {
         return (this.state.isVisible ?
             <div className="row align-items-center justify-content-center stretch-y">
-                <div className="col-xs-6 align-self-center">
+                <div className="col-6 align-self-center">
                     <div className="card text-center">
                         <div className="card-header">
                             Oulu City Library
@@ -63,7 +69,7 @@ var CallDialog = React.createClass({
                                 <div className="embed-responsive embed-responsive-16by9">
                                     <video autoPlay id="source" src={this.state.stuffStream} />
                                 </div>
-                                <button type="button" className="btn btn-primary" onClick={this.stopCall}>Cancel</button>
+                                <button type="button" className="btn btn-primary mt-3" onClick={this.stopCall}>Cancel</button>
                             </div>
                             :
                             <div className="card-block">

@@ -40,22 +40,22 @@ var HomeContent = React.createClass({
     render: function () {
         return (this.state.isVisible ?
             <div>
-                <div className="row flex-items-xs-center">
-                    <div className="col-xs-8">
+                <div className="row justify-content-center">
+                    <div className="col-8 align-self-center">
                         <h1 className="display-1 m-l-1">Home</h1>
                     </div>
                 </div>
-                <div className="row flex-items-xs-center">
-                    <div className="col-xs-2">
+                <div className="row justify-content-center">
+                    <div className="col-2">
                         <InfoCard title="Users" text={this.state.userCount} icon="fa-user" />
                     </div>
-                    <div className="col-xs-2">
+                    <div className="col-2">
                         <InfoCard title="Admins" text={this.state.adminCount} icon="fa-user-secret"/>
                     </div>
-                    <div className="col-xs-2">
+                    <div className="col-2">
                         <InfoCard />
                     </div>
-                    <div className="col-xs-2">
+                    <div className="col-2">
                         <InfoCard />
                     </div>
                 </div>

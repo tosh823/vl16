@@ -15,13 +15,12 @@ body {
     left: 0;
 }
 
-#underworld {
-    display: none;
+#ui {
+    overflow: hidden;
 }
 
-#content {
-    overflow-x: hidden;
-    overflow-y: hidden;
+#underworld {
+    display: none;
 }
 
 #loading {
@@ -38,7 +37,7 @@ body {
 }
 
 .stretch-y {
-    height: 92vh;
+    height: 93vh;
 }
 
 .anchor-bottom {

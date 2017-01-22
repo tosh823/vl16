@@ -56,10 +56,10 @@ var ChatContent = React.createClass({
     },
 
     stopCall: function() {
-        if (this.stream != null) {
+        /*if (this.stream != null) {
             this.stream.stop();
             this.stream = null;
-        }
+        }*/
         this.setState({
             isCalling: false,
             currentRoomID: null,
@@ -88,10 +88,7 @@ var ChatContent = React.createClass({
 
     declineCall: function (event) {
         var roomID = event.target.dataset.room;
-        if (this.stream != null) {
-            this.stream.stop();
-            this.stream = null;
-        }
+        
         this.props.onDeclineCall(roomID);
         this.setState({
             isCalling: false,
@@ -124,30 +121,30 @@ var ChatContent = React.createClass({
     render: function () {
         return (this.state.isVisible ?
             <div>
-                <div className="row flex-items-xs-center">
-                    <div className="col-xs-8">
-                        <h1 className="display-1 m-l-1">Chat</h1>
+                <div className="row justify-content-center">
+                    <div className="col-8 align-self-center">
+                        <h1 className="display-1 ml-1">Chat</h1>
                     </div>
                 </div>
                 {this.state.isCalling ?
-                    <div className="row flex-items-xs-center">
-                        <div className="col-xs-5 flex-xs-top text-xs-center">
-                            <p className="h4">Client</p>``
+                    <div className="row justify-content-center">
+                        <div className="col-5 text-center">
+                            <p className="h4">Client</p>
                             <div className="embed-responsive embed-responsive-16by9">
                                 <video autoPlay id="webcam" src={this.state.guestStream} />
                             </div>
                         </div>
-                        <div className="col-xs-3 flex-xs-top text-xs-center">
+                        <div className="col-3 text-center">
                             <p className="h4">Own</p>
                             <div className="embed-responsive embed-responsive-16by9">
                                 <video autoPlay id="webcam-self" src={this.state.ownStream} />
                             </div>
-                            <button type="button" className="btn btn-outline-danger m-t-1" data-room={this.state.currentRoomID} onClick={this.declineCall}>Decline</button>
+                            <button type="button" className="btn btn-outline-danger mt-1" data-room={this.state.currentRoomID} onClick={this.declineCall}>Decline</button>
                         </div>
                     </div>
                     :
-                    <div className="row flex-items-xs-center">
-                        <div className="col-xs-8">
+                    <div className="row justify-content-center">
+                        <div className="col-8 align-self-center">
                             <table className="table table-striped table-hover">
                                 <thead>
                                     <tr>
@@ -163,7 +160,7 @@ var ChatContent = React.createClass({
                                 </tbody>
                             </table>
                             {this.state.pendingCalls.length == 0 ?
-                                <p className="text-xs-center">There are no call requests at the moment.</p>
+                                <p className="text-center">There are no call requests at the moment.</p>
                                 :
                                 null
                             }

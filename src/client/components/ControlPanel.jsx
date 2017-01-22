@@ -73,8 +73,10 @@ var ControlPanel = React.createClass({
                             </div>
                         </div>
                         <div className="card-block">
-                            <div className="list-group list-group-flush limited-h-50">
-                                {locations}
+                            <div className="limited-h-50">
+                                <div className="list-group">
+                                    {locations}
+                                </div>
                             </div>
                         </div>
                     </div>

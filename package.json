@@ -57,6 +57,7 @@
   },
   "browserify-shim": {
     "three": "THREE",
-    "dat.GUI": "dat"
+    "dat.GUI": "dat",
+    "webrtc-adapter": "global:adapter"
   }
 }

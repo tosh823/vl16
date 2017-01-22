@@ -16,8 +16,14 @@ Client.prototype._createRTCPeerConnection = function () {
         'iceServers': [{
             'url': 'stun:stun.l.google.com:19302'
         }]
-    }
-    this.peerConnection = new RTCPeerConnection(servers);
+    };
+    var options = {
+        optional: [
+            { DtlsSrtpKeyAgreement: true },
+            { RtpDataChannels: true }
+        ]
+    };
+    this.peerConnection = new RTCPeerConnection(servers, options);
     this.peerConnection.addStream(this.stream);
     this.peerConnection.onicecandidate = function (event) {
         if (event.candidate) {
@@ -88,7 +94,7 @@ Client.prototype.connect = function () {
         this.room = roomID;
         this.isCallInitializer = true;
     }.bind(this));
-    this.socket.on('leftRoom', function() {
+    this.socket.on('leftRoom', function () {
         // Reset all
         this.room = null;
         this.isCallInitializer = false;
@@ -209,7 +215,8 @@ Client.prototype.stopCall = function () {
         this.socket.emit('leaveRoom', this.room);
         this.room = null;
         this.isCallInitializer = false;
-        if (this.peerConnection != null) this.peerConnection.close(); 
+        if (this.peerConnection != null) this.peerConnection.close();
+        if (this.onCallEndCallback != null) this.onCallEndCallback();
     }
 };
 
