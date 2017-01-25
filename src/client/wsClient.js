@@ -73,6 +73,7 @@ Client.prototype._onSDPReceived = function (sdp) {
 };
 
 Client.prototype.connect = function () {
+    //var url = 'http://localhost:3000';
     var url = 'https://infinite-dusk-99399.herokuapp.com';
     var options = {
         reconnection: true

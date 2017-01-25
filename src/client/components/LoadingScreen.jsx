@@ -5,6 +5,9 @@ var LoadingScreen = React.createClass({
     getInitialState: function () {
         return {
             currentProgress: 0,
+            styleValue: {
+                width: 0 + '%',
+            },
             message: 'Loading scene',
             isVisible: true
         };
@@ -13,7 +16,10 @@ var LoadingScreen = React.createClass({
     updateProgress: function (value, message = 'Loading scene') {
         this.setState({
             currentProgress: value,
-            message: message
+            message: message,
+            styleValue: {
+                width: value + '%',
+            },
         });
     },
 
@@ -33,7 +39,7 @@ var LoadingScreen = React.createClass({
                     </div>
                     {this.state.currentProgress > 0 ?
                         <div className="progress">
-                            <div className="progress-bar progress-bar-striped" role="progressbar" value={this.state.currentProgress} max="100"></div>
+                            <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={this.state.styleValue} aria-valuenow={this.state.currentProgress} aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                         :
                         null
