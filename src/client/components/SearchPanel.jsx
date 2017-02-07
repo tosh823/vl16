@@ -1,6 +1,5 @@
 var React = require('react');
 var SearchResultsListView = require('./SearchResultsListView.jsx');
-var LibraryAPI = require('../LibraryAPI');
 
 var SearchPanel = React.createClass({
 
@@ -22,21 +21,20 @@ var SearchPanel = React.createClass({
         this.setState({
             isLoading: true
         });
-        var api = new LibraryAPI();
-        api.search(this.props.search, function (itemList, data) {
-            // Hide spinner
-            if (itemList == true) {
+        var url = 'http://localhost:3000/search?title=' + this.props.search.replace(/ /g, '+');
+        $.get(url, function (response) {
+            if (response.itemList == true) {
                 this.setState({
                     isLoading: false,
                     renderSearch: true,
-                    books: data
+                    books: response.data
                 });
             }
             else {
                 this.setState({
                     isLoading: false,
                     renderSearch: false,
-                    selectedBook: data[0]
+                    selectedBook: response.data[0]
                 });
             }
         }.bind(this));
@@ -48,13 +46,11 @@ var SearchPanel = React.createClass({
             isLoading: true,
             renderBack: true
         });
-        var api = new LibraryAPI();
-        api.getBook(book.href, function (data) {
-            // Hide spinner
-            console.log(data);
+        var url = 'http://localhost:3000/search/book?id=' + book.bookId;
+        $.get(url, function (response) {
             this.setState({
                 isLoading: false,
-                selectedBook: data
+                selectedBook: response.data
             });
         }.bind(this));
     },
@@ -86,7 +82,7 @@ var SearchPanel = React.createClass({
         this.setState({
             renderSearch: true,
             renderBack: false,
-            pathAvailable: true,
+            pathAvailable: true
         });
     },
 
@@ -168,13 +164,13 @@ var SearchPanel = React.createClass({
                             </div>
                             <div className="col">
                                 <p className="h3">{this.state.selectedBook.title}</p>
-                                <p className="h5">By {this.state.selectedBook.authors.join(', ')}</p>
+                                <p className="h5">By {this.state.selectedBook.author}</p>
                             </div>
                         </div>
                         <div className="row mt-1">
                             <div className="col">
                                 <ul className="list-group">
-                                    <li className="list-group-item">Publisher: {this.state.selectedBook.publisher.join(' ')}</li>
+                                    <li className="list-group-item">Publisher: {this.state.selectedBook.publisher}</li>
                                     <li className="list-group-item">Type: {this.state.selectedBook.type}</li>
                                     <li className="list-group-item">Details: {this.state.selectedBook.description}</li>
                                     <li className="list-group-item">Language: {this.state.selectedBook.language}</li>
@@ -186,19 +182,13 @@ var SearchPanel = React.createClass({
                         {this.state.pathAvailable ?
                             <div className="row mt-1">
                                 <div className="col-4">
-                                    <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find path</button>
-                                </div>
-                                <div className="col text-center">
-                                    <p>Click to build route.</p>
+                                    <button type="button" className="btn btn-primary" onClick={this.onPathClick}>Find route</button>
                                 </div>
                             </div>
                             :
                             <div className="row mt-1">
                                 <div className="col-4">
-                                    <button type="button" className="btn btn-primary" onClick={this.onPathClick} disabled>Find path</button>
-                                </div>
-                                <div className="col text-center">
-                                    <p>Sorry, can't provide route for this book.</p>
+                                    <button type="button" className="btn btn-danger" onClick={this.onPathClick} disabled>No route</button>
                                 </div>
                             </div>
                         }
