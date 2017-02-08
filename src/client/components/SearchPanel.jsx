@@ -21,7 +21,7 @@ var SearchPanel = React.createClass({
         this.setState({
             isLoading: true
         });
-        var url = 'http://localhost:3000/search?title=' + this.props.search.replace(/ /g, '+');
+        var url = 'http://95.85.62.204:3000/search?title=' + this.props.search.replace(/ /g, '+');
         $.get(url, function (response) {
             if (response.itemList == true) {
                 this.setState({
@@ -46,7 +46,7 @@ var SearchPanel = React.createClass({
             isLoading: true,
             renderBack: true
         });
-        var url = 'http://localhost:3000/search/book?id=' + book.bookId;
+        var url = 'http://95.85.62.204:3000/search/book?id=' + book.bookId;
         $.get(url, function (response) {
             this.setState({
                 isLoading: false,
